@@ -18,6 +18,8 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
 export interface LocationWithWave extends Location {
   currentWave:    WaveConditions;
   weatherUpdated: string | null;
+  dataAge_hours:  number | null;
+  stale:          boolean;
 }
 
 export interface WeatherObservation {

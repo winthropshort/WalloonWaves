@@ -11,6 +11,7 @@
 # OPTIONS
 #   --backend-only    Skip frontend build + S3 sync
 #   --frontend-only   Skip CDK deploy
+#   --with-frontend   Also deploy FrontendStack (CloudFront + S3) via CDK
 #   --skip-cdk        Skip CDK deploy
 #   --dry-run         Print commands without executing
 #
@@ -41,6 +42,7 @@ source "${REPO_ROOT}/scripts/deploy-guards.sh"
 
 BACKEND_ONLY=false
 FRONTEND_ONLY=false
+WITH_FRONTEND=false
 SKIP_CDK=false
 DRY_RUN=false
 SKIP_GUARDS=false
@@ -48,15 +50,16 @@ SKIP_SMOKE=false
 
 for arg in "$@"; do
   case $arg in
-    --backend-only)  BACKEND_ONLY=true ;;
-    --frontend-only) FRONTEND_ONLY=true ;;
-    --skip-cdk)      SKIP_CDK=true ;;
-    --dry-run)       DRY_RUN=true ;;
-    --skip-guards)   SKIP_GUARDS=true ;;
-    --skip-smoke)    SKIP_SMOKE=true ;;
+    --backend-only)   BACKEND_ONLY=true ;;
+    --frontend-only)  FRONTEND_ONLY=true ;;
+    --with-frontend)  WITH_FRONTEND=true ;;
+    --skip-cdk)       SKIP_CDK=true ;;
+    --dry-run)        DRY_RUN=true ;;
+    --skip-guards)    SKIP_GUARDS=true ;;
+    --skip-smoke)     SKIP_SMOKE=true ;;
     *)
       echo "Unknown option: $arg"
-      echo "Usage: $0 [--backend-only] [--frontend-only] [--skip-cdk] [--dry-run] [--skip-smoke]"
+      echo "Usage: $0 [--backend-only] [--frontend-only] [--with-frontend] [--skip-cdk] [--dry-run] [--skip-smoke]"
       exit 1
       ;;
   esac
@@ -103,6 +106,11 @@ if ! $SKIP_GUARDS && ! $DRY_RUN; then
   check_dev_before_prod "$DEPLOY_FRONTEND" "$DEPLOY_BACKEND"
 fi
 
+if ! $DRY_RUN; then
+  read -rp "  Proceed with PRODUCTION deploy? [y/N] " _prod_ans
+  [[ "$_prod_ans" =~ ^[Yy]$ ]] || { echo "  Aborted."; exit 0; }
+fi
+
 # ─── Step 1: Build shared ─────────────────────────────────────────────────────
 
 if ! $FRONTEND_ONLY; then
@@ -113,14 +121,16 @@ fi
 # ─── Step 2: CDK backend deploy ───────────────────────────────────────────────
 
 if ! $FRONTEND_ONLY && ! $SKIP_CDK; then
-  step "Step 2/5: Deploy CDK stacks — ${CDK_STACKS}"
+  step "Step 2/5: Deploy CDK backend stacks (prod)"
   echo "  Region: ${REGION} | Profile: ${AWS_PROFILE} | Env: ${ENV}"
   echo ""
-  pushd "${REPO_ROOT}/packages/infrastructure" > /dev/null
-  run npx cdk deploy \
-    WalloonWaves-Storage-prod WalloonWaves-Api-prod \
-    --context env=prod --require-approval never
-  popd > /dev/null
+  run npm run deploy:prod:backend -w packages/infrastructure
+
+  if $WITH_FRONTEND; then
+    echo ""
+    echo "  Deploying FrontendStack (CloudFront + S3)…"
+    run npm run deploy:prod:frontend -w packages/infrastructure
+  fi
 else
   echo ""
   echo "  (Skipping CDK deploy)"

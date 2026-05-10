@@ -73,6 +73,11 @@ export default function App() {
         {locsError && (
           <ErrorBanner message="Unable to load wave conditions. Check your connection and try again." />
         )}
+        {locations?.some((l) => l.stale) && (
+          <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800 max-w-2xl mx-auto">
+            Weather data is more than 8 hours old — conditions shown may not reflect current state.
+          </div>
+        )}
         {locsLoading && <LoadingSkeleton />}
         {locations && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -46,16 +46,24 @@ async function getCurrentWeather() {
 
 export const handler: APIGatewayProxyHandler = async () => {
   try {
+    const now     = new Date();
     const weather = await getCurrentWeather();
 
     const windSpeed_mph = (weather?.windSpeed_mph as number | undefined) ?? 0;
     const windDir_deg   = (weather?.windDir_deg   as number | null | undefined) ?? null;
     const weatherTs     = (weather?.timestamp     as string | undefined)        ?? null;
 
+    const dataAge_hours = weatherTs
+      ? Math.round((now.getTime() - new Date(weatherTs).getTime()) / 360_000) / 10
+      : null;
+    const stale = dataAge_hours !== null && dataAge_hours > 8;
+
     const locations = PRESET_LOCATIONS.map((loc) => ({
       ...loc,
       currentWave:    calcWaves(loc.id, windSpeed_mph, windDir_deg),
       weatherUpdated: weatherTs,
+      dataAge_hours,
+      stale,
     }));
 
     return ok(locations);

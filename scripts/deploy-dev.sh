@@ -19,6 +19,7 @@
 # OPTIONS
 #   --backend-only    Skip steps 3-5
 #   --frontend-only   Skip steps 1-2
+#   --with-frontend   Also deploy FrontendStack (CloudFront + S3) via CDK
 #   --skip-cdk        Skip CDK deploy
 #   --dry-run         Print commands without executing
 #
@@ -48,6 +49,7 @@ source "${REPO_ROOT}/scripts/deploy-guards.sh"
 
 BACKEND_ONLY=false
 FRONTEND_ONLY=false
+WITH_FRONTEND=false
 SKIP_CDK=false
 DRY_RUN=false
 SKIP_GUARDS=false
@@ -55,15 +57,16 @@ SKIP_SMOKE=false
 
 for arg in "$@"; do
   case $arg in
-    --backend-only)  BACKEND_ONLY=true ;;
-    --frontend-only) FRONTEND_ONLY=true ;;
-    --skip-cdk)      SKIP_CDK=true ;;
-    --dry-run)       DRY_RUN=true ;;
-    --skip-guards)   SKIP_GUARDS=true ;;
-    --skip-smoke)    SKIP_SMOKE=true ;;
+    --backend-only)   BACKEND_ONLY=true ;;
+    --frontend-only)  FRONTEND_ONLY=true ;;
+    --with-frontend)  WITH_FRONTEND=true ;;
+    --skip-cdk)       SKIP_CDK=true ;;
+    --dry-run)        DRY_RUN=true ;;
+    --skip-guards)    SKIP_GUARDS=true ;;
+    --skip-smoke)     SKIP_SMOKE=true ;;
     *)
       echo "Unknown option: $arg"
-      echo "Usage: $0 [--backend-only] [--frontend-only] [--skip-cdk] [--dry-run] [--skip-smoke]"
+      echo "Usage: $0 [--backend-only] [--frontend-only] [--with-frontend] [--skip-cdk] [--dry-run] [--skip-smoke]"
       exit 1
       ;;
   esac
@@ -120,6 +123,12 @@ if ! $FRONTEND_ONLY && ! $SKIP_CDK; then
   echo "  Region: ${REGION} | Profile: ${AWS_PROFILE}"
   echo ""
   run npm run deploy:dev:backend -w packages/infrastructure
+
+  if $WITH_FRONTEND; then
+    echo ""
+    echo "  Deploying FrontendStack (CloudFront + S3)…"
+    run npm run deploy:dev:frontend -w packages/infrastructure
+  fi
 else
   echo ""
   echo "  (Skipping CDK deploy)"
@@ -153,7 +162,7 @@ if ! $BACKEND_ONLY; then
     --include "*.html" \
     --cache-control "public, max-age=60" \
     --delete \
-    --region "${REGION}"
+    --region "${REGION_CF}"
 
   echo "  Uploading hashed assets (cache: 1 year)…"
   run aws s3 sync \
@@ -161,7 +170,7 @@ if ! $BACKEND_ONLY; then
     --exclude "*.html" \
     --cache-control "public, max-age=31536000, immutable" \
     --delete \
-    --region "${REGION}"
+    --region "${REGION_CF}"
 fi
 
 # ─── Step 5: CloudFront invalidation ─────────────────────────────────────────

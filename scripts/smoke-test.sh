@@ -10,6 +10,10 @@
 #   [S1] AWS auth
 #   [A1] CloudFront site reachable
 #   [H1] GET /health returns 200
+#   [W1] GET /weather/current returns success
+#   [W2] GET /weather/locations returns 3 locations
+#   [W3] POST /weather/predict for lake-grove-road returns wave data
+#   [W4] GET /weather/geocode with known query returns a result
 #
 # =============================================================================
 
@@ -83,10 +87,35 @@ fi
 # [H1] Health endpoint
 if [ -n "$API_URL" ]; then
   check "H1" "GET /health returns 200" \
-    curl -sf --max-time 10 "${API_URL}v1/health" -o /dev/null
+    curl -sf --max-time 10 "${API_URL}health" -o /dev/null
 else
   FAIL=$(( FAIL + 1 )); FAILURES+=("[H1] API URL not found in SSM")
   echo "  [H1] ✗  API URL not found in SSM (/walloon/${ENV}/api/url)"
+fi
+
+# [W1-W4] API endpoint checks
+if [ -n "$API_URL" ]; then
+  check "W1" "GET /weather/current returns success" \
+    bash -c "curl -sf --max-time 10 '${API_URL}weather/current' | grep -q '\"success\":true'"
+
+  check "W2" "GET /weather/locations returns 3 locations" \
+    bash -c "curl -sf --max-time 10 '${API_URL}weather/locations' | python3 -c \
+      'import sys,json; d=json.load(sys.stdin); assert d[\"success\"] and len(d[\"data\"])==3'"
+
+  check "W3" "POST /weather/predict for lake-grove-road" \
+    bash -c "curl -sf --max-time 10 -X POST '${API_URL}weather/predict' \
+      -H 'Content-Type: application/json' \
+      -d '{\"locationId\":\"lake-grove-road\",\"windSpeed_mph\":10,\"windDir_deg\":180}' \
+      | grep -q '\"success\":true'"
+
+  check "W4" "GET /weather/geocode returns result for 'Walloon Lake MI'" \
+    bash -c "curl -sf --max-time 15 '${API_URL}weather/geocode?address=Walloon+Lake+MI' \
+      | grep -q '\"success\":true'"
+else
+  for id in W1 W2 W3 W4; do
+    FAIL=$(( FAIL + 1 )); FAILURES+=("[${id}] Skipped — API URL not found")
+    echo "  [${id}] ✗  Skipped — API URL not found in SSM"
+  done
 fi
 
 echo ""

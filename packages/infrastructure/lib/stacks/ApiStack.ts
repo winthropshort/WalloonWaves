@@ -29,6 +29,10 @@ import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction as LambdaTarget } from 'aws-cdk-lib/aws-events-targets';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
+import { Topic } from 'aws-cdk-lib/aws-sns';
+import { EmailSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
+import { Alarm, ComparisonOperator, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
+import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import { AppLambda } from '../constructs/AppLambda.js';
 import { StorageStack } from './StorageStack.js';
 import type { WalloonConfig } from '../config.js';
@@ -156,6 +160,46 @@ export class ApiStack extends Stack {
       description: 'Trigger NWS forecast ingest every 4 hours',
       schedule:    Schedule.rate(Duration.hours(4)),
       targets:     [new LambdaTarget(ingestFn)],
+    });
+
+    // ─── SNS topic for monitoring alerts ─────────────────────────────────────
+    const alertTopic = new Topic(this, 'AlertTopic', {
+      topicName:   `walloon-${config.env}-alerts`,
+      displayName: `WalloonWaves ${config.env} alerts`,
+    });
+    alertTopic.addSubscription(new EmailSubscription(config.monitoringEmail));
+
+    // ─── CloudWatch alarm: ingest Lambda errors ───────────────────────────────
+    const ingestErrorAlarm = new Alarm(this, 'IngestErrorAlarm', {
+      alarmName:          `walloon-${config.env}-ingest-errors`,
+      alarmDescription:   'WeatherIngest Lambda failed > 2 times in 24 hours',
+      metric:             ingestFn.metricErrors({
+        period: Duration.hours(24),
+        statistic: 'Sum',
+      }),
+      threshold:          2,
+      evaluationPeriods:  1,
+      comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+      treatMissingData:   TreatMissingData.NOT_BREACHING,
+    });
+    ingestErrorAlarm.addAlarmAction(new SnsAction(alertTopic));
+
+    // ─── WeatherMonitor Lambda (daily 8 AM UTC) ───────────────────────────────
+    const monitorFn = new AppLambda(this, 'WeatherMonitorFn', {
+      functionName: `walloon-${config.env}-weather-monitor`,
+      config,
+      entry:   path.join(BACKEND_SRC, 'handlers/weatherMonitor.ts'),
+      handler: 'handler',
+      extraEnv: { ...commonEnv, SNS_TOPIC_ARN: alertTopic.topicArn },
+    });
+    monitorFn.addToRolePolicy(dynamoReadPolicy);
+    alertTopic.grantPublish(monitorFn);
+
+    new Rule(this, 'WeatherMonitorRule', {
+      ruleName:    `walloon-${config.env}-weather-monitor`,
+      description: 'Daily weather data freshness check at 8 AM UTC',
+      schedule:    Schedule.cron({ hour: '8', minute: '0' }),
+      targets:     [new LambdaTarget(monitorFn)],
     });
 
     // ─── API Gateway ─────────────────────────────────────────────────────────

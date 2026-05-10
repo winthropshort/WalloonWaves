@@ -11,7 +11,9 @@
     "diff": "cdk diff",
     "deploy:dev": "cdk deploy --all --context env=dev --require-approval never",
     "deploy:dev:backend": "cdk deploy WalloonWaves-Storage-dev WalloonWaves-Api-dev --context env=dev --require-approval never",
+    "deploy:dev:frontend": "cdk deploy WalloonWaves-Frontend-dev --context env=dev --require-approval never",
     "deploy:prod:backend": "cdk deploy WalloonWaves-Storage-prod WalloonWaves-Api-prod --context env=prod --require-approval broadening",
+    "deploy:prod:frontend": "cdk deploy WalloonWaves-Frontend-prod --context env=prod --require-approval broadening",
     "deploy:prod": "cdk deploy --all --context env=prod --require-approval broadening",
     "destroy:dev": "cdk destroy --all --context env=dev",
     "clean": "rm -rf dist cdk.out"
