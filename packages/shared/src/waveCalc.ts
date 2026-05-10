@@ -13,80 +13,101 @@ interface FetchEntry {
 
 // ─── Per-location fetch tables ────────────────────────────────────────────────
 //
-// Walloon Lake geometry (actual):
-//   • Main body:  NNW–SSE, ~4.5 mi long, ~1.5 mi wide.
-//   • West arm:   runs WNW from the main body (~45.30 N), arm axis ≈ bearing 109°.
-//                 Arm length ~5 mi, width ~1 mi.
-//   • 5152 Lake Grove Rd and Legacy Water Sports sit on the EASTERN shore of the
-//     west-arm/main-body junction — near-zero fetch for E/ESE.
-//   • Bear Cove Marina sits at the WESTERN TIP of the west arm, facing east.
-//     W/WNW/NW/NNW winds blow off the shore → near-zero fetch.
-//     ESE winds travel the full arm length → maximum fetch.
+// Walloon Lake geometry (confirmed coordinates):
+//   Bear Cove Marina:   45.32619 N, 85.04375 W  — NW tip of west arm
+//   5152 Lake Grove Rd: 45.30325 N, 85.01259 W  — SE end of arm / NW main body
+//   Walloon Village:    45.26352 N, 84.93499 W  — SE end of main body
+//
+//   Arm axis (Bear Cove → 5152): bearing 136° (SE), length 2.2 mi, width ~0.7 mi.
+//   5152 and Walloon Village sit on the east shore of the main body;
+//   fetch is short toward E and large toward the NW (arm/body).
+//   Bear Cove is at the NW tip: N/NW/W/SW winds blow off the shore → near-zero.
+//   Maximum fetch at Bear Cove is SE (136°, along arm axis) = 2.2 mi.
+//
+// Fetch geometry for Bear Cove derived from a rectangular arm model:
+//   For bearing θ, along-arm = 0.695·sinθ - 0.719·cosθ
+//                  cross-arm = 0.719·sinθ + 0.695·cosθ
+//   fetch = arm_halfwidth / |cross-arm|  when cross-arm hits a wall first,
+//         = arm_length    /  along-arm   when along-arm hits the far end first.
+//   Bearings with along-arm < 0 face the NW shore → fetch ≈ 0.
 //
 const FETCH_TABLES: Record<string, FetchEntry[]> = {
 
-  // 5152 Lake Grove Road — 45.3025 N, eastern shore at west-arm junction
+  // 5152 Lake Grove Road — 45.30325°N, 85.01259°W
+  // Located on the east shore at the junction of the west arm and main body.
+  // West arm runs NW (315°) toward Bear Cove, 2.2 mi.
+  // Main body runs SE/S toward Walloon Village, max ~4.2 mi.
+  // East shore is immediately to the right → E/ESE fetch ≈ 0.1 mi.
   'lake-grove-road': [
-    { bearing:   0.0, mi: 4.0 },  // N   — up the long main body
-    { bearing:  22.5, mi: 3.5 },  // NNE
-    { bearing:  45.0, mi: 2.5 },  // NE
-    { bearing:  67.5, mi: 1.0 },  // ENE
-    { bearing:  90.0, mi: 0.1 },  // E   — right at the east shore
-    { bearing: 112.5, mi: 0.1 },  // ESE
-    { bearing: 135.0, mi: 0.3 },  // SE
-    { bearing: 157.5, mi: 0.8 },  // SSE
-    { bearing: 180.0, mi: 1.5 },  // S   — toward south end of main body
-    { bearing: 202.5, mi: 2.0 },  // SSW
-    { bearing: 225.0, mi: 2.5 },  // SW
-    { bearing: 247.5, mi: 1.8 },  // WSW
-    { bearing: 270.0, mi: 1.5 },  // W   — across arm toward Bear Cove (partial)
-    { bearing: 292.5, mi: 2.5 },  // WNW
-    { bearing: 315.0, mi: 3.5 },  // NW
-    { bearing: 337.5, mi: 4.5 },  // NNW — longest run, most dangerous
+    { bearing:   0.0, mi: 1.5 },  // N   — limited by N shore of main body
+    { bearing:  22.5, mi: 1.2 },  // NNE
+    { bearing:  45.0, mi: 0.8 },  // NE
+    { bearing:  67.5, mi: 0.3 },  // ENE
+    { bearing:  90.0, mi: 0.1 },  // E   — eastern shore immediately
+    { bearing: 112.5, mi: 0.1 },  // ESE — eastern shore
+    { bearing: 135.0, mi: 2.5 },  // SE  — down main body toward Walloon Village
+    { bearing: 157.5, mi: 3.5 },  // SSE
+    { bearing: 180.0, mi: 4.2 },  // S   — long main body run (max fetch)
+    { bearing: 202.5, mi: 3.8 },  // SSW
+    { bearing: 225.0, mi: 3.0 },  // SW
+    { bearing: 247.5, mi: 2.2 },  // WSW — through arm junction
+    { bearing: 270.0, mi: 1.5 },  // W   — across arm width
+    { bearing: 292.5, mi: 2.0 },  // WNW — into arm toward Bear Cove
+    { bearing: 315.0, mi: 2.2 },  // NW  — arm axis toward Bear Cove
+    { bearing: 337.5, mi: 1.8 },  // NNW — off-axis
   ],
 
-  // Legacy Water Sports Marina — 45.3010 N, ~200 m south of Lake Grove Rd
+  // Walloon Village — 45.26352°N, 84.93499°W — SE end of main body
+  // Main body runs NW (315°) ~4.7 mi toward 5152. Eastern shore close to the right.
   'legacy-water-sports': [
-    { bearing:   0.0, mi: 4.1 },
-    { bearing:  22.5, mi: 3.6 },
-    { bearing:  45.0, mi: 2.5 },
-    { bearing:  67.5, mi: 0.8 },
-    { bearing:  90.0, mi: 0.1 },
-    { bearing: 112.5, mi: 0.1 },
-    { bearing: 135.0, mi: 0.3 },
-    { bearing: 157.5, mi: 0.7 },
-    { bearing: 180.0, mi: 1.4 },
-    { bearing: 202.5, mi: 1.9 },
-    { bearing: 225.0, mi: 2.4 },
-    { bearing: 247.5, mi: 1.7 },
-    { bearing: 270.0, mi: 1.5 },
-    { bearing: 292.5, mi: 2.5 },
-    { bearing: 315.0, mi: 3.4 },
-    { bearing: 337.5, mi: 4.4 },
+    { bearing:   0.0, mi: 1.0 },  // N   — across body width
+    { bearing:  22.5, mi: 0.8 },  // NNE
+    { bearing:  45.0, mi: 0.4 },  // NE
+    { bearing:  67.5, mi: 0.1 },  // ENE — toward east shore
+    { bearing:  90.0, mi: 0.1 },  // E   — eastern shore
+    { bearing: 112.5, mi: 0.1 },  // ESE — eastern shore
+    { bearing: 135.0, mi: 0.2 },  // SE  — near SE tip of lake
+    { bearing: 157.5, mi: 0.3 },  // SSE
+    { bearing: 180.0, mi: 0.5 },  // S   — near south end
+    { bearing: 202.5, mi: 0.8 },  // SSW
+    { bearing: 225.0, mi: 1.5 },  // SW
+    { bearing: 247.5, mi: 2.5 },  // WSW
+    { bearing: 270.0, mi: 3.0 },  // W   — across body + toward arm
+    { bearing: 292.5, mi: 4.0 },  // WNW — long run up body
+    { bearing: 315.0, mi: 4.7 },  // NW  — body axis toward 5152 (max fetch)
+    { bearing: 337.5, mi: 3.5 },  // NNW — off-axis
   ],
 
-  // Bear Cove Marina — 45.32619 N, 85.04375 W
-  // Western tip of the west arm; arm axis runs ESE (~109° bearing) toward the main body.
-  // Modeled as a rectangular arm 5 mi long × 1 mi wide.
-  // Fetches derived geometrically: t = half-width / |cross-arm component| (shore hits)
-  //   or arm-length / along-arm component (east-end hit for near-axis bearings).
+  // Bear Cove Marina — 45.32619°N, 85.04375°W — NW tip of west arm
+  //
+  // Arm axis: Bear Cove (45.32619,-85.04375) → 5152 (45.30325,-85.01259)
+  //   Δlat = -0.02294° → -2552 m (south);  Δlon = +0.03116° → +2497 m (east)
+  //   bearing = atan2(2497, -2552) ≈ 136° (SE), length 2.2 mi, half-width 0.35 mi
+  //
+  // Open sector: roughly SE (≈90°–225°). All NW-facing bearings hit land immediately.
+  // Fetch geometry (unit vectors: along-arm = sin136°,cos136° = 0.695,−0.719):
+  //   along-arm component = 0.695·sinθ − 0.719·cosθ   (> 0 means toward 5152)
+  //   cross-arm component = 0.719·sinθ + 0.695·cosθ   (> 0 means NE wall)
+  //   t_end  = arm_length  / along-arm   (reaches 5152 end)
+  //   t_wall = half_width  / |cross-arm| (hits NE or SW wall)
+  //   fetch  = min(t_end, t_wall); 0.05 mi when along-arm ≤ 0 (faces land)
   'bear-cove-marina': [
-    { bearing:   0.0, mi: 0.5 },  // N   — hits north shore (arm width)
-    { bearing:  22.5, mi: 0.5 },  // NNE — near-perpendicular to arm axis
-    { bearing:  45.0, mi: 0.6 },  // NE
-    { bearing:  67.5, mi: 0.8 },  // ENE
-    { bearing:  90.0, mi: 1.5 },  // E   — hits north shore ~1.5 mi from tip
-    { bearing: 112.5, mi: 5.0 },  // ESE — along arm axis: full arm (max fetch)
-    { bearing: 135.0, mi: 1.1 },  // SE  — 26° past arm axis, hits south shore
-    { bearing: 157.5, mi: 0.7 },  // SSE
-    { bearing: 180.0, mi: 0.5 },  // S   — hits south shore (arm width)
-    { bearing: 202.5, mi: 0.05 }, // SSW — western shore
-    { bearing: 225.0, mi: 0.05 }, // SW  — western shore
-    { bearing: 247.5, mi: 0.05 }, // WSW — western shore
-    { bearing: 270.0, mi: 0.05 }, // W   — western shore (wind blows off land)
-    { bearing: 292.5, mi: 0.05 }, // WNW — western shore
-    { bearing: 315.0, mi: 0.05 }, // NW  — western shore
-    { bearing: 337.5, mi: 0.05 }, // NNW — western shore
+    { bearing:   0.0, mi: 0.05 }, // N   — faces NW shore (along-arm < 0)
+    { bearing:  22.5, mi: 0.05 }, // NNE — faces NW shore
+    { bearing:  45.0, mi: 0.05 }, // NE  — barely outside open sector
+    { bearing:  67.5, mi: 0.4  }, // ENE — open; hits NE wall ~0.4 mi
+    { bearing:  90.0, mi: 0.5  }, // E   — hits NE wall ~0.5 mi
+    { bearing: 112.5, mi: 0.9  }, // ESE — hits NE wall ~0.9 mi
+    { bearing: 135.0, mi: 2.2  }, // SE  — along arm axis: full length (max fetch)
+    { bearing: 157.5, mi: 1.0  }, // SSE — hits SW wall ~1.0 mi
+    { bearing: 180.0, mi: 0.5  }, // S   — hits SW wall ~0.5 mi
+    { bearing: 202.5, mi: 0.4  }, // SSW — hits SW wall ~0.4 mi
+    { bearing: 225.0, mi: 0.2  }, // SW  — barely open, narrow SW corridor
+    { bearing: 247.5, mi: 0.05 }, // WSW — faces NW shore
+    { bearing: 270.0, mi: 0.05 }, // W   — faces NW shore (wind blows off land)
+    { bearing: 292.5, mi: 0.05 }, // WNW — faces NW shore
+    { bearing: 315.0, mi: 0.05 }, // NW  — faces NW shore
+    { bearing: 337.5, mi: 0.05 }, // NNW — faces NW shore
   ],
 };
 

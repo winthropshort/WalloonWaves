@@ -7,7 +7,7 @@ import { calcWaves } from '@walloon/shared';
 import { WindCompass } from './WindCompass.js';
 
 // Walloon Lake bounding box (~10 km padding around the lake)
-const BOUNDS = { minLat: 45.27, maxLat: 45.38, minLng: -85.10, maxLng: -84.85 };
+const BOUNDS = { minLat: 45.24, maxLat: 45.38, minLng: -85.10, maxLng: -84.85 };
 
 function withinBounds(lat: number, lng: number) {
   return lat >= BOUNDS.minLat && lat <= BOUNDS.maxLat
@@ -15,8 +15,8 @@ function withinBounds(lat: number, lng: number) {
 }
 
 const PRESETS = [
-  { id: 'lake-grove-road',     lat: 45.3025,  lng: -84.9435,  name: '5152 Lake Grove Rd' },
-  { id: 'legacy-water-sports', lat: 45.3010,  lng: -84.9410,  name: 'Legacy Water Sports' },
+  { id: 'lake-grove-road',     lat: 45.30325, lng: -85.01259, name: '5152 Lake Grove Rd' },
+  { id: 'legacy-water-sports', lat: 45.26352, lng: -84.93499, name: 'Walloon Village'     },
   { id: 'bear-cove-marina',    lat: 45.32619, lng: -85.04375, name: 'Bear Cove Marina'    },
 ];
 

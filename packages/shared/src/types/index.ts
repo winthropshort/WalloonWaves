@@ -34,8 +34,8 @@ export const PRESET_LOCATIONS: Location[] = [
   {
     id: 'lake-grove-road',
     name: '5152 Lake Grove Road',
-    lat: 45.3025,
-    lng: -84.9435,
+    lat: 45.30325,
+    lng: -85.01259,
     address: '5152 Lake Grove Road, Walloon Lake, MI',
   },
   {
@@ -47,9 +47,9 @@ export const PRESET_LOCATIONS: Location[] = [
   },
   {
     id: 'legacy-water-sports',
-    name: 'Legacy Water Sports Marina',
-    lat: 45.3010,
-    lng: -84.9410,
-    address: 'Legacy Water Sports Marina, Walloon Lake, MI',
+    name: 'Walloon Village',
+    lat: 45.26352,
+    lng: -84.93499,
+    address: 'Walloon Village, Walloon Lake, MI',
   },
 ];

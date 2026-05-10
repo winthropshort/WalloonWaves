@@ -12,7 +12,7 @@ import { ok, badRequest, internalError } from '../lib/response.js';
 
 // Bounding box around Walloon Lake with ~10 km padding
 const BOUNDS = {
-  minLat: 45.27,
+  minLat: 45.24,
   maxLat: 45.38,
   minLng: -85.10,
   maxLng: -84.85,

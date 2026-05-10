@@ -3,16 +3,18 @@ import { fetchForBearing, calcWaves, KNOWN_LOCATION_IDS } from './waveCalc.js';
 
 describe('fetchForBearing', () => {
   it('returns exact table value at a known bearing', () => {
-    // NNW (337.5°) for lake-grove-road = 4.5 mi
-    expect(fetchForBearing('lake-grove-road', 337.5)).toBe(4.5);
+    // NNW (337.5°) for lake-grove-road = 1.8 mi
+    expect(fetchForBearing('lake-grove-road', 337.5)).toBe(1.8);
     // E (90°) = 0.1 mi
     expect(fetchForBearing('lake-grove-road', 90)).toBe(0.1);
+    // S (180°) = 4.2 mi (max fetch)
+    expect(fetchForBearing('lake-grove-road', 180)).toBe(4.2);
   });
 
   it('interpolates between bearings', () => {
-    // Midpoint between N (0°, 4.0 mi) and NNE (22.5°, 3.5 mi) → 11.25° → 3.75 mi
+    // Midpoint between N (0°, 1.5 mi) and NNE (22.5°, 1.2 mi) → 11.25° → 1.35 mi
     const result = fetchForBearing('lake-grove-road', 11.25);
-    expect(result).toBeCloseTo(3.75, 5);
+    expect(result).toBeCloseTo(1.35, 5);
   });
 
   it('wraps correctly at 0/360 boundary', () => {
@@ -48,10 +50,10 @@ describe('calcWaves', () => {
     expect(result.conditions).toBe('calm');
   });
 
-  it('produces higher waves for NNW (longest fetch) vs E (shortest fetch)', () => {
-    const nnw = calcWaves('lake-grove-road', 20, 337.5);
-    const e   = calcWaves('lake-grove-road', 20, 90);
-    expect(nnw.waveHeight_ft).toBeGreaterThan(e.waveHeight_ft);
+  it('produces higher waves for S (longest fetch) vs E (shortest fetch)', () => {
+    const s = calcWaves('lake-grove-road', 20, 180);
+    const e = calcWaves('lake-grove-road', 20, 90);
+    expect(s.waveHeight_ft).toBeGreaterThan(e.waveHeight_ft);
   });
 
   it('wave height increases monotonically with wind speed', () => {
@@ -63,8 +65,8 @@ describe('calcWaves', () => {
   });
 
   it('classifies rough conditions correctly', () => {
-    // 30 mph NNW should produce rough wave heights
-    const result = calcWaves('lake-grove-road', 30, 337.5);
+    // 30 mph S (max fetch 4.2 mi) should produce rough wave heights
+    const result = calcWaves('lake-grove-road', 30, 180);
     expect(result.waveHeight_ft).toBeGreaterThan(1.5);
     expect(['rough', 'very-rough']).toContain(result.conditions);
     expect(result.dockStatus).toBe('avoid');
@@ -79,8 +81,8 @@ describe('calcWaves', () => {
     expect(lgr.waveHeight_ft).toBeGreaterThan(bcm.waveHeight_ft * 4);
   });
 
-  it('bear-cove-marina ESE wind uses maximum arm-length fetch', () => {
-    expect(fetchForBearing('bear-cove-marina', 112.5)).toBe(5.0);
+  it('bear-cove-marina SE wind uses maximum arm-length fetch', () => {
+    expect(fetchForBearing('bear-cove-marina', 135.0)).toBe(2.2);
   });
 
   it('bear-cove-marina produces shorter S fetch than lake-grove-road', () => {
@@ -91,10 +93,10 @@ describe('calcWaves', () => {
   });
 
   it('returns correct wave height for a known input (regression)', () => {
-    // 15 mph from NNW (337.5°) at lake-grove-road (fetch = 4.5 mi) → 1.07 ft
-    const result = calcWaves('lake-grove-road', 15, 337.5);
-    expect(result.waveHeight_ft).toBe(1.07);
-    expect(result.wavePeriod_s).toBeGreaterThan(1);
+    // 15 mph from S (180°) at lake-grove-road (fetch = 4.2 mi) → 1.03 ft
+    const result = calcWaves('lake-grove-road', 15, 180);
+    expect(result.waveHeight_ft).toBe(1.03);
+    expect(result.wavePeriod_s).toBe(2.3);
     expect(result.conditions).toBe('moderate');
     expect(result.dockStatus).toBe('jetting-only');
   });
