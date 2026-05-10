@@ -2,13 +2,19 @@
  * ApiStack — API Gateway REST API + Lambda functions.
  * Region: us-east-2.
  *
- * Phase 1: skeleton only — placeholder Lambda wired to GET /health.
- * Phase 2 adds WeatherIngest Lambda + EventBridge rule.
- * Phase 3 adds wave prediction endpoints.
+ * Phase 2 endpoints:
+ *   GET /health              — liveness check
+ *   GET /weather/current     — most recent NWS forecast period (≤ now)
+ *   GET /weather/history     — past N hours of forecast periods (?hours=48)
+ *
+ * Background:
+ *   EventBridge rate(4 hours) → WeatherIngest Lambda → DynamoDB
  */
 
 import { Stack, type StackProps, Duration, CfnOutput } from 'aws-cdk-lib';
 import type { Construct } from 'constructs';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
 import {
   RestApi,
   LambdaIntegration,
@@ -18,10 +24,17 @@ import {
   AccessLogFormat,
 } from 'aws-cdk-lib/aws-apigateway';
 import { Function, Runtime, Code, Architecture } from 'aws-cdk-lib/aws-lambda';
+import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
+import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
+import { LambdaFunction as LambdaTarget } from 'aws-cdk-lib/aws-events-targets';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
+import { AppLambda } from '../constructs/AppLambda.js';
 import { StorageStack } from './StorageStack.js';
 import type { WalloonConfig } from '../config.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const BACKEND_SRC = path.resolve(__dirname, '../../../backend/src');
 
 export interface ApiStackProps extends StackProps {
   config: WalloonConfig;
@@ -37,38 +50,92 @@ export class ApiStack extends Stack {
     });
 
     const { config } = props;
-
     const tableName = StringParameter.valueForStringParameter(this, props.tableNameSsmParam);
 
-    // ─── Placeholder Lambda ───────────────────────────────────────────────────
+    const commonEnv = {
+      DYNAMODB_TABLE_NAME: tableName,
+      ENV_NAME:            config.env,
+      CORS_ORIGIN:         config.env === 'prod' ? `https://${config.domainName}` : '*',
+    };
+
+    const dynamoReadPolicy = new PolicyStatement({
+      actions: ['dynamodb:Query', 'dynamodb:GetItem'],
+      resources: [
+        `arn:aws:dynamodb:${config.region}:${config.account}:table/walloon-${config.env}-main`,
+      ],
+    });
+
+    const dynamoWritePolicy = new PolicyStatement({
+      actions: [
+        'dynamodb:PutItem', 'dynamodb:BatchWriteItem',
+        'dynamodb:UpdateItem', 'dynamodb:DeleteItem',
+      ],
+      resources: [
+        `arn:aws:dynamodb:${config.region}:${config.account}:table/walloon-${config.env}-main`,
+      ],
+    });
+
+    // ─── Health Lambda (inline — no external deps) ───────────────────────────
     const healthFn = new Function(this, 'HealthFn', {
       functionName: `walloon-${config.env}-health`,
       runtime: Runtime.NODEJS_22_X,
       architecture: Architecture.ARM_64,
       handler: 'index.handler',
-      code: Code.fromInline(`
-        exports.handler = async () => ({
+      code: Code.fromInline(
+        `exports.handler = async () => ({
           statusCode: 200,
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: 'ok', env: '${config.env}' }),
-        });
-      `),
-      memorySize: config.lambdaMemoryMb,
-      timeout: Duration.seconds(config.lambdaTimeoutSeconds),
-      environment: {
-        DYNAMODB_TABLE_NAME: tableName,
-        ENV_NAME: config.env,
-        CORS_ORIGIN: config.env === 'prod' ? `https://${config.domainName}` : '*',
-      },
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+          body: JSON.stringify({ success: true, data: { status: 'ok', env: '${config.env}' } }),
+        });`,
+      ),
+      memorySize: 128,
+      timeout: Duration.seconds(5),
     });
 
-    // ─── API Gateway access log group ─────────────────────────────────────────
+    // ─── WeatherIngest Lambda (EventBridge-triggered) ────────────────────────
+    const ingestFn = new AppLambda(this, 'WeatherIngestFn', {
+      functionName: `walloon-${config.env}-weather-ingest`,
+      config,
+      entry:   path.join(BACKEND_SRC, 'handlers/weatherIngest.ts'),
+      handler: 'handler',
+      extraEnv: commonEnv,
+    });
+    ingestFn.addToRolePolicy(dynamoWritePolicy);
+
+    // ─── WeatherCurrent Lambda ───────────────────────────────────────────────
+    const currentFn = new AppLambda(this, 'WeatherCurrentFn', {
+      functionName: `walloon-${config.env}-weather-current`,
+      config,
+      entry:   path.join(BACKEND_SRC, 'handlers/weatherCurrent.ts'),
+      handler: 'handler',
+      extraEnv: commonEnv,
+    });
+    currentFn.addToRolePolicy(dynamoReadPolicy);
+
+    // ─── WeatherHistory Lambda ───────────────────────────────────────────────
+    const historyFn = new AppLambda(this, 'WeatherHistoryFn', {
+      functionName: `walloon-${config.env}-weather-history`,
+      config,
+      entry:   path.join(BACKEND_SRC, 'handlers/weatherHistory.ts'),
+      handler: 'handler',
+      extraEnv: commonEnv,
+    });
+    historyFn.addToRolePolicy(dynamoReadPolicy);
+
+    // ─── EventBridge: every 4 hours → WeatherIngest ─────────────────────────
+    new Rule(this, 'WeatherIngestRule', {
+      ruleName:    `walloon-${config.env}-weather-ingest`,
+      description: 'Trigger NWS forecast ingest every 4 hours',
+      schedule:    Schedule.rate(Duration.hours(4)),
+      targets:     [new LambdaTarget(ingestFn)],
+    });
+
+    // ─── API Gateway ─────────────────────────────────────────────────────────
     const accessLogGroup = new LogGroup(this, 'ApiAccessLogs', {
       logGroupName: `/walloon-${config.env}-api-access`,
-      retention: RetentionDays.THREE_MONTHS,
+      retention:    RetentionDays.THREE_MONTHS,
     });
 
-    // ─── API Gateway ──────────────────────────────────────────────────────────
     const api = new RestApi(this, 'WalloonApi', {
       restApiName: `walloon-${config.env}`,
       description: 'WalloonWaves API',
@@ -94,21 +161,25 @@ export class ApiStack extends Stack {
     });
 
     // GET /health
-    const health = api.root.addResource('health');
-    health.addMethod('GET', new LambdaIntegration(healthFn));
+    api.root
+      .addResource('health')
+      .addMethod('GET', new LambdaIntegration(healthFn));
 
-    // ─── SSM: store API URL for frontend env file ─────────────────────────────
+    // GET /weather/current
+    // GET /weather/history?hours=N
+    const weather = api.root.addResource('weather');
+    weather.addResource('current').addMethod('GET', new LambdaIntegration(currentFn));
+    weather.addResource('history').addMethod('GET', new LambdaIntegration(historyFn));
+
+    // ─── SSM: store API URL for deploy scripts ────────────────────────────────
     new StringParameter(this, 'ApiUrlParam', {
       parameterName: `/walloon/${config.env}/api/url`,
-      stringValue: api.url,
+      stringValue:   api.url,
     });
 
     new CfnOutput(this, 'ApiUrl', {
-      value: api.url,
+      value:       api.url,
       description: 'API Gateway invoke URL',
     });
-
-    // Suppress unused variable warning
-    void healthFn;
   }
 }
