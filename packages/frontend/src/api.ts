@@ -3,8 +3,9 @@ import type { WaveConditions, Location } from '@walloon/shared';
 const BASE = import.meta.env.VITE_API_URL as string;
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  const isPost = init?.method === 'POST';
   const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
+    ...(isPost ? { headers: { 'Content-Type': 'application/json' } } : {}),
     ...init,
   });
   const json = (await res.json()) as { success: boolean; data: T; error?: string };
