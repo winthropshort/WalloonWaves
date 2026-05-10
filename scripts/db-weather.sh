@@ -140,23 +140,27 @@ query_date() {
   local sk_min="${2:-OBS#}"
   local sk_max="${3:-OBS#z}"  # 'z' > any digit or letter in ASCII
 
-  aws dynamodb query \
+  local raw
+  raw=$(aws dynamodb query \
     --table-name "$TABLE" \
     --region "$REGION" \
     --key-condition-expression 'PK = :pk AND SK BETWEEN :skMin AND :skMax' \
     --expression-attribute-values \
       "{\":pk\":{\"S\":\"WEATHER#${date_str}\"},\":skMin\":{\"S\":\"${sk_min}\"},\":skMax\":{\"S\":\"${sk_max}\"}}" \
-    --scan-index-forward true \
-    --output json 2>/dev/null \
-  | jq '[.Items[] | {
+    --scan-index-forward \
+    --output json 2>/dev/null) || true
+
+  [[ -z "$raw" ]] && { echo '[]'; return; }
+
+  echo "$raw" | jq '[.Items[]? | {
       timestamp:     .timestamp.S,
-      windSpeed_mph: (.windSpeed_mph.N | tonumber),
-      windGust_mph:  (.windGust_mph.N  | tonumber),
-      windDir_label: .windDir_label.S,
-      windDir_deg:   (.windDir_deg.N   | if . then tonumber else null end),
-      shortForecast: .shortForecast.S,
-      fetchedAt:     .fetchedAt.S
-    }]'
+      windSpeed_mph: ((.windSpeed_mph.N // "0") | tonumber),
+      windGust_mph:  ((.windGust_mph.N  // "0") | tonumber),
+      windDir_label: (.windDir_label.S // "—"),
+      windDir_deg:   (if .windDir_deg.N then (.windDir_deg.N | tonumber) else null end),
+      shortForecast: (.shortForecast.S // ""),
+      fetchedAt:     (.fetchedAt.S // "unknown")
+    }]' 2>/dev/null || echo '[]'
 }
 
 # Print a formatted table of items
@@ -300,7 +304,7 @@ stats)
         --region "$REGION" \
         --key-condition-expression 'PK = :pk' \
         --expression-attribute-values "{\":pk\":{\"S\":\"WEATHER#${d}\"}}" \
-        --scan-index-forward false \
+        --no-scan-index-forward \
         --limit 1 \
         --output json 2>/dev/null \
         | jq -r '.Items[0] | "\(.SK.S)\t\(.fetchedAt.S)"')
