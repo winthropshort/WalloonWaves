@@ -122,6 +122,34 @@ export class ApiStack extends Stack {
     });
     historyFn.addToRolePolicy(dynamoReadPolicy);
 
+    // ─── WeatherPredict Lambda (stateless — no DynamoDB) ─────────────────────
+    const predictFn = new AppLambda(this, 'WeatherPredictFn', {
+      functionName: `walloon-${config.env}-weather-predict`,
+      config,
+      entry:   path.join(BACKEND_SRC, 'handlers/weatherPredict.ts'),
+      handler: 'handler',
+      extraEnv: commonEnv,
+    });
+
+    // ─── WeatherGeocode Lambda (stateless — calls Nominatim) ─────────────────
+    const geocodeFn = new AppLambda(this, 'WeatherGeocodeFn', {
+      functionName: `walloon-${config.env}-weather-geocode`,
+      config,
+      entry:   path.join(BACKEND_SRC, 'handlers/weatherGeocode.ts'),
+      handler: 'handler',
+      extraEnv: commonEnv,
+    });
+
+    // ─── WeatherLocations Lambda ──────────────────────────────────────────────
+    const locationsFn = new AppLambda(this, 'WeatherLocationsFn', {
+      functionName: `walloon-${config.env}-weather-locations`,
+      config,
+      entry:   path.join(BACKEND_SRC, 'handlers/weatherLocations.ts'),
+      handler: 'handler',
+      extraEnv: commonEnv,
+    });
+    locationsFn.addToRolePolicy(dynamoReadPolicy);
+
     // ─── EventBridge: every 4 hours → WeatherIngest ─────────────────────────
     new Rule(this, 'WeatherIngestRule', {
       ruleName:    `walloon-${config.env}-weather-ingest`,
@@ -165,11 +193,17 @@ export class ApiStack extends Stack {
       .addResource('health')
       .addMethod('GET', new LambdaIntegration(healthFn));
 
-    // GET /weather/current
-    // GET /weather/history?hours=N
+    // GET  /weather/current
+    // GET  /weather/history?hours=N
+    // POST /weather/predict
+    // GET  /weather/geocode?address=...
+    // GET  /weather/locations
     const weather = api.root.addResource('weather');
-    weather.addResource('current').addMethod('GET', new LambdaIntegration(currentFn));
-    weather.addResource('history').addMethod('GET', new LambdaIntegration(historyFn));
+    weather.addResource('current').addMethod('GET',  new LambdaIntegration(currentFn));
+    weather.addResource('history').addMethod('GET',  new LambdaIntegration(historyFn));
+    weather.addResource('predict').addMethod('POST', new LambdaIntegration(predictFn));
+    weather.addResource('geocode').addMethod('GET',  new LambdaIntegration(geocodeFn));
+    weather.addResource('locations').addMethod('GET', new LambdaIntegration(locationsFn));
 
     // ─── SSM: store API URL for deploy scripts ────────────────────────────────
     new StringParameter(this, 'ApiUrlParam', {
