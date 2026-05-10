@@ -1,0 +1,28 @@
+{
+  "name": "@walloon/infrastructure",
+  "version": "0.0.1",
+  "private": true,
+  "description": "WalloonWaves — AWS CDK infrastructure",
+  "type": "module",
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "typecheck": "tsc --project tsconfig.json --noEmit",
+    "synth": "cdk synth",
+    "diff": "cdk diff",
+    "deploy:dev": "cdk deploy --all --context env=dev --require-approval never",
+    "deploy:dev:backend": "cdk deploy WalloonWaves-Storage-dev WalloonWaves-Api-dev --context env=dev --require-approval never",
+    "deploy:prod:backend": "cdk deploy WalloonWaves-Storage-prod WalloonWaves-Api-prod --context env=prod --require-approval broadening",
+    "deploy:prod": "cdk deploy --all --context env=prod --require-approval broadening",
+    "destroy:dev": "cdk destroy --all --context env=dev",
+    "clean": "rm -rf dist cdk.out"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.160.0",
+    "constructs": "^10.3.0"
+  },
+  "devDependencies": {
+    "aws-cdk": "^2.160.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.0"
+  }
+}

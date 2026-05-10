@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-lake-blue:    #1B4F72;
+    --color-forest-green: #1E5631;
+    --color-warm-white:   #F5F5F0;
+    --color-natural-tan:  #C9A96E;
+  }
+
+  html {
+    @apply text-gray-900 antialiased;
+  }
+
+  body {
+    background-color: #F5F5F0;
+    @apply font-sans;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}

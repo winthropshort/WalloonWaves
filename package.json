@@ -1,0 +1,39 @@
+{
+  "name": "walloon-waves",
+  "version": "0.0.1",
+  "private": true,
+  "description": "WalloonWaves — wave height prediction for Walloon Lake",
+  "workspaces": [
+    "packages/shared",
+    "packages/frontend",
+    "packages/backend",
+    "packages/infrastructure"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "build:shared": "npm run build -w packages/shared",
+    "build:frontend": "npm run build -w packages/frontend",
+    "build:backend": "npm run build -w packages/backend",
+    "build:infra": "npm run build -w packages/infrastructure",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "eslint packages/*/src --ext .ts,.tsx",
+    "format": "prettier --write \"packages/*/src/**/*.{ts,tsx}\"",
+    "format:check": "prettier --check \"packages/*/src/**/*.{ts,tsx}\"",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "deploy:dev": "npm run deploy:dev -w packages/infrastructure",
+    "deploy:prod": "npm run deploy:prod -w packages/infrastructure"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "eslint-plugin-react": "^7.37.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  }
+}
