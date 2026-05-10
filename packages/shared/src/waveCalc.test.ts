@@ -70,6 +70,19 @@ describe('calcWaves', () => {
     expect(result.dockStatus).toBe('avoid');
   });
 
+  it('bear-cove-marina W wind is near-calm (western tip faces land)', () => {
+    const bcm = calcWaves('bear-cove-marina', 20, 270);  // 20 mph due W
+    const lgr = calcWaves('lake-grove-road',  20, 270);
+    // Bear Cove faces land for W wind → fetch 0.05 mi (rounds to 0.1 in output)
+    expect(bcm.fetchMi).toBeLessThanOrEqual(0.1);
+    // 5152 Lake Grove Rd has 1.5 mi W fetch — significantly rougher
+    expect(lgr.waveHeight_ft).toBeGreaterThan(bcm.waveHeight_ft * 4);
+  });
+
+  it('bear-cove-marina ESE wind uses maximum arm-length fetch', () => {
+    expect(fetchForBearing('bear-cove-marina', 112.5)).toBe(5.0);
+  });
+
   it('bear-cove-marina produces shorter S fetch than lake-grove-road', () => {
     const bcm = calcWaves('bear-cove-marina',  20, 180);
     const lgr = calcWaves('lake-grove-road',   20, 180);

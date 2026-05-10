@@ -6,7 +6,7 @@
  * Point URL resolves to the same grid for any coordinate on Walloon Lake.
  */
 
-const NWS_POINT_URL = 'https://api.weather.gov/points/45.1050,-84.9435';
+const NWS_POINT_URL = 'https://api.weather.gov/points/45.3262,-85.0438';
 const USER_AGENT    = 'WalloonWaves/1.0 (wshort@gmail.com)';
 
 // NWS compass strings → degrees (direction wind is coming FROM)

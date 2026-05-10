@@ -10,12 +10,12 @@
 import type { APIGatewayProxyHandler } from 'aws-lambda';
 import { ok, badRequest, internalError } from '../lib/response.js';
 
-// Conservative bounding box around Walloon Lake (with ~5 km padding)
+// Bounding box around Walloon Lake with ~10 km padding
 const BOUNDS = {
-  minLat: 45.055,
-  maxLat: 45.165,
-  minLng: -85.030,
-  maxLng: -84.890,
+  minLat: 45.27,
+  maxLat: 45.38,
+  minLng: -85.10,
+  maxLng: -84.85,
 };
 
 const NOMINATIM = 'https://nominatim.openstreetmap.org/search';

@@ -13,19 +13,19 @@ interface FetchEntry {
 
 // ─── Per-location fetch tables ────────────────────────────────────────────────
 //
-// All three locations sit on the eastern shore of the main body of Walloon Lake.
-// Values are estimated from lake geometry; exact shoreline ray-cast is deferred
-// until a precise lake-boundary GeoJSON is available.
-//
-// Lake geometry:
-//   • Main body axis: NNW–SSE, roughly 4.5 mi long.
-//   • Width (E–W): ~1.5 mi at the widest point.
-//   • West arm extends ~2.5 mi westward from the northern third of the main body.
-//   • All three locations are on the eastern shore → near-zero fetch for E and ESE.
+// Walloon Lake geometry (actual):
+//   • Main body:  NNW–SSE, ~4.5 mi long, ~1.5 mi wide.
+//   • West arm:   runs WNW from the main body (~45.30 N), arm axis ≈ bearing 109°.
+//                 Arm length ~5 mi, width ~1 mi.
+//   • 5152 Lake Grove Rd and Legacy Water Sports sit on the EASTERN shore of the
+//     west-arm/main-body junction — near-zero fetch for E/ESE.
+//   • Bear Cove Marina sits at the WESTERN TIP of the west arm, facing east.
+//     W/WNW/NW/NNW winds blow off the shore → near-zero fetch.
+//     ESE winds travel the full arm length → maximum fetch.
 //
 const FETCH_TABLES: Record<string, FetchEntry[]> = {
 
-  // 5152 Lake Grove Road — 45.1050 N, eastern shore, south of midpoint
+  // 5152 Lake Grove Road — 45.3025 N, eastern shore at west-arm junction
   'lake-grove-road': [
     { bearing:   0.0, mi: 4.0 },  // N   — up the long main body
     { bearing:  22.5, mi: 3.5 },  // NNE
@@ -35,17 +35,17 @@ const FETCH_TABLES: Record<string, FetchEntry[]> = {
     { bearing: 112.5, mi: 0.1 },  // ESE
     { bearing: 135.0, mi: 0.3 },  // SE
     { bearing: 157.5, mi: 0.8 },  // SSE
-    { bearing: 180.0, mi: 1.5 },  // S   — toward Boyne City end
+    { bearing: 180.0, mi: 1.5 },  // S   — toward south end of main body
     { bearing: 202.5, mi: 2.0 },  // SSW
     { bearing: 225.0, mi: 2.5 },  // SW
     { bearing: 247.5, mi: 1.8 },  // WSW
-    { bearing: 270.0, mi: 1.5 },  // W   — across lake width
-    { bearing: 292.5, mi: 2.5 },  // WNW — picks up west-arm fetch
+    { bearing: 270.0, mi: 1.5 },  // W   — across arm toward Bear Cove (partial)
+    { bearing: 292.5, mi: 2.5 },  // WNW
     { bearing: 315.0, mi: 3.5 },  // NW
     { bearing: 337.5, mi: 4.5 },  // NNW — longest run, most dangerous
   ],
 
-  // Legacy Water Sports Marina — 45.1020 N, ~350 m south of Lake Grove Rd
+  // Legacy Water Sports Marina — 45.3010 N, ~200 m south of Lake Grove Rd
   'legacy-water-sports': [
     { bearing:   0.0, mi: 4.1 },
     { bearing:  22.5, mi: 3.6 },
@@ -65,25 +65,28 @@ const FETCH_TABLES: Record<string, FetchEntry[]> = {
     { bearing: 337.5, mi: 4.4 },
   ],
 
-  // Bear Cove Marina — 45.0990 N, ~700 m south of Lake Grove Rd
-  // Closer to the south end of the lake: S/SSE fetch is shorter.
+  // Bear Cove Marina — 45.32619 N, 85.04375 W
+  // Western tip of the west arm; arm axis runs ESE (~109° bearing) toward the main body.
+  // Modeled as a rectangular arm 5 mi long × 1 mi wide.
+  // Fetches derived geometrically: t = half-width / |cross-arm component| (shore hits)
+  //   or arm-length / along-arm component (east-end hit for near-axis bearings).
   'bear-cove-marina': [
-    { bearing:   0.0, mi: 4.3 },
-    { bearing:  22.5, mi: 3.8 },
-    { bearing:  45.0, mi: 2.7 },
-    { bearing:  67.5, mi: 0.6 },
-    { bearing:  90.0, mi: 0.1 },
-    { bearing: 112.5, mi: 0.1 },
-    { bearing: 135.0, mi: 0.2 },
-    { bearing: 157.5, mi: 0.5 },
-    { bearing: 180.0, mi: 1.0 },
-    { bearing: 202.5, mi: 1.5 },
-    { bearing: 225.0, mi: 2.2 },
-    { bearing: 247.5, mi: 1.6 },
-    { bearing: 270.0, mi: 1.4 },
-    { bearing: 292.5, mi: 2.4 },
-    { bearing: 315.0, mi: 3.4 },
-    { bearing: 337.5, mi: 4.5 },
+    { bearing:   0.0, mi: 0.5 },  // N   — hits north shore (arm width)
+    { bearing:  22.5, mi: 0.5 },  // NNE — near-perpendicular to arm axis
+    { bearing:  45.0, mi: 0.6 },  // NE
+    { bearing:  67.5, mi: 0.8 },  // ENE
+    { bearing:  90.0, mi: 1.5 },  // E   — hits north shore ~1.5 mi from tip
+    { bearing: 112.5, mi: 5.0 },  // ESE — along arm axis: full arm (max fetch)
+    { bearing: 135.0, mi: 1.1 },  // SE  — 26° past arm axis, hits south shore
+    { bearing: 157.5, mi: 0.7 },  // SSE
+    { bearing: 180.0, mi: 0.5 },  // S   — hits south shore (arm width)
+    { bearing: 202.5, mi: 0.05 }, // SSW — western shore
+    { bearing: 225.0, mi: 0.05 }, // SW  — western shore
+    { bearing: 247.5, mi: 0.05 }, // WSW — western shore
+    { bearing: 270.0, mi: 0.05 }, // W   — western shore (wind blows off land)
+    { bearing: 292.5, mi: 0.05 }, // WNW — western shore
+    { bearing: 315.0, mi: 0.05 }, // NW  — western shore
+    { bearing: 337.5, mi: 0.05 }, // NNW — western shore
   ],
 };
 
