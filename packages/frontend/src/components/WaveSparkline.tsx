@@ -20,14 +20,6 @@ function conditionColor(h: number): string {
   return '#a855f7';
 }
 
-/** Midnight (local time) N days before now. */
-function localMidnightDaysAgo(days: number): number {
-  const d = new Date();
-  d.setDate(d.getDate() - days);
-  d.setHours(0, 0, 0, 0);
-  return d.getTime();
-}
-
 export function WaveSparkline({ history, locationId }: Props) {
   if (!history.length) {
     return (
@@ -49,8 +41,7 @@ export function WaveSparkline({ history, locationId }: Props) {
   const latest = data[data.length - 1]?.h ?? 0;
   const color  = conditionColor(latest);
 
-  // 48-hour window from midnight 2 days ago through now
-  const domainStart = localMidnightDaysAgo(2);
+  const domainStart = Date.now() - 48 * 3_600_000;
   const domainEnd   = Date.now();
 
   return (
@@ -63,7 +54,6 @@ export function WaveSparkline({ history, locationId }: Props) {
               <stop offset="95%" stopColor={color} stopOpacity={0.05} />
             </linearGradient>
           </defs>
-          {/* Hidden XAxis to enforce the 48h midnight-anchored domain */}
           <XAxis
             dataKey="t"
             type="number"
