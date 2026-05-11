@@ -1,4 +1,4 @@
-import { AreaChart, Area, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { AreaChart, Area, Tooltip, ResponsiveContainer, ReferenceLine, XAxis } from 'recharts';
 import { calcWaves } from '@walloon/shared';
 import type { WeatherObservation } from '../api.js';
 
@@ -13,11 +13,19 @@ interface DataPoint {
 }
 
 function conditionColor(h: number): string {
-  if (h < 0.5) return '#22c55e';  // green
-  if (h < 1.0) return '#eab308';  // yellow
-  if (h < 2.0) return '#f97316';  // orange
-  if (h < 3.0) return '#ef4444';  // red
-  return '#a855f7';               // purple
+  if (h < 0.5) return '#22c55e';
+  if (h < 1.0) return '#eab308';
+  if (h < 2.0) return '#f97316';
+  if (h < 3.0) return '#ef4444';
+  return '#a855f7';
+}
+
+/** Midnight (local time) N days before now. */
+function localMidnightDaysAgo(days: number): number {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
 }
 
 export function WaveSparkline({ history, locationId }: Props) {
@@ -41,6 +49,10 @@ export function WaveSparkline({ history, locationId }: Props) {
   const latest = data[data.length - 1]?.h ?? 0;
   const color  = conditionColor(latest);
 
+  // 48-hour window from midnight 2 days ago through now
+  const domainStart = localMidnightDaysAgo(2);
+  const domainEnd   = Date.now();
+
   return (
     <div className="h-14">
       <ResponsiveContainer width="100%" height="100%">
@@ -51,7 +63,13 @@ export function WaveSparkline({ history, locationId }: Props) {
               <stop offset="95%" stopColor={color} stopOpacity={0.05} />
             </linearGradient>
           </defs>
-          {/* Reference lines at condition thresholds */}
+          {/* Hidden XAxis to enforce the 48h midnight-anchored domain */}
+          <XAxis
+            dataKey="t"
+            type="number"
+            domain={[domainStart, domainEnd]}
+            hide
+          />
           {maxH >= 0.75 && (
             <ReferenceLine y={0.75} stroke="#94a3b8" strokeDasharray="3 3" strokeWidth={1} />
           )}

@@ -14,6 +14,13 @@ import { fetchHourlyForecast } from '../lib/nws.js';
 
 const TTL_DAYS = 90;
 
+/** NWS wind-chill formula, valid when T ≤ 50 °F and V ≥ 3 mph. */
+function windChill(temp_f: number, windSpeed_mph: number): number {
+  if (temp_f > 50 || windSpeed_mph < 3) return temp_f;
+  const v = Math.pow(windSpeed_mph, 0.16);
+  return Math.round((35.74 + 0.6215 * temp_f - 35.75 * v + 0.4275 * temp_f * v) * 10) / 10;
+}
+
 function toUtcDateStr(isoWithOffset: string): string {
   return new Date(isoWithOffset).toISOString().slice(0, 10);  // YYYY-MM-DD
 }
@@ -50,6 +57,8 @@ export const handler = async (): Promise<void> => {
       windGust_mph:  p.windGust_mph,
       windDir_deg:   p.windDir_deg,
       windDir_label: p.windDir_label,
+      temperature_f: p.temperature_f,
+      windChill_f:   windChill(p.temperature_f, p.windSpeed_mph),
       shortForecast: p.shortForecast,
       ttl,
       fetchedAt,

@@ -15,10 +15,13 @@ function withinBounds(lat: number, lng: number) {
 }
 
 const PRESETS = [
-  { id: 'lake-grove-road',     lat: 45.30325, lng: -85.01259, name: '5152 Lake Grove Rd'    },
-  { id: 'legacy-water-sports', lat: 45.26352, lng: -84.93499, name: 'Walloon Village'        },
-  { id: 'bear-cove-marina',    lat: 45.32619, lng: -85.04375, name: 'Bear Cove Marina'       },
-  { id: 'jones-landing',       lat: 45.30219, lng: -84.96792, name: 'Jones Landing (N. Arm)' },
+  { id: 'lake-grove-road',   lat: 45.30325, lng: -85.01259, name: '5152 Lake Grove Rd'          },
+  { id: 'walloon-village',   lat: 45.26352, lng: -84.93499, name: 'Walloon Village'              },
+  { id: 'bear-cove-marina',  lat: 45.32619, lng: -85.04375, name: 'Bear Cove Marina'             },
+  { id: 'camp-michagania',   lat: 45.3215,  lng: -84.9628,  name: 'Camp Michagania'              },
+  { id: 'camp-daggett',      lat: 45.3072,  lng: -84.9720,  name: 'Camp Daggett'                 },
+  { id: 'walloon-lake-cc',   lat: 45.2610,  lng: -84.9568,  name: 'Walloon Lake Country Club'   },
+  { id: 'jones-landing',     lat: 45.30219, lng: -84.96792, name: 'Jones Landing'               },
 ];
 
 function nearestPreset(lat: number, lng: number) {

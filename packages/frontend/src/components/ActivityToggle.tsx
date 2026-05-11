@@ -8,7 +8,7 @@ interface Props {
 export function ActivityToggle({ value, onChange }: Props) {
   return (
     <div className="inline-flex rounded-full border border-walloon-blue-200 bg-white p-1 shadow-sm">
-      {(['mariner', 'dock'] as const).map((mode) => {
+      {(['dock', 'mariner'] as const).map((mode) => {
         const active = value === mode;
         return (
           <button

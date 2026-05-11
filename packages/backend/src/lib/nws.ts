@@ -23,6 +23,7 @@ export interface NwsPeriod {
   windGust_mph:  number;
   windDir_deg:   number | null;  // null when direction is variable
   windDir_label: string;         // e.g. "NNW" or "VRB"
+  temperature_f: number;
   shortForecast: string;
 }
 
@@ -58,10 +59,12 @@ export async function fetchHourlyForecast(): Promise<NwsPeriod[]> {
   const hourlyData = (await nwsGet(hourlyUrl)) as {
     properties: {
       periods: Array<{
-        startTime: string;
-        windSpeed: string;
-        windGust: string | null;
+        startTime:    string;
+        windSpeed:    string;
+        windGust:     string | null;
         windDirection: string;
+        temperature:  number;
+        temperatureUnit: string;
         shortForecast: string;
       }>;
     };
@@ -69,12 +72,17 @@ export async function fetchHourlyForecast(): Promise<NwsPeriod[]> {
 
   return hourlyData.properties.periods.map((p) => {
     const { deg, label } = parseDir(p.windDirection);
+    // NWS hourly forecast always returns °F for US points
+    const temp_f = p.temperatureUnit === 'C'
+      ? p.temperature * 9 / 5 + 32
+      : p.temperature;
     return {
       startTime:     p.startTime,
       windSpeed_mph: parseSpeed(p.windSpeed),
       windGust_mph:  parseSpeed(p.windGust),
       windDir_deg:   deg,
       windDir_label: label,
+      temperature_f: temp_f,
       shortForecast: p.shortForecast,
     };
   });

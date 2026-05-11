@@ -82,7 +82,8 @@ const FETCH_TABLES: Record<string, FetchEntry[]> = {
   // The Foot: rhombus ~2.0 mi E-W × ~1.4 mi N-S. WV at extreme SE corner.
   // Open-water sector ~255°–293°; maximum fetch WbN (281.25°) = 2.10 mi.
   // All other directions blocked immediately by south/east shore.
-  'legacy-water-sports': [
+  // NOTE: also registered as 'legacy-water-sports' for backward compat.
+  'walloon-village': [
     { bearing:   0.00, mi: 0.05 }, // N     — SE tip, east shore immediately
     { bearing:  11.25, mi: 0.05 }, // NbE   — east shore
     { bearing:  22.50, mi: 0.05 }, // NNE   — east shore
@@ -194,7 +195,127 @@ const FETCH_TABLES: Record<string, FetchEntry[]> = {
     { bearing: 337.50, mi: 0.45 }, // NNW   — west shore
     { bearing: 348.75, mi: 0.50 }, // NbW   — west shore, arm widens
   ],
+
+  // Camp Michagania — ~45.3215°N, 84.9628°W — north tip of North Arm, east shore
+  // Coordinates approximate; verify against actual camp property boundaries.
+  // At the north tip, shore closes immediately N/E. Full arm fetch opens to the south.
+  // Maximum fetch S (180°) ≈ 1.85 mi to south narrows; arm ~0.60 mi wide.
+  'camp-michagania': [
+    { bearing:   0.00, mi: 0.05 }, // N     — north shore
+    { bearing:  11.25, mi: 0.05 }, // NbE   — east shore
+    { bearing:  22.50, mi: 0.05 }, // NNE   — east shore
+    { bearing:  33.75, mi: 0.05 }, // NEbN  — east shore
+    { bearing:  45.00, mi: 0.05 }, // NE    — east shore
+    { bearing:  56.25, mi: 0.05 }, // NEbE  — east shore
+    { bearing:  67.50, mi: 0.05 }, // ENE   — east shore
+    { bearing:  78.75, mi: 0.05 }, // EbN   — east shore
+    { bearing:  90.00, mi: 0.05 }, // E     — east shore
+    { bearing: 101.25, mi: 0.05 }, // EbS   — east shore
+    { bearing: 112.50, mi: 0.05 }, // ESE   — east shore
+    { bearing: 123.75, mi: 0.05 }, // SEbE  — east shore
+    { bearing: 135.00, mi: 0.05 }, // SE    — east shore
+    { bearing: 146.25, mi: 0.10 }, // SEbS  — entering channel
+    { bearing: 157.50, mi: 0.60 }, // SSE   — channel opens
+    { bearing: 168.75, mi: 1.60 }, // SbE   — down arm
+    { bearing: 180.00, mi: 1.85 }, // S     — full arm (max fetch)
+    { bearing: 191.25, mi: 1.20 }, // SbW   — diagonal to west shore
+    { bearing: 202.50, mi: 0.90 }, // SSW   — diagonal
+    { bearing: 213.75, mi: 0.75 }, // SWbS  — cross-arm diagonal
+    { bearing: 225.00, mi: 0.65 }, // SW    — cross-arm
+    { bearing: 236.25, mi: 0.55 }, // SWbW  — cross-arm
+    { bearing: 247.50, mi: 0.50 }, // WSW   — cross-arm
+    { bearing: 258.75, mi: 0.55 }, // WbS   — cross-arm
+    { bearing: 270.00, mi: 0.60 }, // W     — arm width near north
+    { bearing: 281.25, mi: 0.55 }, // WbN   — arm width
+    { bearing: 292.50, mi: 0.45 }, // WNW   — angles to north shore
+    { bearing: 303.75, mi: 0.30 }, // NWbW  — north shore approaching
+    { bearing: 315.00, mi: 0.20 }, // NW    — north shore
+    { bearing: 326.25, mi: 0.10 }, // NWbN  — north shore
+    { bearing: 337.50, mi: 0.05 }, // NNW   — north shore
+    { bearing: 348.75, mi: 0.05 }, // NbW   — north shore
+  ],
+
+  // Camp Daggett — ~45.3072°N, 84.9720°W — junction area, NW shore of main body
+  // Coordinates approximate; verify against actual camp property boundaries.
+  // At the junction of the North Arm and West Arm inflows; faces SW across main body.
+  // S/SW fetch = 1.2–1.4 mi across The Foot; E = 0.8 mi; W = 0.4 mi (junction narrows).
+  'camp-daggett': [
+    { bearing:   0.00, mi: 0.05 }, // N     — north shore
+    { bearing:  11.25, mi: 0.05 }, // NbE   — north shore
+    { bearing:  22.50, mi: 0.05 }, // NNE   — north shore
+    { bearing:  33.75, mi: 0.05 }, // NEbN  — north shore
+    { bearing:  45.00, mi: 0.05 }, // NE    — north shore
+    { bearing:  56.25, mi: 0.10 }, // NEbE  — short diagonal
+    { bearing:  67.50, mi: 0.25 }, // ENE   — opens toward east
+    { bearing:  78.75, mi: 0.50 }, // EbN   — east shore diagonal
+    { bearing:  90.00, mi: 0.80 }, // E     — across to east shore
+    { bearing: 101.25, mi: 0.75 }, // EbS   — east shore
+    { bearing: 112.50, mi: 0.60 }, // ESE   — angled
+    { bearing: 123.75, mi: 0.50 }, // SEbE  — diagonal SE
+    { bearing: 135.00, mi: 0.55 }, // SE    — diagonal
+    { bearing: 146.25, mi: 0.70 }, // SEbS  — opens toward south
+    { bearing: 157.50, mi: 0.90 }, // SSE   — south opening
+    { bearing: 168.75, mi: 1.20 }, // SbE   — main fetch opens
+    { bearing: 180.00, mi: 1.40 }, // S     — max fetch across The Foot
+    { bearing: 191.25, mi: 1.40 }, // SbW   — similar diagonal
+    { bearing: 202.50, mi: 1.30 }, // SSW   — diagonal
+    { bearing: 213.75, mi: 1.10 }, // SWbS  — shortening
+    { bearing: 225.00, mi: 0.90 }, // SW    — diagonal
+    { bearing: 236.25, mi: 0.65 }, // SWbW  — west shore approaching
+    { bearing: 247.50, mi: 0.45 }, // WSW   — west shore
+    { bearing: 258.75, mi: 0.30 }, // WbS   — junction narrows
+    { bearing: 270.00, mi: 0.30 }, // W     — junction area
+    { bearing: 281.25, mi: 0.15 }, // WbN   — junction closing
+    { bearing: 292.50, mi: 0.05 }, // WNW   — north shore
+    { bearing: 303.75, mi: 0.05 }, // NWbW  — north shore
+    { bearing: 315.00, mi: 0.05 }, // NW    — north shore
+    { bearing: 326.25, mi: 0.05 }, // NWbN  — north shore
+    { bearing: 337.50, mi: 0.05 }, // NNW   — north shore
+    { bearing: 348.75, mi: 0.05 }, // NbW   — north shore
+  ],
+
+  // Walloon Lake Country Club — ~45.2610°N, 84.9568°W — south shore of The Foot
+  // Coordinates approximate; verify against actual club property boundaries.
+  // On south shore west of Walloon Village. Open water faces NNW–NE (max fetch ~1.6 mi).
+  // South shore blocks all southerly directions; west shore ~0.5 mi.
+  'walloon-lake-cc': [
+    { bearing:   0.00, mi: 1.60 }, // N     — max fetch north across The Foot
+    { bearing:  11.25, mi: 1.55 }, // NbE   — slight diagonal
+    { bearing:  22.50, mi: 1.45 }, // NNE   — diagonal
+    { bearing:  33.75, mi: 1.25 }, // NEbN  — angling toward NE shore
+    { bearing:  45.00, mi: 1.00 }, // NE    — NE shore
+    { bearing:  56.25, mi: 0.80 }, // NEbE  — closing
+    { bearing:  67.50, mi: 0.70 }, // ENE   — east
+    { bearing:  78.75, mi: 0.75 }, // EbN   — east shore
+    { bearing:  90.00, mi: 1.00 }, // E     — east shore (~1 mi)
+    { bearing: 101.25, mi: 0.60 }, // EbS   — SE shore closing
+    { bearing: 112.50, mi: 0.25 }, // ESE   — SE shore
+    { bearing: 123.75, mi: 0.05 }, // SEbE  — south shore
+    { bearing: 135.00, mi: 0.05 }, // SE    — south shore
+    { bearing: 146.25, mi: 0.05 }, // SEbS  — south shore
+    { bearing: 157.50, mi: 0.05 }, // SSE   — south shore
+    { bearing: 168.75, mi: 0.05 }, // SbE   — south shore
+    { bearing: 180.00, mi: 0.05 }, // S     — south shore
+    { bearing: 191.25, mi: 0.05 }, // SbW   — south shore
+    { bearing: 202.50, mi: 0.05 }, // SSW   — south shore
+    { bearing: 213.75, mi: 0.05 }, // SWbS  — south shore
+    { bearing: 225.00, mi: 0.05 }, // SW    — south shore
+    { bearing: 236.25, mi: 0.05 }, // SWbW  — south shore
+    { bearing: 247.50, mi: 0.10 }, // WSW   — west shore approaching
+    { bearing: 258.75, mi: 0.30 }, // WbS   — west shore
+    { bearing: 270.00, mi: 0.50 }, // W     — west shore (The Foot narrows here)
+    { bearing: 281.25, mi: 0.65 }, // WbN   — NW diagonal
+    { bearing: 292.50, mi: 0.80 }, // WNW   — NW fetch
+    { bearing: 303.75, mi: 1.00 }, // NWbW  — NW
+    { bearing: 315.00, mi: 1.20 }, // NW    — long NW fetch
+    { bearing: 326.25, mi: 1.50 }, // NWbN  — opens toward north
+    { bearing: 337.50, mi: 1.60 }, // NNW   — north shore
+    { bearing: 348.75, mi: 1.60 }, // NbW   — north shore
+  ],
 };
+
+// Backward-compat alias — old ID used in existing DynamoDB records / client code
+(FETCH_TABLES as Record<string, FetchEntry[]>)['legacy-water-sports'] = FETCH_TABLES['walloon-village']!;
 
 export const KNOWN_LOCATION_IDS = Object.keys(FETCH_TABLES);
 

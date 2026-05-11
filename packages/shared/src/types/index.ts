@@ -18,6 +18,8 @@ export interface WeatherObservation {
   windGust_mph: number;
   windDir_deg: number;
   windDir_label: string;
+  temperature_f?: number;   // added in May 2026; absent on historical records
+  windChill_f?: number;
   shortForecast: string;
   ttl: number;
 }
@@ -39,6 +41,13 @@ export const PRESET_LOCATIONS: Location[] = [
     address: '5152 Lake Grove Road, Walloon Lake, MI',
   },
   {
+    id: 'walloon-village',
+    name: 'Walloon Village',
+    lat: 45.26352,
+    lng: -84.93499,
+    address: 'Walloon Village, Walloon Lake, MI',
+  },
+  {
     id: 'bear-cove-marina',
     name: 'Bear Cove Marina',
     lat: 45.32619,
@@ -46,15 +55,29 @@ export const PRESET_LOCATIONS: Location[] = [
     address: 'Bear Cove Marina, Walloon Lake, MI',
   },
   {
-    id: 'legacy-water-sports',
-    name: 'Walloon Village',
-    lat: 45.26352,
-    lng: -84.93499,
-    address: 'Walloon Village, Walloon Lake, MI',
+    id: 'camp-michagania',
+    name: 'Camp Michagania',
+    lat: 45.3215,
+    lng: -84.9628,
+    address: 'Camp Michagania, Walloon Lake, MI',
+  },
+  {
+    id: 'camp-daggett',
+    name: 'Camp Daggett',
+    lat: 45.3072,
+    lng: -84.9720,
+    address: 'Camp Daggett, Walloon Lake, MI',
+  },
+  {
+    id: 'walloon-lake-cc',
+    name: 'Walloon Lake Country Club',
+    lat: 45.2610,
+    lng: -84.9568,
+    address: 'Walloon Lake Country Club, Walloon Lake, MI',
   },
   {
     id: 'jones-landing',
-    name: 'Jones Landing (N. Arm)',
+    name: 'Jones Landing',
     lat: 45.30219,
     lng: -84.96792,
     address: '5186 Jones Landing, Walloon Lake, MI',

@@ -28,6 +28,8 @@ export interface WeatherObservation {
   windGust_mph:  number;
   windDir_deg:   number | null;
   windDir_label: string;
+  temperature_f?: number;
+  windChill_f?:   number;
   shortForecast: string;
 }
 

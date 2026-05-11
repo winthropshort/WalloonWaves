@@ -2,6 +2,7 @@ import type { ActivityMode } from '@walloon/shared';
 import type { LocationWithWave, WeatherObservation } from '../api.js';
 import { WindCompass } from './WindCompass.js';
 import { WaveSparkline } from './WaveSparkline.js';
+import { WeatherSparklines } from './WeatherSparklines.js';
 
 interface Props {
   location: LocationWithWave;
@@ -112,10 +113,13 @@ export function LocationCard({ location, activity, history }: Props) {
         </div>
       </div>
 
-      {/* 48h sparkline */}
-      <div>
-        <div className="text-xs text-gray-400 mb-1">48-hour wave height</div>
-        <WaveSparkline history={history} locationId={location.id} />
+      {/* 48h sparklines */}
+      <div className="space-y-2">
+        <div>
+          <div className="text-xs text-gray-400 mb-1">48-hr wave height</div>
+          <WaveSparkline history={history} locationId={location.id} />
+        </div>
+        <WeatherSparklines history={history} />
       </div>
 
       {/* Footer */}
