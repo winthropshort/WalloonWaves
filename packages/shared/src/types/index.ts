@@ -52,4 +52,11 @@ export const PRESET_LOCATIONS: Location[] = [
     lng: -84.93499,
     address: 'Walloon Village, Walloon Lake, MI',
   },
+  {
+    id: 'jones-landing',
+    name: 'Jones Landing (N. Arm)',
+    lat: 45.30219,
+    lng: -84.96792,
+    address: '5186 Jones Landing, Walloon Lake, MI',
+  },
 ];

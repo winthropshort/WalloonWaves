@@ -3,18 +3,18 @@ import { fetchForBearing, calcWaves, KNOWN_LOCATION_IDS } from './waveCalc.js';
 
 describe('fetchForBearing', () => {
   it('returns exact table value at a known bearing', () => {
-    // NNW (337.5°) for lake-grove-road = 1.8 mi
-    expect(fetchForBearing('lake-grove-road', 337.5)).toBe(1.8);
-    // E (90°) = 0.1 mi
-    expect(fetchForBearing('lake-grove-road', 90)).toBe(0.1);
-    // S (180°) = 4.2 mi (max fetch)
-    expect(fetchForBearing('lake-grove-road', 180)).toBe(4.2);
+    // NW (315°) for lake-grove-road = 2.10 mi (long diagonal to far west shore)
+    expect(fetchForBearing('lake-grove-road', 315)).toBe(2.10);
+    // W (270°) = 0.85 mi (arm width)
+    expect(fetchForBearing('lake-grove-road', 270)).toBe(0.85);
+    // S (180°) = 0.75 mi (to WA narrows)
+    expect(fetchForBearing('lake-grove-road', 180)).toBe(0.75);
   });
 
   it('interpolates between bearings', () => {
-    // Midpoint between N (0°, 1.5 mi) and NNE (22.5°, 1.2 mi) → 11.25° → 1.35 mi
-    const result = fetchForBearing('lake-grove-road', 11.25);
-    expect(result).toBeCloseTo(1.35, 5);
+    // Midpoint between SbW (191.25°, 0.80 mi) and SSW (202.5°, 0.85 mi) → 196.875° → 0.825 mi
+    const result = fetchForBearing('lake-grove-road', 196.875);
+    expect(result).toBeCloseTo(0.825, 5);
   });
 
   it('wraps correctly at 0/360 boundary', () => {
@@ -28,10 +28,11 @@ describe('fetchForBearing', () => {
     expect(() => fetchForBearing('unknown-location', 90)).toThrow('Unknown location ID');
   });
 
-  it('all three preset locations are defined', () => {
+  it('all four preset locations are defined', () => {
     expect(KNOWN_LOCATION_IDS).toContain('lake-grove-road');
     expect(KNOWN_LOCATION_IDS).toContain('legacy-water-sports');
     expect(KNOWN_LOCATION_IDS).toContain('bear-cove-marina');
+    expect(KNOWN_LOCATION_IDS).toContain('jones-landing');
   });
 });
 
@@ -65,8 +66,8 @@ describe('calcWaves', () => {
   });
 
   it('classifies rough conditions correctly', () => {
-    // 30 mph S (max fetch 4.2 mi) should produce rough wave heights
-    const result = calcWaves('lake-grove-road', 30, 180);
+    // 35 mph NW (max table fetch 2.10 mi) should produce rough wave heights
+    const result = calcWaves('lake-grove-road', 35, 315);
     expect(result.waveHeight_ft).toBeGreaterThan(1.5);
     expect(['rough', 'very-rough']).toContain(result.conditions);
     expect(result.dockStatus).toBe('avoid');
@@ -75,14 +76,14 @@ describe('calcWaves', () => {
   it('bear-cove-marina W wind is near-calm (western tip faces land)', () => {
     const bcm = calcWaves('bear-cove-marina', 20, 270);  // 20 mph due W
     const lgr = calcWaves('lake-grove-road',  20, 270);
-    // Bear Cove faces land for W wind → fetch 0.05 mi (rounds to 0.1 in output)
+    // Bear Cove faces west shore for W wind → fetch 0.05 mi (rounds to 0.1 in output)
     expect(bcm.fetchMi).toBeLessThanOrEqual(0.1);
-    // 5152 Lake Grove Rd has 1.5 mi W fetch — significantly rougher
+    // 5152 Lake Grove Rd has 0.85 mi W fetch — significantly rougher
     expect(lgr.waveHeight_ft).toBeGreaterThan(bcm.waveHeight_ft * 4);
   });
 
   it('bear-cove-marina SE wind uses maximum arm-length fetch', () => {
-    expect(fetchForBearing('bear-cove-marina', 135.0)).toBe(2.2);
+    expect(fetchForBearing('bear-cove-marina', 135.0)).toBe(2.0);
   });
 
   it('bear-cove-marina produces shorter S fetch than lake-grove-road', () => {
@@ -93,11 +94,11 @@ describe('calcWaves', () => {
   });
 
   it('returns correct wave height for a known input (regression)', () => {
-    // 15 mph from S (180°) at lake-grove-road (fetch = 4.2 mi) → 1.03 ft
-    const result = calcWaves('lake-grove-road', 15, 180);
-    expect(result.waveHeight_ft).toBe(1.03);
-    expect(result.wavePeriod_s).toBe(2.3);
-    expect(result.conditions).toBe('moderate');
-    expect(result.dockStatus).toBe('jetting-only');
+    // 15 mph from NW (315°) at lake-grove-road (fetch = 2.10 mi) → 0.73 ft
+    const result = calcWaves('lake-grove-road', 15, 315);
+    expect(result.waveHeight_ft).toBe(0.73);
+    expect(result.wavePeriod_s).toBe(1.8);
+    expect(result.conditions).toBe('slight');
+    expect(result.dockStatus).toBe('ok');
   });
 });

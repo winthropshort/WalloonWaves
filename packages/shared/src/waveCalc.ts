@@ -13,101 +13,186 @@ interface FetchEntry {
 
 // ─── Per-location fetch tables ────────────────────────────────────────────────
 //
-// Walloon Lake geometry (confirmed coordinates):
-//   Bear Cove Marina:   45.32619 N, 85.04375 W  — NW tip of west arm
-//   5152 Lake Grove Rd: 45.30325 N, 85.01259 W  — SE end of arm / NW main body
-//   Walloon Village:    45.26352 N, 84.93499 W  — SE end of main body
+// Walloon Lake geometry (polygon ray-cast from GPS shoreline coordinates):
 //
-//   Arm axis (Bear Cove → 5152): bearing 136° (SE), length 2.2 mi, width ~0.7 mi.
-//   5152 and Walloon Village sit on the east shore of the main body;
-//   fetch is short toward E and large toward the NW (arm/body).
-//   Bear Cove is at the NW tip: N/NW/W/SW winds blow off the shore → near-zero.
-//   Maximum fetch at Bear Cove is SE (136°, along arm axis) = 2.2 mi.
+//   West Arm: runs ~332°/152°, length ~2.9 mi (5152→Mud Lake narrows),
+//             ~0.85 mi wide. East shore = Lake Grove Rd. West shore = Eagle Island
+//             Rd / Fox Run / Bear Cove Ln. WA narrows (Tamarack Ln) connects south
+//             to Wildwood Basin.
 //
-// Fetch geometry for Bear Cove derived from a rectangular arm model:
-//   For bearing θ, along-arm = 0.695·sinθ - 0.719·cosθ
-//                  cross-arm = 0.719·sinθ + 0.695·cosθ
-//   fetch = arm_halfwidth / |cross-arm|  when cross-arm hits a wall first,
-//         = arm_length    /  along-arm   when along-arm hits the far end first.
-//   Bearings with along-arm < 0 face the NW shore → fetch ≈ 0.
+//   North Arm: runs ~N-S, ~0.6 mi wide, ~1.87 mi long. East shore = Jones Landing.
+//             Narrows at ~45.28169°N connect south to West Arm / Wildwood.
+//
+//   5152 Lake Grove Rd (45.30325N, 85.01259W): east shore of West Arm, ~0.83 mi
+//             N of WA narrows. Arm axis toward Mud Lake = 322° (peak fetch 2.91 mi);
+//             32-bearing sample NWbN (326.25°) captures 2.65 mi.
+//
+//   Bear Cove Marina (45.32611N, 85.04358W): west shore of West Arm, ~0.7 mi S of
+//             Mud Lake narrows. Arm axis toward WA narrows = 148° (peak 2.78 mi);
+//             32-bearing sample SEbS (146.25°) captures 2.75 mi.
+//
+//   Jones Landing (45.30219N, 84.96792W): east shore of North Arm, mid-arm.
+//             Maximum fetch S (180°) = 1.40 mi to the south narrows.
+//
+//   Walloon Village (45.26352N, 84.93499W): SE tip of The Foot. Open-water sector
+//             ~255°–293°; maximum fetch WbN (281.25°) = 2.10 mi.
 //
 const FETCH_TABLES: Record<string, FetchEntry[]> = {
 
   // 5152 Lake Grove Road — 45.30325°N, 85.01259°W
-  // Located on the east shore at the junction of the west arm and main body.
-  // West arm runs NW (315°) toward Bear Cove, 2.2 mi.
-  // Main body runs SE/S toward Walloon Village, max ~4.2 mi.
-  // East shore is immediately to the right → E/ESE fetch ≈ 0.1 mi.
+  // East shore of the West Arm, ~0.83 mi N of WA narrows (Tamarack Ln).
+  // Arm axis toward Mud Lake ~322° (peak fetch 2.91 mi); NWbN (326.25°) = 2.65 mi.
+  // N through SEbS exits east shore immediately; shore cliff at ~331°.
   'lake-grove-road': [
-    { bearing:   0.0, mi: 1.5 },  // N   — limited by N shore of main body
-    { bearing:  22.5, mi: 1.2 },  // NNE
-    { bearing:  45.0, mi: 0.8 },  // NE
-    { bearing:  67.5, mi: 0.3 },  // ENE
-    { bearing:  90.0, mi: 0.1 },  // E   — eastern shore immediately
-    { bearing: 112.5, mi: 0.1 },  // ESE — eastern shore
-    { bearing: 135.0, mi: 2.5 },  // SE  — down main body toward Walloon Village
-    { bearing: 157.5, mi: 3.5 },  // SSE
-    { bearing: 180.0, mi: 4.2 },  // S   — long main body run (max fetch)
-    { bearing: 202.5, mi: 3.8 },  // SSW
-    { bearing: 225.0, mi: 3.0 },  // SW
-    { bearing: 247.5, mi: 2.2 },  // WSW — through arm junction
-    { bearing: 270.0, mi: 1.5 },  // W   — across arm width
-    { bearing: 292.5, mi: 2.0 },  // WNW — into arm toward Bear Cove
-    { bearing: 315.0, mi: 2.2 },  // NW  — arm axis toward Bear Cove
-    { bearing: 337.5, mi: 1.8 },  // NNW — off-axis
+    { bearing:   0.00, mi: 0.05 }, // N     — east shore immediately
+    { bearing:  11.25, mi: 0.05 }, // NbE   — east shore
+    { bearing:  22.50, mi: 0.05 }, // NNE   — east shore
+    { bearing:  33.75, mi: 0.05 }, // NEbN  — east shore
+    { bearing:  45.00, mi: 0.05 }, // NE    — east shore
+    { bearing:  56.25, mi: 0.05 }, // NEbE  — east shore
+    { bearing:  67.50, mi: 0.05 }, // ENE   — east shore
+    { bearing:  78.75, mi: 0.05 }, // EbN   — east shore
+    { bearing:  90.00, mi: 0.05 }, // E     — east shore
+    { bearing: 101.25, mi: 0.05 }, // EbS   — east shore
+    { bearing: 112.50, mi: 0.05 }, // ESE   — east shore
+    { bearing: 123.75, mi: 0.05 }, // SEbE  — east shore
+    { bearing: 135.00, mi: 0.05 }, // SE    — east shore
+    { bearing: 146.25, mi: 0.05 }, // SEbS  — east shore
+    { bearing: 157.50, mi: 0.40 }, // SSE   — cuts toward east shore south of 5152
+    { bearing: 168.75, mi: 0.50 }, // SbE   — angled toward south shore
+    { bearing: 180.00, mi: 0.75 }, // S     — down arm to WA narrows
+    { bearing: 191.25, mi: 0.80 }, // SbW   — diagonal to west shore
+    { bearing: 202.50, mi: 0.85 }, // SSW   — diagonal to west shore
+    { bearing: 213.75, mi: 0.70 }, // SWbS  — SW diagonal
+    { bearing: 225.00, mi: 0.65 }, // SW
+    { bearing: 236.25, mi: 0.65 }, // SWbW
+    { bearing: 247.50, mi: 0.70 }, // WSW
+    { bearing: 258.75, mi: 0.90 }, // WbS   — wider diagonal cross
+    { bearing: 270.00, mi: 0.85 }, // W     — arm width (~0.85 mi)
+    { bearing: 281.25, mi: 0.85 }, // WbN   — arm width, slight diagonal
+    { bearing: 292.50, mi: 0.90 }, // WNW
+    { bearing: 303.75, mi: 1.40 }, // NWbW  — toward far NW shore
+    { bearing: 315.00, mi: 2.10 }, // NW    — long diagonal up arm
+    { bearing: 326.25, mi: 2.65 }, // NWbN  — near arm axis (322°); peak fetch
+    { bearing: 337.50, mi: 0.05 }, // NNW   — exits east shore (shore ~331°)
+    { bearing: 348.75, mi: 0.05 }, // NbW   — east shore
   ],
 
-  // Walloon Village — 45.26352°N, 84.93499°W — SE end of main body
-  // Main body runs NW (315°) ~4.7 mi toward 5152. Eastern shore close to the right.
+  // Walloon Village — 45.26352°N, 84.93499°W — SE tip of The Foot
+  // The Foot: rhombus ~2.0 mi E-W × ~1.4 mi N-S. WV at extreme SE corner.
+  // Open-water sector ~255°–293°; maximum fetch WbN (281.25°) = 2.10 mi.
+  // All other directions blocked immediately by south/east shore.
   'legacy-water-sports': [
-    { bearing:   0.0, mi: 1.0 },  // N   — across body width
-    { bearing:  22.5, mi: 0.8 },  // NNE
-    { bearing:  45.0, mi: 0.4 },  // NE
-    { bearing:  67.5, mi: 0.1 },  // ENE — toward east shore
-    { bearing:  90.0, mi: 0.1 },  // E   — eastern shore
-    { bearing: 112.5, mi: 0.1 },  // ESE — eastern shore
-    { bearing: 135.0, mi: 0.2 },  // SE  — near SE tip of lake
-    { bearing: 157.5, mi: 0.3 },  // SSE
-    { bearing: 180.0, mi: 0.5 },  // S   — near south end
-    { bearing: 202.5, mi: 0.8 },  // SSW
-    { bearing: 225.0, mi: 1.5 },  // SW
-    { bearing: 247.5, mi: 2.5 },  // WSW
-    { bearing: 270.0, mi: 3.0 },  // W   — across body + toward arm
-    { bearing: 292.5, mi: 4.0 },  // WNW — long run up body
-    { bearing: 315.0, mi: 4.7 },  // NW  — body axis toward 5152 (max fetch)
-    { bearing: 337.5, mi: 3.5 },  // NNW — off-axis
+    { bearing:   0.00, mi: 0.05 }, // N     — SE tip, east shore immediately
+    { bearing:  11.25, mi: 0.05 }, // NbE   — east shore
+    { bearing:  22.50, mi: 0.05 }, // NNE   — east shore
+    { bearing:  33.75, mi: 0.05 }, // NEbN  — east shore
+    { bearing:  45.00, mi: 0.05 }, // NE    — east shore
+    { bearing:  56.25, mi: 0.05 }, // NEbE  — east shore
+    { bearing:  67.50, mi: 0.05 }, // ENE   — east shore
+    { bearing:  78.75, mi: 0.05 }, // EbN   — east shore
+    { bearing:  90.00, mi: 0.05 }, // E     — east shore
+    { bearing: 101.25, mi: 0.05 }, // EbS   — east shore
+    { bearing: 112.50, mi: 0.05 }, // ESE   — east shore
+    { bearing: 123.75, mi: 0.05 }, // SEbE  — SE corner
+    { bearing: 135.00, mi: 0.05 }, // SE    — SE corner
+    { bearing: 146.25, mi: 0.05 }, // SEbS  — south shore
+    { bearing: 157.50, mi: 0.05 }, // SSE   — south shore
+    { bearing: 168.75, mi: 0.05 }, // SbE   — south shore
+    { bearing: 180.00, mi: 0.05 }, // S     — south shore
+    { bearing: 191.25, mi: 0.05 }, // SbW   — south shore
+    { bearing: 202.50, mi: 0.05 }, // SSW   — south shore
+    { bearing: 213.75, mi: 0.05 }, // SWbS  — south shore
+    { bearing: 225.00, mi: 0.05 }, // SW    — south shore
+    { bearing: 236.25, mi: 0.05 }, // SWbW  — south shore
+    { bearing: 247.50, mi: 0.05 }, // WSW   — south shore (outside open sector)
+    { bearing: 258.75, mi: 1.85 }, // WbS   — entering open sector
+    { bearing: 270.00, mi: 1.95 }, // W     — long fetch across The Foot
+    { bearing: 281.25, mi: 2.10 }, // WbN   — max fetch across The Foot
+    { bearing: 292.50, mi: 2.00 }, // WNW   — long fetch
+    { bearing: 303.75, mi: 0.05 }, // NWbW  — north shore (outside open sector)
+    { bearing: 315.00, mi: 0.05 }, // NW    — north shore
+    { bearing: 326.25, mi: 0.05 }, // NWbN  — east shore
+    { bearing: 337.50, mi: 0.05 }, // NNW   — east shore
+    { bearing: 348.75, mi: 0.05 }, // NbW   — east shore
   ],
 
-  // Bear Cove Marina — 45.32619°N, 85.04375°W — NW tip of west arm
-  //
-  // Arm axis: Bear Cove (45.32619,-85.04375) → 5152 (45.30325,-85.01259)
-  //   Δlat = -0.02294° → -2552 m (south);  Δlon = +0.03116° → +2497 m (east)
-  //   bearing = atan2(2497, -2552) ≈ 136° (SE), length 2.2 mi, half-width 0.35 mi
-  //
-  // Open sector: roughly SE (≈90°–225°). All NW-facing bearings hit land immediately.
-  // Fetch geometry (unit vectors: along-arm = sin136°,cos136° = 0.695,−0.719):
-  //   along-arm component = 0.695·sinθ − 0.719·cosθ   (> 0 means toward 5152)
-  //   cross-arm component = 0.719·sinθ + 0.695·cosθ   (> 0 means NE wall)
-  //   t_end  = arm_length  / along-arm   (reaches 5152 end)
-  //   t_wall = half_width  / |cross-arm| (hits NE or SW wall)
-  //   fetch  = min(t_end, t_wall); 0.05 mi when along-arm ≤ 0 (faces land)
+  // Bear Cove Marina — 45.32611°N, 85.04358°W — west shore of West Arm
+  // West shore, ~0.7 mi S of Mud Lake narrows. Arm axis toward WA narrows ~148°
+  // (peak fetch 2.78 mi); SEbS (146.25°) captures 2.75 mi.
+  // N through ESE cross to east shore (~0.45–0.70 mi). SbE through NWbN exit west shore.
   'bear-cove-marina': [
-    { bearing:   0.0, mi: 0.05 }, // N   — faces NW shore (along-arm < 0)
-    { bearing:  22.5, mi: 0.05 }, // NNE — faces NW shore
-    { bearing:  45.0, mi: 0.05 }, // NE  — barely outside open sector
-    { bearing:  67.5, mi: 0.4  }, // ENE — open; hits NE wall ~0.4 mi
-    { bearing:  90.0, mi: 0.5  }, // E   — hits NE wall ~0.5 mi
-    { bearing: 112.5, mi: 0.9  }, // ESE — hits NE wall ~0.9 mi
-    { bearing: 135.0, mi: 2.2  }, // SE  — along arm axis: full length (max fetch)
-    { bearing: 157.5, mi: 1.0  }, // SSE — hits SW wall ~1.0 mi
-    { bearing: 180.0, mi: 0.5  }, // S   — hits SW wall ~0.5 mi
-    { bearing: 202.5, mi: 0.4  }, // SSW — hits SW wall ~0.4 mi
-    { bearing: 225.0, mi: 0.2  }, // SW  — barely open, narrow SW corridor
-    { bearing: 247.5, mi: 0.05 }, // WSW — faces NW shore
-    { bearing: 270.0, mi: 0.05 }, // W   — faces NW shore (wind blows off land)
-    { bearing: 292.5, mi: 0.05 }, // WNW — faces NW shore
-    { bearing: 315.0, mi: 0.05 }, // NW  — faces NW shore
-    { bearing: 337.5, mi: 0.05 }, // NNW — faces NW shore
+    { bearing:   0.00, mi: 0.65 }, // N     — to upper arm NE corner
+    { bearing:  11.25, mi: 0.55 }, // NbE   — cross-arm
+    { bearing:  22.50, mi: 0.50 }, // NNE   — cross-arm to east shore
+    { bearing:  33.75, mi: 0.50 }, // NEbN  — cross-arm
+    { bearing:  45.00, mi: 0.50 }, // NE    — cross-arm
+    { bearing:  56.25, mi: 0.55 }, // NEbE  — cross-arm
+    { bearing:  67.50, mi: 0.50 }, // ENE   — cross-arm (~0.85 mi wide here)
+    { bearing:  78.75, mi: 0.45 }, // EbN   — cross-arm, shortest width
+    { bearing:  90.00, mi: 0.50 }, // E     — cross-arm
+    { bearing: 101.25, mi: 0.55 }, // EbS   — angled cross
+    { bearing: 112.50, mi: 0.70 }, // ESE   — angled cross
+    { bearing: 123.75, mi: 1.35 }, // SEbE  — toward far east shore, angled
+    { bearing: 135.00, mi: 2.00 }, // SE    — along arm toward WA narrows
+    { bearing: 146.25, mi: 2.75 }, // SEbS  — near arm axis (148°); peak fetch
+    { bearing: 157.50, mi: 0.85 }, // SSE   — hits far east shore
+    { bearing: 168.75, mi: 0.05 }, // SbE   — west shore immediately
+    { bearing: 180.00, mi: 0.05 }, // S     — west shore
+    { bearing: 191.25, mi: 0.05 }, // SbW   — west shore
+    { bearing: 202.50, mi: 0.05 }, // SSW   — west shore
+    { bearing: 213.75, mi: 0.05 }, // SWbS  — west shore
+    { bearing: 225.00, mi: 0.05 }, // SW    — west shore
+    { bearing: 236.25, mi: 0.05 }, // SWbW  — west shore
+    { bearing: 247.50, mi: 0.05 }, // WSW   — west shore
+    { bearing: 258.75, mi: 0.05 }, // WbS   — west shore
+    { bearing: 270.00, mi: 0.05 }, // W     — west shore (wind off land)
+    { bearing: 281.25, mi: 0.05 }, // WbN   — west shore
+    { bearing: 292.50, mi: 0.05 }, // WNW   — west shore
+    { bearing: 303.75, mi: 0.05 }, // NWbW  — west shore
+    { bearing: 315.00, mi: 0.05 }, // NW    — west shore
+    { bearing: 326.25, mi: 0.05 }, // NWbN  — west shore
+    { bearing: 337.50, mi: 0.05 }, // NNW   — west shore
+    { bearing: 348.75, mi: 0.15 }, // NbW   — slight gap toward north narrows
+  ],
+
+  // Jones Landing — 45.30219°N, 84.96792°W — east shore of North Arm
+  // North Arm runs ~N-S, ~0.6 mi wide, ~1.87 mi long. JL on east shore, mid-arm.
+  // Maximum fetch S (180°) = 1.40 mi to the south narrows (~45.28169°N).
+  // N through SEbS and SSE exit east shore; W through NWbN cross arm to west shore.
+  'jones-landing': [
+    { bearing:   0.00, mi: 0.45 }, // N     — north to upper arm end
+    { bearing:  11.25, mi: 0.40 }, // NbE   — east shore angles in
+    { bearing:  22.50, mi: 0.05 }, // NNE   — east shore immediately
+    { bearing:  33.75, mi: 0.05 }, // NEbN  — east shore
+    { bearing:  45.00, mi: 0.05 }, // NE    — east shore
+    { bearing:  56.25, mi: 0.05 }, // NEbE  — east shore
+    { bearing:  67.50, mi: 0.05 }, // ENE   — east shore
+    { bearing:  78.75, mi: 0.05 }, // EbN   — east shore
+    { bearing:  90.00, mi: 0.05 }, // E     — east shore
+    { bearing: 101.25, mi: 0.05 }, // EbS   — east shore
+    { bearing: 112.50, mi: 0.05 }, // ESE   — east shore
+    { bearing: 123.75, mi: 0.05 }, // SEbE  — east shore
+    { bearing: 135.00, mi: 0.05 }, // SE    — east shore
+    { bearing: 146.25, mi: 0.05 }, // SEbS  — east shore
+    { bearing: 157.50, mi: 0.15 }, // SSE   — angled, clips east shore
+    { bearing: 168.75, mi: 1.25 }, // SbE   — entering arm channel
+    { bearing: 180.00, mi: 1.40 }, // S     — down arm to narrows (max fetch)
+    { bearing: 191.25, mi: 0.70 }, // SbW   — diagonal to west shore
+    { bearing: 202.50, mi: 0.65 }, // SSW   — diagonal
+    { bearing: 213.75, mi: 0.60 }, // SWbS  — cross-arm diagonal
+    { bearing: 225.00, mi: 0.55 }, // SW    — cross-arm
+    { bearing: 236.25, mi: 0.45 }, // SWbW  — cross-arm, shorter
+    { bearing: 247.50, mi: 0.40 }, // WSW   — cross-arm
+    { bearing: 258.75, mi: 0.50 }, // WbS   — cross-arm
+    { bearing: 270.00, mi: 0.55 }, // W     — cross-arm to west shore
+    { bearing: 281.25, mi: 0.60 }, // WbN   — cross-arm
+    { bearing: 292.50, mi: 0.60 }, // WNW   — cross-arm
+    { bearing: 303.75, mi: 0.60 }, // NWbW  — cross-arm
+    { bearing: 315.00, mi: 0.50 }, // NW    — cross-arm to west shore
+    { bearing: 326.25, mi: 0.45 }, // NWbN  — west shore angles in
+    { bearing: 337.50, mi: 0.45 }, // NNW   — west shore
+    { bearing: 348.75, mi: 0.50 }, // NbW   — west shore, arm widens
   ],
 };
 
