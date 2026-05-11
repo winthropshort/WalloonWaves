@@ -11,7 +11,7 @@
 #   [A1] CloudFront site reachable
 #   [H1] GET /health returns 200
 #   [W1] GET /weather/current returns success
-#   [W2] GET /weather/locations returns 3 locations
+#   [W2] GET /weather/locations returns 4 locations
 #   [W3] POST /weather/predict for lake-grove-road returns wave data
 #   [W4] GET /weather/geocode with known query returns a result
 #
@@ -98,9 +98,9 @@ if [ -n "$API_URL" ]; then
   check "W1" "GET /weather/current returns success" \
     bash -c "curl -sf --max-time 10 '${API_URL}weather/current' | grep -q '\"success\":true'"
 
-  check "W2" "GET /weather/locations returns 3 locations" \
+  check "W2" "GET /weather/locations returns 4 locations" \
     bash -c "curl -sf --max-time 10 '${API_URL}weather/locations' | python3 -c \
-      'import sys,json; d=json.load(sys.stdin); assert d[\"success\"] and len(d[\"data\"])==3'"
+      'import sys,json; d=json.load(sys.stdin); assert d[\"success\"] and len(d[\"data\"])==4'"
 
   check "W3" "POST /weather/predict for lake-grove-road" \
     bash -c "curl -sf --max-time 10 -X POST '${API_URL}weather/predict' \
