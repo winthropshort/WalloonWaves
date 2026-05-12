@@ -249,8 +249,34 @@ function DockView({
           </div>
         </div>
 
-        {/* History sparklines */}
-        <div className="space-y-2">
+        {/* Sparklines */}
+        <div className="relative space-y-1 pt-1 border-t border-gray-50">
+          <div
+            className="absolute inset-y-0 w-px bg-gray-300 pointer-events-none z-10"
+            style={{ left: `calc(8rem + ${nowPct / 100} * (100% - 8rem))` }}
+          />
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-400 w-12 shrink-0">λ:</span>
+            <span className="text-xs font-medium tabular-nums w-16 shrink-0" style={{ color: htClr }}>
+              {displayWave.waveHeight_ft.toFixed(2)} ft
+            </span>
+            <div className="flex-1 h-12">
+              <WaveSparkline history={history} locationId={displayPresetId} hours={hours} />
+            </div>
+          </div>
+          <WeatherSparklines history={history} hours={hours} />
+        </div>
+
+        {/* Footer: data timestamp + window label + 72h toggle */}
+        <div className="pt-1 border-t border-gray-50 space-y-0.5">
+          {currentObs && (
+            <div className="text-xs text-gray-400">
+              Data from{' '}
+              {new Date(currentObs.timestamp).toLocaleTimeString('en-US', {
+                hour: '2-digit', minute: '2-digit', hour12: false,
+              })}
+            </div>
+          )}
           <div className="flex items-center justify-between">
             <span className="text-xs text-gray-400">{windowLabel(hours)}</span>
             <label className="flex items-center gap-1 text-xs text-gray-400 cursor-pointer select-none">
@@ -263,30 +289,7 @@ function DockView({
               72h
             </label>
           </div>
-          <div className="relative space-y-1 pt-1 border-t border-gray-50">
-            <div
-              className="absolute inset-y-0 w-px bg-gray-300 pointer-events-none z-10"
-              style={{ left: `calc(8rem + ${nowPct / 100} * (100% - 8rem))` }}
-            />
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-400 w-16 shrink-0">Wave height</span>
-              <div className="w-12 shrink-0" />
-              <div className="flex-1 h-14">
-                <WaveSparkline history={history} locationId={displayPresetId} hours={hours} />
-              </div>
-            </div>
-            <WeatherSparklines history={history} hours={hours} />
-          </div>
         </div>
-
-        {currentObs && (
-          <div className="text-xs text-gray-400 pt-1 border-t border-gray-50">
-            Wind data from{' '}
-            {new Date(currentObs.timestamp).toLocaleTimeString('en-US', {
-              hour: 'numeric', minute: '2-digit', hour12: true,
-            })}
-          </div>
-        )}
       </div>
     </div>
   );
@@ -326,8 +329,12 @@ export default function App() {
   const { data: locations, isLoading: locsLoading, error: locsError, dataUpdatedAt } = useLocations();
   const { data: history = [] } = useWeatherHistory(hours);
 
+  const nowMs = Date.now();
   const currentObs = history.length
-    ? [...history].sort((a, b) => b.timestamp.localeCompare(a.timestamp))[0] ?? null
+    ? history.reduce((best, o) =>
+        Math.abs(new Date(o.timestamp).getTime() - nowMs) <
+        Math.abs(new Date(best.timestamp).getTime() - nowMs) ? o : best,
+      )
     : null;
 
   const lastUpdated = dataUpdatedAt

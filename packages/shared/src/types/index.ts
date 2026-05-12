@@ -20,6 +20,10 @@ export interface WeatherObservation {
   windDir_label: string;
   temperature_f?: number;   // added in May 2026; absent on historical records
   windChill_f?: number;
+  pressure_mb?:  number;   // hPa; populated after backend fix in May 2026
+  pop_pct?:      number;   // probability of precipitation 0–100
+  skyCover_pct?: number;   // sky cover 0–100
+  precip_in?:    number;   // quantitative precipitation in inches
   shortForecast: string;
   ttl: number;
 }

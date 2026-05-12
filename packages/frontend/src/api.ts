@@ -31,7 +31,10 @@ export interface WeatherObservation {
   temperature_f?: number;
   windChill_f?:   number;
   pressure_mb?:   number;
-  shortForecast: string;
+  pop_pct?:       number;
+  skyCover_pct?:  number;
+  precip_in?:     number;
+  shortForecast:  string;
 }
 
 export interface GeocodeResult {

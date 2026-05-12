@@ -10,7 +10,7 @@
 
 import { BatchWriteCommand } from '@aws-sdk/lib-dynamodb';
 import { db, TABLE_NAME } from '../lib/dynamo.js';
-import { fetchHourlyForecast, fetchGridpointPressure } from '../lib/nws.js';
+import { fetchHourlyForecast, fetchGridpointData } from '../lib/nws.js';
 
 const TTL_DAYS = 90;
 
@@ -43,13 +43,15 @@ export const handler = async (): Promise<void> => {
 
   console.log(`[WeatherIngest] Fetched ${periods.length} periods`);
 
-  let pressureMap = new Map<string, number>();
+  let gridpoint = { pressureMap: new Map<string, number>(), skyCoverMap: new Map<string, number>(), precipMap: new Map<string, number>() };
   try {
-    pressureMap = await fetchGridpointPressure();
-    console.log(`[WeatherIngest] Fetched ${pressureMap.size} pressure values`);
+    gridpoint = await fetchGridpointData();
+    console.log(`[WeatherIngest] Gridpoint: ${gridpoint.pressureMap.size} pressure, ${gridpoint.skyCoverMap.size} sky cover, ${gridpoint.precipMap.size} precip values`);
   } catch (err) {
-    console.warn('[WeatherIngest] Pressure fetch failed, continuing without pressure:', err);
+    console.warn('[WeatherIngest] Gridpoint fetch failed, continuing without gridpoint data:', err);
   }
+
+  const { pressureMap, skyCoverMap, precipMap } = gridpoint;
 
   const items = periods.map((p) => {
     const utcIso  = toUtcIso(p.startTime);
@@ -59,6 +61,8 @@ export const handler = async (): Promise<void> => {
 
     const hourKey   = utcIso.slice(0, 13); // "YYYY-MM-DDTHH"
     const pressure  = pressureMap.get(hourKey);
+    const skyCover  = skyCoverMap.get(hourKey);
+    const precipMm  = precipMap.get(hourKey);
 
     return {
       PK:            `WEATHER#${dateStr}`,
@@ -70,7 +74,10 @@ export const handler = async (): Promise<void> => {
       windDir_label: p.windDir_label,
       temperature_f: p.temperature_f,
       windChill_f:   windChill(p.temperature_f, p.windSpeed_mph),
-      ...(pressure !== undefined && { pressure_mb: pressure }),
+      ...(pressure  !== undefined && { pressure_mb:  pressure }),
+      ...(p.pop_pct !== null      && p.pop_pct !== undefined && { pop_pct: p.pop_pct }),
+      ...(skyCover  !== undefined && { skyCover_pct: Math.round(skyCover) }),
+      ...(precipMm  !== undefined && { precip_in:    Math.round(precipMm * 0.03937 * 1000) / 1000 }),
       shortForecast: p.shortForecast,
       ttl,
       fetchedAt,

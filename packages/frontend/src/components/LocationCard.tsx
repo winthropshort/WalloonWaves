@@ -127,8 +127,29 @@ export function LocationCard({ location, activity, history, hours, onHoursChange
         </div>
       </div>
 
-      {/* History sparklines */}
-      <div className="space-y-2">
+      {/* Sparklines — all rows share [w-12 label][w-16 value][flex-1 chart] = 8rem left offset */}
+      <div className="relative space-y-1 pt-1 border-t border-gray-50">
+        <div
+          className="absolute inset-y-0 w-px bg-gray-300 pointer-events-none z-10"
+          style={{ left: `calc(8rem + ${nowPct / 100} * (100% - 8rem))` }}
+        />
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-400 w-12 shrink-0">λ:</span>
+          <span className="text-xs font-medium tabular-nums w-16 shrink-0" style={{ color: htColor }}>
+            {wave.waveHeight_ft.toFixed(2)} ft
+          </span>
+          <div className="flex-1 h-12">
+            <WaveSparkline history={history} locationId={location.id} hours={hours} />
+          </div>
+        </div>
+        <WeatherSparklines history={history} hours={hours} />
+      </div>
+
+      {/* Footer */}
+      <div className="pt-1 border-t border-gray-50 space-y-0.5">
+        <div className="text-xs text-gray-400">
+          Data from {ageLabel(location.weatherUpdated)}
+        </div>
         <div className="flex items-center justify-between">
           <span className="text-xs text-gray-400">{windowLabel(hours)}</span>
           <label className="flex items-center gap-1 text-xs text-gray-400 cursor-pointer select-none">
@@ -141,31 +162,6 @@ export function LocationCard({ location, activity, history, hours, onHoursChange
             72h
           </label>
         </div>
-
-        {/*
-          All rows: [w-16 label] [w-12 value/spacer] [flex-1 chart]
-          The single now-line overlay is positioned using the same column math:
-          chart starts at 4rem + 0.5rem gap + 3rem + 0.5rem gap = 8rem from left.
-        */}
-        <div className="relative space-y-1 pt-1 border-t border-gray-50">
-          <div
-            className="absolute inset-y-0 w-px bg-gray-300 pointer-events-none z-10"
-            style={{ left: `calc(8rem + ${nowPct / 100} * (100% - 8rem))` }}
-          />
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-400 w-16 shrink-0">Wave height</span>
-            <div className="w-12 shrink-0" />
-            <div className="flex-1 h-14">
-              <WaveSparkline history={history} locationId={location.id} hours={hours} />
-            </div>
-          </div>
-          <WeatherSparklines history={history} hours={hours} />
-        </div>
-      </div>
-
-      {/* Footer */}
-      <div className="text-xs text-gray-400 pt-1 border-t border-gray-50">
-        Updated {ageLabel(location.weatherUpdated)}
       </div>
     </div>
   );

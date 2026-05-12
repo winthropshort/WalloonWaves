@@ -25,6 +25,7 @@ export interface NwsPeriod {
   windDir_label: string;         // e.g. "NNW" or "VRB"
   temperature_f: number;
   shortForecast: string;
+  pop_pct:       number | null;  // probability of precipitation 0-100
 }
 
 async function nwsGet(url: string): Promise<unknown> {
@@ -58,39 +59,50 @@ function parseDurationHours(duration: string): number {
   return m ? parseInt(m[1]!, 10) : 1;
 }
 
-/**
- * Fetch barometric pressure from NWS gridpoints forecast.
- * Returns a map keyed by "YYYY-MM-DDTHH" (UTC hour) → pressure in hPa (mb).
- */
-export async function fetchGridpointPressure(): Promise<Map<string, number>> {
-  const data = (await nwsGet(NWS_GRIDPOINT_URL)) as {
-    properties: {
-      pressure?: {
-        uom: string;
-        values: Array<{ validTime: string; value: number | null }>;
-      };
-    };
-  };
+export interface GridpointData {
+  pressureMap: Map<string, number>;  // hPa (mb)
+  skyCoverMap: Map<string, number>;  // percent 0-100
+  precipMap:   Map<string, number>;  // mm
+}
 
+type GridpointValues = Array<{ validTime: string; value: number | null }>;
+
+function buildHourlyMap(values: GridpointValues, scale: number): Map<string, number> {
   const map = new Map<string, number>();
-  const entries = data.properties.pressure?.values ?? [];
-
-  for (const entry of entries) {
+  for (const entry of values) {
     if (entry.value === null) continue;
     const parts = entry.validTime.split('/');
     const timePart = parts[0];
     if (!timePart) continue;
     const durationHours = parseDurationHours(parts[1] ?? 'PT1H');
     const startMs = new Date(timePart).getTime();
-    const mb = Math.round(entry.value / 100 * 10) / 10; // Pa → hPa
-
+    const scaled = Math.round(entry.value * scale * 10) / 10;
     for (let h = 0; h < durationHours; h++) {
       const hourKey = new Date(startMs + h * 3_600_000).toISOString().slice(0, 13);
-      map.set(hourKey, mb);
+      map.set(hourKey, scaled);
     }
   }
-
   return map;
+}
+
+/**
+ * Fetch pressure (atmosphericPressure), sky cover, and quantitative precipitation
+ * from NWS gridpoints in a single request.
+ */
+export async function fetchGridpointData(): Promise<GridpointData> {
+  const data = (await nwsGet(NWS_GRIDPOINT_URL)) as {
+    properties: {
+      atmosphericPressure?:       { uom: string; values: GridpointValues };
+      skyCover?:                  { uom: string; values: GridpointValues };
+      quantitativePrecipitation?: { uom: string; values: GridpointValues };
+    };
+  };
+
+  const pressureMap = buildHourlyMap(data.properties.atmosphericPressure?.values ?? [], 1 / 100);  // Pa → hPa
+  const skyCoverMap = buildHourlyMap(data.properties.skyCover?.values ?? [], 1);                   // already %
+  const precipMap   = buildHourlyMap(data.properties.quantitativePrecipitation?.values ?? [], 1);  // mm
+
+  return { pressureMap, skyCoverMap, precipMap };
 }
 
 /** Fetch and parse all hourly forecast periods from NWS. Returns up to 156 items. */
@@ -108,13 +120,13 @@ export async function fetchHourlyForecast(): Promise<NwsPeriod[]> {
         temperature:  number;
         temperatureUnit: string;
         shortForecast: string;
+        probabilityOfPrecipitation: { unitCode: string; value: number | null };
       }>;
     };
   };
 
   return hourlyData.properties.periods.map((p) => {
     const { deg, label } = parseDir(p.windDirection);
-    // NWS hourly forecast always returns °F for US points
     const temp_f = p.temperatureUnit === 'C'
       ? p.temperature * 9 / 5 + 32
       : p.temperature;
@@ -126,6 +138,7 @@ export async function fetchHourlyForecast(): Promise<NwsPeriod[]> {
       windDir_label: label,
       temperature_f: temp_f,
       shortForecast: p.shortForecast,
+      pop_pct:       p.probabilityOfPrecipitation?.value ?? null,
     };
   });
 }

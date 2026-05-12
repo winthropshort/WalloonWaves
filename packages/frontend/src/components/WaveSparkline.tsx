@@ -37,21 +37,26 @@ export function WaveSparkline({ history, locationId, hours = 48 }: Props) {
     );
   }
 
-  const nowMs = Date.now();
+  const [domainStart, domainEnd] = midnightDomain(hours);
   const data: DataPoint[] = history
-    .filter((obs) => (obs.windDir_deg !== null || obs.windSpeed_mph === 0)
-      && new Date(obs.timestamp).getTime() <= nowMs)
+    .filter((obs) => {
+      const t = new Date(obs.timestamp).getTime();
+      return (obs.windDir_deg !== null || obs.windSpeed_mph === 0)
+        && t >= domainStart
+        && t <= domainEnd;
+    })
     .map((obs) => ({
       t: new Date(obs.timestamp).getTime(),
       h: calcWaves(locationId, obs.windSpeed_mph, obs.windDir_deg).waveHeight_ft,
     }))
     .sort((a, b) => a.t - b.t);
 
-  const maxH   = Math.max(...data.map((d) => d.h), 0.5);
-  const latest = data.at(-1);
-  const color  = conditionColor(latest?.h ?? 0);
-
-  const [domainStart, domainEnd] = midnightDomain(hours);
+  const nowMs  = Date.now();
+  const closest = data.length
+    ? data.reduce((best, d) => Math.abs(d.t - nowMs) < Math.abs(best.t - nowMs) ? d : best)
+    : undefined;
+  const maxH  = Math.max(...data.map((d) => d.h), 0.5);
+  const color = conditionColor(closest?.h ?? 0);
 
   return (
     <div className="h-14">
