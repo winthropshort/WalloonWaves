@@ -68,7 +68,25 @@ function withinBounds(lat: number, lng: number) {
   return lat >= BOUNDS.minLat && lat <= BOUNDS.maxLat && lng >= BOUNDS.minLng && lng <= BOUNDS.maxLng;
 }
 
-function DockView({ currentObs, history }: { currentObs: WeatherObservation | null; history: WeatherObservation[] }) {
+function windowLabel(hours: 48 | 72): string {
+  const now = new Date();
+  const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+  const endDate  = new Date(midnight.getTime() + hours * 3_600_000 - 60_000);
+  const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return `${fmt(midnight)} 00:00 – ${fmt(endDate)} 23:59`;
+}
+
+function DockView({
+  currentObs,
+  history,
+  hours,
+  onHoursChange,
+}: {
+  currentObs:    WeatherObservation | null;
+  history:       WeatherObservation[];
+  hours:         48 | 72;
+  onHoursChange: (h: 48 | 72) => void;
+}) {
   const [address, setAddress] = useState('5152 Lake Grove Road, Walloon Lake, MI');
   const [result, setResult]   = useState<DockResult | null>(null);
   const [geoError, setGeoError] = useState<string | null>(null);
@@ -226,13 +244,25 @@ function DockView({ currentObs, history }: { currentObs: WeatherObservation | nu
           </div>
         </div>
 
-        {/* Sparklines */}
+        {/* History sparklines */}
         <div className="space-y-2">
-          <div>
-            <div className="text-xs text-gray-400 mb-1">48-hr wave height</div>
-            <WaveSparkline history={history} locationId={displayPresetId} />
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-gray-400">{windowLabel(hours)}</span>
+            <label className="flex items-center gap-1 text-xs text-gray-400 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={hours === 72}
+                onChange={(e) => onHoursChange(e.target.checked ? 72 : 48)}
+                className="h-3 w-3 rounded"
+              />
+              72h
+            </label>
           </div>
-          <WeatherSparklines history={history} />
+          <div>
+            <div className="text-xs text-gray-400 mb-1">Wave height</div>
+            <WaveSparkline history={history} locationId={displayPresetId} hours={hours} />
+          </div>
+          <WeatherSparklines history={history} hours={hours} />
         </div>
 
         {currentObs && (
@@ -277,9 +307,10 @@ function ErrorBanner({ message }: { message: string }) {
 
 export default function App() {
   const [activity, setActivity] = useState<ActivityMode>('dock');
+  const [hours, setHours]       = useState<48 | 72>(48);
 
   const { data: locations, isLoading: locsLoading, error: locsError, dataUpdatedAt } = useLocations();
-  const { data: history = [] } = useWeatherHistory(48);
+  const { data: history = [] } = useWeatherHistory(hours);
 
   const currentObs = history.length
     ? [...history].sort((a, b) => b.timestamp.localeCompare(a.timestamp))[0] ?? null
@@ -321,7 +352,7 @@ export default function App() {
         {activity === 'dock' && (
           locsLoading
             ? <LoadingSkeleton count={1} />
-            : <DockView currentObs={currentObs} history={history} />
+            : <DockView currentObs={currentObs} history={history} hours={hours} onHoursChange={setHours} />
         )}
 
         {activity === 'mariner' && (
@@ -335,6 +366,8 @@ export default function App() {
                     location={loc}
                     activity={activity}
                     history={history}
+                    hours={hours}
+                    onHoursChange={setHours}
                   />
                 ))}
               </div>

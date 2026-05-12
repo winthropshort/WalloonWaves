@@ -40,10 +40,11 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
     const now      = new Date();
     const start    = new Date(now.getTime() - hours * 3_600_000);
+    const end      = new Date(now.getTime() + hours * 3_600_000);
     const startIso = start.toISOString();
-    const nowIso   = now.toISOString();
+    const endIso   = end.toISOString();
 
-    const dates = dateBetween(start, now);
+    const dates = dateBetween(start, end);
 
     const allItems: unknown[] = [];
 
@@ -54,7 +55,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         ExpressionAttributeValues: {
           ':pk':    `WEATHER#${dateStr}`,
           ':skMin': `OBS#${startIso}`,
-          ':skMax': `OBS#${nowIso}`,
+          ':skMax': `OBS#${endIso}`,
         },
         ScanIndexForward: true,
       }));

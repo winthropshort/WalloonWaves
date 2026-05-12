@@ -5,9 +5,19 @@ import { WaveSparkline } from './WaveSparkline.js';
 import { WeatherSparklines } from './WeatherSparklines.js';
 
 interface Props {
-  location: LocationWithWave;
-  activity: ActivityMode;
-  history:  WeatherObservation[];
+  location:      LocationWithWave;
+  activity:      ActivityMode;
+  history:       WeatherObservation[];
+  hours:         48 | 72;
+  onHoursChange: (h: 48 | 72) => void;
+}
+
+function windowLabel(hours: 48 | 72): string {
+  const now = new Date();
+  const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+  const endDate  = new Date(midnight.getTime() + hours * 3_600_000 - 60_000);
+  const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return `${fmt(midnight)} 00:00 – ${fmt(endDate)} 23:59`;
 }
 
 const CONDITION_STYLES: Record<string, { bg: string; text: string; label: string }> = {
@@ -40,7 +50,7 @@ function ageLabel(isoTs: string | null): string {
   return `${Math.round(diff / 3600)}h ago`;
 }
 
-export function LocationCard({ location, activity, history }: Props) {
+export function LocationCard({ location, activity, history, hours, onHoursChange }: Props) {
   const wave = location.currentWave;
   const cond = CONDITION_STYLES[wave.conditions] ?? CONDITION_STYLES['calm']!;
   const dock = DOCK_STYLES[wave.dockStatus ?? 'ok']!;
@@ -113,13 +123,25 @@ export function LocationCard({ location, activity, history }: Props) {
         </div>
       </div>
 
-      {/* 48h sparklines */}
+      {/* History sparklines */}
       <div className="space-y-2">
-        <div>
-          <div className="text-xs text-gray-400 mb-1">48-hr wave height</div>
-          <WaveSparkline history={history} locationId={location.id} />
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-gray-400">{windowLabel(hours)}</span>
+          <label className="flex items-center gap-1 text-xs text-gray-400 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={hours === 72}
+              onChange={(e) => onHoursChange(e.target.checked ? 72 : 48)}
+              className="h-3 w-3 rounded"
+            />
+            72h
+          </label>
         </div>
-        <WeatherSparklines history={history} />
+        <div>
+          <div className="text-xs text-gray-400 mb-1">Wave height</div>
+          <WaveSparkline history={history} locationId={location.id} hours={hours} />
+        </div>
+        <WeatherSparklines history={history} hours={hours} />
       </div>
 
       {/* Footer */}

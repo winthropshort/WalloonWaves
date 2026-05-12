@@ -10,7 +10,7 @@
 
 import { BatchWriteCommand } from '@aws-sdk/lib-dynamodb';
 import { db, TABLE_NAME } from '../lib/dynamo.js';
-import { fetchHourlyForecast } from '../lib/nws.js';
+import { fetchHourlyForecast, fetchGridpointPressure } from '../lib/nws.js';
 
 const TTL_DAYS = 90;
 
@@ -43,11 +43,22 @@ export const handler = async (): Promise<void> => {
 
   console.log(`[WeatherIngest] Fetched ${periods.length} periods`);
 
+  let pressureMap = new Map<string, number>();
+  try {
+    pressureMap = await fetchGridpointPressure();
+    console.log(`[WeatherIngest] Fetched ${pressureMap.size} pressure values`);
+  } catch (err) {
+    console.warn('[WeatherIngest] Pressure fetch failed, continuing without pressure:', err);
+  }
+
   const items = periods.map((p) => {
     const utcIso  = toUtcIso(p.startTime);
     const dateStr = toUtcDateStr(p.startTime);
     const startMs = new Date(p.startTime).getTime();
     const ttl     = Math.floor(startMs / 1000) + TTL_DAYS * 86400;
+
+    const hourKey   = utcIso.slice(0, 13); // "YYYY-MM-DDTHH"
+    const pressure  = pressureMap.get(hourKey);
 
     return {
       PK:            `WEATHER#${dateStr}`,
@@ -59,6 +70,7 @@ export const handler = async (): Promise<void> => {
       windDir_label: p.windDir_label,
       temperature_f: p.temperature_f,
       windChill_f:   windChill(p.temperature_f, p.windSpeed_mph),
+      ...(pressure !== undefined && { pressure_mb: pressure }),
       shortForecast: p.shortForecast,
       ttl,
       fetchedAt,

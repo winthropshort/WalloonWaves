@@ -30,6 +30,7 @@ export interface WeatherObservation {
   windDir_label: string;
   temperature_f?: number;
   windChill_f?:   number;
+  pressure_mb?:   number;
   shortForecast: string;
 }
 

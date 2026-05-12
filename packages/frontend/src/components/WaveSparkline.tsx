@@ -5,11 +5,12 @@ import type { WeatherObservation } from '../api.js';
 interface Props {
   history:    WeatherObservation[];
   locationId: string;
+  hours?:     48 | 72;
 }
 
 interface DataPoint {
-  t:    number;   // unix ms
-  h:    number;   // wave height ft
+  t: number;
+  h: number;
 }
 
 function conditionColor(h: number): string {
@@ -20,7 +21,13 @@ function conditionColor(h: number): string {
   return '#a855f7';
 }
 
-export function WaveSparkline({ history, locationId }: Props) {
+function midnightDomain(hours: 48 | 72): [number, number] {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0).getTime();
+  return [start, start + hours * 3_600_000];
+}
+
+export function WaveSparkline({ history, locationId, hours = 48 }: Props) {
   if (!history.length) {
     return (
       <div className="h-14 flex items-center justify-center text-xs text-gray-400">
@@ -38,11 +45,11 @@ export function WaveSparkline({ history, locationId }: Props) {
     .sort((a, b) => a.t - b.t);
 
   const maxH   = Math.max(...data.map((d) => d.h), 0.5);
-  const latest = data[data.length - 1]?.h ?? 0;
-  const color  = conditionColor(latest);
+  const nowMs  = Date.now();
+  const latest = data.filter((d) => d.t <= nowMs).at(-1) ?? data[data.length - 1];
+  const color  = conditionColor(latest?.h ?? 0);
 
-  const domainStart = Date.now() - 48 * 3_600_000;
-  const domainEnd   = Date.now();
+  const [domainStart, domainEnd] = midnightDomain(hours);
 
   return (
     <div className="h-14">
@@ -66,6 +73,7 @@ export function WaveSparkline({ history, locationId }: Props) {
           {maxH >= 1.5 && (
             <ReferenceLine y={1.5}  stroke="#94a3b8" strokeDasharray="3 3" strokeWidth={1} />
           )}
+          <ReferenceLine x={nowMs} stroke="#d1d5db" strokeWidth={1} />
           <Area
             type="monotone"
             dataKey="h"
