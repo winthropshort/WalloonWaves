@@ -1,4 +1,5 @@
 import { AreaChart, Area, Tooltip, ResponsiveContainer, ReferenceLine, XAxis } from 'recharts';
+// ReferenceLine is kept for the 0.75 ft and 1.5 ft wave-height threshold guides.
 import { calcWaves } from '@walloon/shared';
 import type { WeatherObservation } from '../api.js';
 
@@ -45,8 +46,7 @@ export function WaveSparkline({ history, locationId, hours = 48 }: Props) {
     .sort((a, b) => a.t - b.t);
 
   const maxH   = Math.max(...data.map((d) => d.h), 0.5);
-  const nowMs  = Date.now();
-  const latest = data.filter((d) => d.t <= nowMs).at(-1) ?? data[data.length - 1];
+  const latest = data.filter((d) => d.t <= Date.now()).at(-1) ?? data[data.length - 1];
   const color  = conditionColor(latest?.h ?? 0);
 
   const [domainStart, domainEnd] = midnightDomain(hours);
@@ -66,6 +66,7 @@ export function WaveSparkline({ history, locationId, hours = 48 }: Props) {
             type="number"
             domain={[domainStart, domainEnd]}
             hide
+            height={0}
           />
           {maxH >= 0.75 && (
             <ReferenceLine y={0.75} stroke="#94a3b8" strokeDasharray="3 3" strokeWidth={1} />
@@ -73,7 +74,6 @@ export function WaveSparkline({ history, locationId, hours = 48 }: Props) {
           {maxH >= 1.5 && (
             <ReferenceLine y={1.5}  stroke="#94a3b8" strokeDasharray="3 3" strokeWidth={1} />
           )}
-          <ReferenceLine x={nowMs} stroke="#d1d5db" strokeWidth={1} />
           <Area
             type="monotone"
             dataKey="h"

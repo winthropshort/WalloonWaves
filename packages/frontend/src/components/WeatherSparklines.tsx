@@ -1,4 +1,4 @@
-import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis, ReferenceLine } from 'recharts';
+import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 import type { WeatherObservation } from '../api.js';
 
 interface Props {
@@ -11,7 +11,7 @@ interface Point {
   v: number;
 }
 
-function midnightDomain(hours: 48 | 72): [number, number] {
+export function midnightDomain(hours: 48 | 72): [number, number] {
   const now = new Date();
   const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0).getTime();
   return [start, start + hours * 3_600_000];
@@ -26,17 +26,14 @@ function WindDirectionRow({
   domainStart: number;
   domainEnd:   number;
 }) {
-  const nowMs  = Date.now();
-  const nowPct = Math.max(0, Math.min(100,
-    ((nowMs - domainStart) / (domainEnd - domainStart)) * 100,
-  ));
+  const nowMs = Date.now();
   const latest = data.filter((d) => d.t <= nowMs).at(-1);
 
   if (!data.length) {
     return (
       <div className="flex items-center gap-2">
         <span className="text-xs text-gray-400 w-16 shrink-0">Wind dir</span>
-        <span className="text-xs text-gray-300 italic">no data</span>
+        <span className="text-xs text-gray-300 italic w-12 shrink-0">no data</span>
       </div>
     );
   }
@@ -44,15 +41,10 @@ function WindDirectionRow({
   return (
     <div className="flex items-center gap-2">
       <span className="text-xs text-gray-400 w-16 shrink-0">Wind dir</span>
-      <span className="text-xs font-medium text-blue-400 tabular-nums">
+      <span className="text-xs font-medium text-blue-400 tabular-nums w-12 shrink-0">
         {latest?.label ?? '—'}
       </span>
       <div className="flex-1 relative h-6">
-        {/* Now marker */}
-        <div
-          className="absolute inset-y-0 w-px bg-gray-300 pointer-events-none z-10"
-          style={{ left: `${nowPct}%` }}
-        />
         {/* Direction arrows — rotate(deg) points arrow toward wind's origin (FROM direction) */}
         {data.map((d, i) => {
           if (d.deg === null) return null;
@@ -109,7 +101,7 @@ function MiniSparkline({
   return (
     <div className="flex items-center gap-2">
       <span className="text-xs text-gray-400 w-16 shrink-0">{label}</span>
-      <span className="text-xs font-medium tabular-nums" style={{ color }}>
+      <span className="text-xs font-medium tabular-nums w-12 shrink-0" style={{ color }}>
         {latest.v.toFixed(0)}{unit}
       </span>
       <div className="flex-1 h-6">
@@ -120,8 +112,8 @@ function MiniSparkline({
               type="number"
               domain={[domainStart, domainEnd]}
               hide
+              height={0}
             />
-            <ReferenceLine x={nowMs} stroke="#e5e7eb" strokeWidth={1} />
             <Line
               type="monotone"
               dataKey="v"
@@ -181,8 +173,9 @@ export function WeatherSparklines({ history, hours = 48 }: Props) {
     .filter((o) => o.pressure_mb !== undefined)
     .map((o) => ({ t: new Date(o.timestamp).getTime(), v: o.pressure_mb! }));
 
+  // Rendered as a fragment — parent owns the container and the shared now-line overlay.
   return (
-    <div className="space-y-1 pt-1 border-t border-gray-50">
+    <>
       <WindDirectionRow data={windDirData} domainStart={domainStart} domainEnd={domainEnd} />
       <MiniSparkline data={windData}     color="#3b82f6" label="Wind"       unit=" mph" domainStart={domainStart} domainEnd={domainEnd} />
       <MiniSparkline data={tempData}     color="#f97316" label="Air temp"   unit="°F"   noDataLabel="updating soon" domainStart={domainStart} domainEnd={domainEnd} />
@@ -190,6 +183,6 @@ export function WeatherSparklines({ history, hours = 48 }: Props) {
         <MiniSparkline data={chillData}  color="#06b6d4" label="Wind chill" unit="°F"   domainStart={domainStart} domainEnd={domainEnd} />
       )}
       <MiniSparkline data={pressureData} color="#8b5cf6" label="Pressure"   unit=" mb"  noDataLabel="updating soon" domainStart={domainStart} domainEnd={domainEnd} />
-    </div>
+    </>
   );
 }

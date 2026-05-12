@@ -9,7 +9,7 @@ import { LocationCard } from './components/LocationCard.js';
 import { GeocodeSection } from './components/GeocodeSection.js';
 import { WindCompass } from './components/WindCompass.js';
 import { WaveSparkline } from './components/WaveSparkline.js';
-import { WeatherSparklines } from './components/WeatherSparklines.js';
+import { WeatherSparklines, midnightDomain } from './components/WeatherSparklines.js';
 import { geocodeAddress } from './api.js';
 import type { WeatherObservation } from './api.js';
 import type { WaveConditions } from '@walloon/shared';
@@ -149,6 +149,11 @@ function DockView({
   const htClr  = HT_COLORS[displayWave.conditions] ?? 'text-gray-700';
   const cond   = COND_STYLES[displayWave.conditions] ?? COND_STYLES['calm']!;
 
+  const [domainStart, domainEnd] = midnightDomain(hours);
+  const nowPct = Math.max(0, Math.min(100,
+    ((Date.now() - domainStart) / (domainEnd - domainStart)) * 100,
+  ));
+
   return (
     <div className="max-w-xl mx-auto w-full space-y-4">
       <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
@@ -258,11 +263,20 @@ function DockView({
               72h
             </label>
           </div>
-          <div>
-            <div className="text-xs text-gray-400 mb-1">Wave height</div>
-            <WaveSparkline history={history} locationId={displayPresetId} hours={hours} />
+          <div className="relative space-y-1 pt-1 border-t border-gray-50">
+            <div
+              className="absolute inset-y-0 w-px bg-gray-300 pointer-events-none z-10"
+              style={{ left: `calc(8rem + ${nowPct / 100} * (100% - 8rem))` }}
+            />
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-400 w-16 shrink-0">Wave height</span>
+              <div className="w-12 shrink-0" />
+              <div className="flex-1 h-14">
+                <WaveSparkline history={history} locationId={displayPresetId} hours={hours} />
+              </div>
+            </div>
+            <WeatherSparklines history={history} hours={hours} />
           </div>
-          <WeatherSparklines history={history} hours={hours} />
         </div>
 
         {currentObs && (

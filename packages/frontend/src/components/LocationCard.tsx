@@ -2,7 +2,7 @@ import type { ActivityMode } from '@walloon/shared';
 import type { LocationWithWave, WeatherObservation } from '../api.js';
 import { WindCompass } from './WindCompass.js';
 import { WaveSparkline } from './WaveSparkline.js';
-import { WeatherSparklines } from './WeatherSparklines.js';
+import { WeatherSparklines, midnightDomain } from './WeatherSparklines.js';
 
 interface Props {
   location:      LocationWithWave;
@@ -52,6 +52,10 @@ function ageLabel(isoTs: string | null): string {
 
 export function LocationCard({ location, activity, history, hours, onHoursChange }: Props) {
   const wave = location.currentWave;
+  const [domainStart, domainEnd] = midnightDomain(hours);
+  const nowPct = Math.max(0, Math.min(100,
+    ((Date.now() - domainStart) / (domainEnd - domainStart)) * 100,
+  ));
   const cond = CONDITION_STYLES[wave.conditions] ?? CONDITION_STYLES['calm']!;
   const dock = DOCK_STYLES[wave.dockStatus ?? 'ok']!;
   const htColor = WAVE_HEIGHT_COLORS[wave.conditions] ?? 'text-gray-700';
@@ -137,11 +141,26 @@ export function LocationCard({ location, activity, history, hours, onHoursChange
             72h
           </label>
         </div>
-        <div>
-          <div className="text-xs text-gray-400 mb-1">Wave height</div>
-          <WaveSparkline history={history} locationId={location.id} hours={hours} />
+
+        {/*
+          All rows: [w-16 label] [w-12 value/spacer] [flex-1 chart]
+          The single now-line overlay is positioned using the same column math:
+          chart starts at 4rem + 0.5rem gap + 3rem + 0.5rem gap = 8rem from left.
+        */}
+        <div className="relative space-y-1 pt-1 border-t border-gray-50">
+          <div
+            className="absolute inset-y-0 w-px bg-gray-300 pointer-events-none z-10"
+            style={{ left: `calc(8rem + ${nowPct / 100} * (100% - 8rem))` }}
+          />
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-400 w-16 shrink-0">Wave height</span>
+            <div className="w-12 shrink-0" />
+            <div className="flex-1 h-14">
+              <WaveSparkline history={history} locationId={location.id} hours={hours} />
+            </div>
+          </div>
+          <WeatherSparklines history={history} hours={hours} />
         </div>
-        <WeatherSparklines history={history} hours={hours} />
       </div>
 
       {/* Footer */}
