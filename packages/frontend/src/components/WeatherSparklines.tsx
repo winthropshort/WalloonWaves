@@ -26,8 +26,7 @@ function WindDirectionRow({
   domainStart: number;
   domainEnd:   number;
 }) {
-  const nowMs = Date.now();
-  const latest = data.filter((d) => d.t <= nowMs).at(-1);
+  const latest = data.at(-1);
 
   if (!data.length) {
     return (
@@ -96,8 +95,7 @@ function MiniSparkline({
       </div>
     );
   }
-  const nowMs  = Date.now();
-  const latest = data.filter((d) => d.t <= nowMs).at(-1) ?? data[data.length - 1]!;
+  const latest = data.at(-1)!;
   return (
     <div className="flex items-center gap-2">
       <span className="text-xs text-gray-400 w-16 shrink-0">{label}</span>
@@ -131,7 +129,7 @@ function MiniSparkline({
                     <span className="font-medium">{d.v.toFixed(0)}{unit}</span>
                     {' '}
                     <span className="text-gray-400">
-                      {new Date(d.t).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                      {new Date(d.t).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}
                     </span>
                   </div>
                 );
@@ -148,7 +146,10 @@ export function WeatherSparklines({ history, hours = 48 }: Props) {
   if (!history.length) return null;
 
   const [domainStart, domainEnd] = midnightDomain(hours);
-  const sorted = [...history].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+  const nowMs = Date.now();
+  const sorted = [...history]
+    .filter((o) => new Date(o.timestamp).getTime() <= nowMs)
+    .sort((a, b) => a.timestamp.localeCompare(b.timestamp));
 
   const windDirData = sorted.map((o) => ({
     t:     new Date(o.timestamp).getTime(),

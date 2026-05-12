@@ -37,8 +37,10 @@ export function WaveSparkline({ history, locationId, hours = 48 }: Props) {
     );
   }
 
+  const nowMs = Date.now();
   const data: DataPoint[] = history
-    .filter((obs) => obs.windDir_deg !== null || obs.windSpeed_mph === 0)
+    .filter((obs) => (obs.windDir_deg !== null || obs.windSpeed_mph === 0)
+      && new Date(obs.timestamp).getTime() <= nowMs)
     .map((obs) => ({
       t: new Date(obs.timestamp).getTime(),
       h: calcWaves(locationId, obs.windSpeed_mph, obs.windDir_deg).waveHeight_ft,
@@ -46,7 +48,7 @@ export function WaveSparkline({ history, locationId, hours = 48 }: Props) {
     .sort((a, b) => a.t - b.t);
 
   const maxH   = Math.max(...data.map((d) => d.h), 0.5);
-  const latest = data.filter((d) => d.t <= Date.now()).at(-1) ?? data[data.length - 1];
+  const latest = data.at(-1);
   const color  = conditionColor(latest?.h ?? 0);
 
   const [domainStart, domainEnd] = midnightDomain(hours);
@@ -92,7 +94,7 @@ export function WaveSparkline({ history, locationId, hours = 48 }: Props) {
                   <div className="font-medium">{(d.h).toFixed(2)} ft</div>
                   <div className="text-gray-500">
                     {new Date(d.t).toLocaleTimeString('en-US', {
-                      hour: 'numeric', minute: '2-digit', hour12: true,
+                      hour: '2-digit', minute: '2-digit', hour12: false,
                     })}
                   </div>
                 </div>

@@ -9,7 +9,7 @@
   "presets": [
     { "id": "lake-grove-road",     "name": "5152 Lake Grove Road",    "lat": 45.30325, "lng": -85.01259, "notes": "East shore of West Arm, ~0.83 mi N of WA narrows" },
     { "id": "bear-cove-marina",    "name": "Bear Cove Marina",         "lat": 45.32611, "lng": -85.04358, "notes": "3052 Hilton Ln, west shore of West Arm, ~0.7 mi S of Mud Lake narrows" },
-    { "id": "legacy-water-sports", "name": "Walloon Village",          "lat": 45.26352, "lng": -84.93499, "notes": "SE tip of The Foot; Bear Creek drainage outlet is nearby" },
+    { "id": "legacy-water-sports", "name": "Walloon Village",          "lat": 45.26352, "lng": -84.93499, "labelOffset": {"dx": 9, "dy": -5}, "notes": "SE tip of The Foot; Bear Creek drainage outlet is nearby" },
     { "id": "jones-landing",       "name": "Jones Landing (N. Arm)",   "lat": 45.30219, "lng": -84.96792, "notes": "5186 Jones Landing, east shore of North Arm, mid-arm" }
   ],
 
@@ -211,5 +211,67 @@
     { "name": "Unknown",         "lat": 45.28298, "lng": -84.96288, "notes": "East side of North Arm, N of Sand Point Lane [Google Maps]" },
     { "name": "Unknown",         "lat": 45.27005, "lng": -84.95527, "notes": "East side of The Foot, off N Shore Drive [Google Maps]" },
     { "name": "Unknown",         "lat": 45.26898, "lng": -84.94935, "notes": "East side of The Foot [Google Maps]" }
+  ],
+
+  "polygons": [
+    {
+      "id": "west_arm",
+      "label": { "text": "West Arm", "lat": 45.316, "lng": -85.033 },
+      "segments": [
+        { "ref": "basins.west_arm.east_shore" },
+        { "ref": "basins.west_arm.west_shore" }
+      ]
+    },
+    {
+      "id": "north_arm",
+      "label": { "text": "North Arm", "lat": 45.294, "lng": -84.971 },
+      "segments": [
+        { "ref": "basins.north_arm.north_tip" },
+        { "ref": "basins.north_arm.west_shore" },
+        { "points": [{ "lat": 45.28169, "lng": -84.96688, "notes": "NA narrows center — closes south end of North Arm polygon" }] },
+        { "ref": "basins.north_arm.east_shore", "reverse": true }
+      ]
+    },
+    {
+      "id": "the_foot",
+      "label": { "text": "The Foot", "lat": 45.262, "lng": -84.957 },
+      "segments": [
+        { "ref": "basins.the_foot.boundary" }
+      ]
+    },
+    {
+      "id": "wildwood",
+      "label": { "text": "Wildwood Basin", "lat": 45.281, "lng": -85.008 },
+      "segments": [
+        { "ref": "basins.wildwood_basin.east_shore" },
+        { "ref": "basins.wildwood_basin.west_shore", "reverse": true }
+      ]
+    },
+    {
+      "id": "channel",
+      "notes": "Fills the unmapped Randall Point channel between Wildwood Basin south end and The Foot NW. Replace with real shoreline pins as they are collected.",
+      "segments": [
+        { "points": [
+            { "lat": 45.26516, "lng": -85.00126, "notes": "Forest Ave boat ramp — Wildwood west shore south terminus" },
+            { "lat": 45.26524, "lng": -84.97573, "notes": "Conkle Rd — The Foot west shore, same latitude as Forest Ave" },
+            { "lat": 45.27496, "lng": -84.96949, "notes": "Indian Garden Rd NW corner — The Foot boundary[4]" },
+            { "lat": 45.27169, "lng": -84.99064, "notes": "Ellis Rd — Wildwood east shore south terminus" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "na_foot_connector",
+      "notes": "Bridges the ~0.5 mi gap between North Arm south end and The Foot north shore at the NA narrows junction. Replace with real shoreline pins as they are collected.",
+      "segments": [
+        { "points": [
+            { "lat": 45.28305, "lng": -84.97145, "notes": "6729 Indian Garden Rd — North Arm west shore south terminus" },
+            { "lat": 45.28194, "lng": -84.96530, "notes": "5085 Sand Point Ln — North Arm east shore south terminus" },
+            { "lat": 45.27484, "lng": -84.96140, "notes": "870 N Shore Rd — The Foot north shore boundary[3]" },
+            { "lat": 45.27496, "lng": -84.96949, "notes": "7409 Indian Garden Rd — The Foot NW corner boundary[4]" }
+          ]
+        }
+      ]
+    }
   ]
 }

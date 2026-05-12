@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="960" viewBox="0 0 820 960">
+  <rect width="820" height="960" fill="#dce8c4"/>
+  <polygon id="west_arm" points="311.9,565.3 328.0,548.2 328.6,537.1 336.5,517.3 318.8,478.0 313.4,468.3 304.1,444.3 303.3,429.5 278.4,392.6 271.8,377.0 272.8,371.3 261.0,364.4 242.4,351.9 228.6,337.7 225.5,336.4 225.3,333.1 209.1,308.0 205.9,301.0 203.3,281.9 202.9,273.0 189.9,266.5 185.2,264.9 139.2,218.9 139.0,213.6 134.4,215.6 130.4,228.9 127.3,232.7 122.7,240.1 121.1,242.2 122.9,246.2 122.0,252.0 133.7,259.8 144.9,278.6 152.4,292.6 154.9,306.1 161.4,326.0 158.4,343.7 163.4,360.4 181.8,382.2 225.2,429.5 230.9,464.1 223.0,488.6 225.8,498.1 253.6,511.2 283.5,549.7 271.9,562.2" fill="#4BA3D4" stroke="#2E7BAF" stroke-width="0.8" stroke-linejoin="round"/>
+  <polygon id="north_arm" points="542.5,434.9 540.9,434.6 555.4,437.9 538.5,439.8 532.6,441.3 522.5,446.6 524.6,449.9 523.4,451.9 512.7,444.4 506.3,444.6 503.7,446.3 495.6,450.7 491.5,464.2 492.8,478.7 502.8,495.8 515.6,503.4 513.3,518.9 514.3,525.6 520.2,544.0 537.5,554.2 543.9,566.4 548.4,573.4 540.9,580.0 536.2,596.1 532.4,608.5 536.4,629.9 560.6,640.1 568.9,638.2 578.7,634.7 581.7,618.2 586.5,613.1 586.6,595.8 600.6,582.2 598.4,565.2 605.0,551.5 600.4,530.8 574.7,521.7 561.0,509.5 563.5,496.2 555.1,486.0 564.8,447.7 563.2,445.9" fill="#4BA3D4" stroke="#2E7BAF" stroke-width="0.8" stroke-linejoin="round"/>
+  <polygon id="the_foot" points="729.2,776.7 631.4,734.0 589.5,691.6 546.8,690.7 529.8,693.3 505.3,726.2 502.3,744.4 513.8,763.8 516.7,782.4 531.9,816.2 522.3,843.9 584.3,825.2 623.9,808.5" fill="#4BA3D4" stroke="#2E7BAF" stroke-width="0.8" stroke-linejoin="round"/>
+  <polygon id="wildwood" points="311.9,565.3 320.1,574.6 327.6,611.4 345.0,620.4 345.3,640.0 352.1,649.8 372.4,645.8 383.7,657.2 402.3,672.7 408.4,669.1 434.9,715.3 378.7,764.4 306.4,701.7 272.2,671.1 264.2,659.0 270.7,618.9 268.0,605.2 230.6,570.7 225.1,559.6 240.1,541.0 252.1,542.2 254.6,550.6 271.9,562.2" fill="#4BA3D4" stroke="#2E7BAF" stroke-width="0.8" stroke-linejoin="round"/>
+  <polygon id="channel" points="378.7,764.4 513.8,763.8 546.8,690.7 434.9,715.3" fill="#4BA3D4" stroke="#2E7BAF" stroke-width="0.8" stroke-linejoin="round"/>
+  <polygon id="na_foot_connector" points="536.4,629.9 568.9,638.2 589.5,691.6 546.8,690.7" fill="#4BA3D4" stroke="#2E7BAF" stroke-width="0.8" stroke-linejoin="round"/>
+  <text x="210.8" y="382.2" font-family="Georgia, serif" font-size="12" font-style="italic" fill="white" stroke="rgba(0,30,60,0.45)" stroke-width="3" paint-order="stroke" text-anchor="middle">West Arm</text>
+  <text x="538.8" y="547.6" font-family="Georgia, serif" font-size="12" font-style="italic" fill="white" stroke="rgba(0,30,60,0.45)" stroke-width="3" paint-order="stroke" text-anchor="middle">North Arm</text>
+  <text x="612.8" y="788.2" font-family="Georgia, serif" font-size="12" font-style="italic" fill="white" stroke="rgba(0,30,60,0.45)" stroke-width="3" paint-order="stroke" text-anchor="middle">The Foot</text>
+  <text x="343.1" y="645.3" font-family="Georgia, serif" font-size="12" font-style="italic" fill="white" stroke="rgba(0,30,60,0.45)" stroke-width="3" paint-order="stroke" text-anchor="middle">Wildwood Basin</text>
+  <polygon points="311.9,560.3 315.9,565.3 311.9,570.3 307.9,565.3" fill="#8B5E3C" stroke="white" stroke-width="1"/>
+  <polygon points="271.9,557.2 275.9,562.2 271.9,567.2 267.9,562.2" fill="#8B5E3C" stroke="white" stroke-width="1"/>
+  <polygon points="560.6,635.1 564.6,640.1 560.6,645.1 556.6,640.1" fill="#8B5E3C" stroke="white" stroke-width="1"/>
+  <polygon points="139.2,213.9 143.2,218.9 139.2,223.9 135.2,218.9" fill="#8B5E3C" stroke="white" stroke-width="1"/>
+  <polygon points="139.0,208.6 143.0,213.6 139.0,218.6 135.0,213.6" fill="#8B5E3C" stroke="white" stroke-width="1"/>
+  <circle cx="318.8" cy="478.0" r="5.5" fill="#d04f2c" stroke="white" stroke-width="1.5"/>
+  <text x="327.8" y="482.0" font-family="Arial, sans-serif" font-size="9.5" font-weight="bold" fill="#1a3a5c" stroke="rgba(220,232,196,0.75)" stroke-width="2.5" paint-order="stroke">5152 Lake Grove Road</text>
+  <circle cx="154.9" cy="306.1" r="5.5" fill="#d04f2c" stroke="white" stroke-width="1.5"/>
+  <text x="163.9" y="310.1" font-family="Arial, sans-serif" font-size="9.5" font-weight="bold" fill="#1a3a5c" stroke="rgba(220,232,196,0.75)" stroke-width="2.5" paint-order="stroke">Bear Cove Marina</text>
+  <circle cx="729.2" cy="776.7" r="5.5" fill="#d04f2c" stroke="white" stroke-width="1.5"/>
+  <text x="738.2" y="771.7" font-family="Arial, sans-serif" font-size="9.5" font-weight="bold" fill="#1a3a5c" stroke="rgba(220,232,196,0.75)" stroke-width="2.5" paint-order="stroke">Walloon Village</text>
+  <circle cx="555.1" cy="486.0" r="5.5" fill="#d04f2c" stroke="white" stroke-width="1.5"/>
+  <text x="564.1" y="490.0" font-family="Arial, sans-serif" font-size="9.5" font-weight="bold" fill="#1a3a5c" stroke="rgba(220,232,196,0.75)" stroke-width="2.5" paint-order="stroke">Jones Landing (N. Arm)</text>
+  <circle cx="532.8" cy="441.6" r="3" fill="#3d7a3d" stroke="white" stroke-width="1"/>
+  <text x="538.8" y="444.6" font-family="Arial, sans-serif" font-size="9" fill="#3d7a3d" stroke="rgba(220,232,196,0.7)" stroke-width="2" paint-order="stroke">Schoof's Creek</text>
+  <circle cx="545.1" cy="859.9" r="3" fill="#3d7a3d" stroke="white" stroke-width="1"/>
+  <text x="551.1" y="862.9" font-family="Arial, sans-serif" font-size="9" fill="#3d7a3d" stroke="rgba(220,232,196,0.7)" stroke-width="2" paint-order="stroke">Fineout Creek</text>
+  <circle cx="733.3" cy="794.3" r="3" fill="#3d7a3d" stroke="white" stroke-width="1"/>
+  <text x="739.3" y="797.3" font-family="Arial, sans-serif" font-size="9" fill="#3d7a3d" stroke="rgba(220,232,196,0.7)" stroke-width="2" paint-order="stroke">Bear Creek</text>
+  <text x="410" y="38" text-anchor="middle" font-family="Georgia, serif" font-size="22" font-weight="bold" fill="#1a3a5c">Walloon Lake</text>
+  <text x="410" y="56" text-anchor="middle" font-family="Georgia, serif" font-size="11" fill="#1a3a5c" opacity="0.65">Emmet County, Michigan · WGS84</text>
+  <polygon points="770,880 764,898 770,892 776,898" fill="#1a3a5c"/>
+  <text x="770" y="874" text-anchor="middle" font-family="Arial" font-size="13" font-weight="bold" fill="#1a3a5c">N</text>
+  <line x1="60" y1="938" x2="169" y2="938" stroke="#1a3a5c" stroke-width="3"/>
+  <line x1="60" y1="933" x2="60" y2="943" stroke="#1a3a5c" stroke-width="2"/>
+  <line x1="169" y1="933" x2="169" y2="943" stroke="#1a3a5c" stroke-width="2"/>
+  <text x="114" y="930" text-anchor="middle" font-family="Arial" font-size="10" fill="#1a3a5c">1 mile</text>
+  <circle cx="64" cy="912" r="4" fill="#d04f2c" stroke="white" stroke-width="1"/>
+  <text x="72" y="916" font-family="Arial" font-size="9" fill="#1a3a5c">Preset location</text>
+  <polygon points="64,924 68,929 64,934 60,929" fill="#8B5E3C" stroke="white" stroke-width="1"/>
+  <text x="72" y="933" font-family="Arial" font-size="9" fill="#1a3a5c">Narrows</text>
+</svg>
