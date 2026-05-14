@@ -49,10 +49,10 @@ export function WindCompass({ windDir_deg, windDir_label, size = 72 }: Props) {
       })}
 
       {/* Cardinal labels: N S E W */}
-      <text x="50" y="9"  textAnchor="middle" fontSize="9" fill="#64748b" fontWeight="600">N</text>
-      <text x="50" y="97" textAnchor="middle" fontSize="9" fill="#64748b" fontWeight="600">S</text>
-      <text x="6"  y="53" textAnchor="middle" fontSize="9" fill="#64748b" fontWeight="600">W</text>
-      <text x="94" y="53" textAnchor="middle" fontSize="9" fill="#64748b" fontWeight="600">E</text>
+      <text x="50" y="9"  textAnchor="middle" fontSize="10" fill="#64748b" fontWeight="600">N</text>
+      <text x="50" y="97" textAnchor="middle" fontSize="10" fill="#64748b" fontWeight="600">S</text>
+      <text x="6"  y="53" textAnchor="middle" fontSize="10" fill="#64748b" fontWeight="600">W</text>
+      <text x="94" y="53" textAnchor="middle" fontSize="10" fill="#64748b" fontWeight="600">E</text>
 
       {/* Ordinal labels: NE SE SW NW */}
       {([
@@ -69,7 +69,7 @@ export function WindCompass({ windDir_deg, windDir_label, size = 72 }: Props) {
             x={cx + rL * Math.sin(a)}
             y={cy - rL * Math.cos(a) + 3}
             textAnchor="middle"
-            fontSize="7"
+            fontSize="8"
             fill="#64748b"
             fontWeight="500"
           >

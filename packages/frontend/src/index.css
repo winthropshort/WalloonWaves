@@ -18,6 +18,10 @@
     background-color: #F5F5F0;
     @apply font-sans;
   }
+
+  .dark body {
+    background-color: #081f30;
+  }
 }
 
 @layer utilities {

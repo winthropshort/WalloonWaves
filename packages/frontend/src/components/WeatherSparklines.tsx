@@ -61,12 +61,42 @@ function buildSplit(raw: RawPoint[]): SplitPoint[] {
   }));
 }
 
-// ─── Shared chart click handler ───────────────────────────────────────────────
+// ─── Shared chart interaction helpers ────────────────────────────────────────
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function handleChartClick(payload: any, onTimeSelect?: (t: number) => void) {
+function handleChartInteract(payload: any, onTimeSelect?: (t: number) => void) {
   if (!onTimeSelect || payload?.activeLabel == null) return;
   onTimeSelect(Number(payload.activeLabel));
+}
+
+function makeTouchMove(
+  domainStart: number,
+  domainEnd:   number,
+  onTimeSelect?: (t: number) => void,
+): React.TouchEventHandler<HTMLDivElement> {
+  return (e) => {
+    if (!onTimeSelect) return;
+    const touch = e.touches[0];
+    if (!touch) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pct  = (touch.clientX - rect.left) / rect.width;
+    const t    = domainStart + pct * (domainEnd - domainStart);
+    if (pct >= 0 && pct <= 1) onTimeSelect(Math.round(t));
+  };
+}
+
+function makeMouseMove(
+  domainStart: number,
+  domainEnd:   number,
+  onTimeSelect?: (t: number) => void,
+): React.MouseEventHandler<HTMLDivElement> {
+  return (e) => {
+    if (!onTimeSelect || !e.buttons) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pct  = (e.clientX - rect.left) / rect.width;
+    const t    = domainStart + pct * (domainEnd - domainStart);
+    onTimeSelect(Math.round(t));
+  };
 }
 
 // ─── Direction arrow row ──────────────────────────────────────────────────────
@@ -83,7 +113,6 @@ function DirRow({
   const nowMs   = Date.now();
   const current = closestToNow(data);
 
-  // Only show an arrow when direction label changes from the previous
   const deduped: typeof data = [];
   let prevLabel: string | null = null;
   for (const d of data) {
@@ -102,6 +131,7 @@ function DirRow({
       </span>
       <div
         className="flex-1 relative h-5 cursor-pointer"
+        style={{ WebkitTapHighlightColor: 'transparent' }}
         onClick={(e) => {
           if (!onTimeSelect) return;
           const rect = e.currentTarget.getBoundingClientRect();
@@ -109,6 +139,8 @@ function DirRow({
           const t    = domainStart + pct * (domainEnd - domainStart);
           onTimeSelect(Math.round(t));
         }}
+        onMouseMove={makeMouseMove(domainStart, domainEnd, onTimeSelect)}
+        onTouchMove={makeTouchMove(domainStart, domainEnd, onTimeSelect)}
       >
         {deduped.map((d, i) => {
           if (d.deg === null) return null;
@@ -131,7 +163,6 @@ function DirRow({
             </div>
           );
         })}
-        {/* Active-time crosshair */}
         {activeTime !== undefined && (() => {
           const pct = ((activeTime - domainStart) / (domainEnd - domainStart)) * 100;
           return pct >= 0 && pct <= 100
@@ -178,13 +209,19 @@ function SparkRow({
       <span className="text-xs font-medium tabular-nums w-16 shrink-0" style={{ color }}>
         {current !== undefined ? format(current.v) : '—'}
       </span>
-      <div className="flex-1 h-5">
+      <div
+        className="flex-1 h-5"
+        style={{ WebkitTapHighlightColor: 'transparent' }}
+        onTouchMove={makeTouchMove(domainStart, domainEnd, onTimeSelect)}
+      >
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={data}
             margin={{ top: 1, right: 0, left: 0, bottom: 1 }}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            onClick={(p: any) => handleChartClick(p, onTimeSelect)}
+            onClick={(p: any) => handleChartInteract(p, onTimeSelect)}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            onMouseMove={(p: any) => handleChartInteract(p, onTimeSelect)}
             style={{ cursor: onTimeSelect ? 'pointer' : undefined }}
           >
             <XAxis dataKey="t" type="number" domain={[domainStart, domainEnd]} hide height={0} />
@@ -196,6 +233,7 @@ function SparkRow({
               strokeWidth={1.5}
               strokeDasharray="3 3"
               dot={false}
+              activeDot={false}
               isAnimationActive={false}
               connectNulls={false}
               legendType="none"
@@ -207,6 +245,7 @@ function SparkRow({
               stroke={color}
               strokeWidth={1.5}
               dot={false}
+              activeDot={false}
               isAnimationActive={false}
               connectNulls={false}
               legendType="none"
@@ -226,9 +265,9 @@ function SparkRow({
   );
 }
 
-// ─── Cloud coverage row (area chart) ─────────────────────────────────────────
+// ─── Cloud coverage row (deduped icon row) ────────────────────────────────────
 
-function CloudRow({
+function CloudIconRow({
   raw, domainStart, domainEnd, activeTime, onTimeSelect,
 }: {
   raw:           RawPoint[];
@@ -247,8 +286,18 @@ function CloudRow({
     );
   }
 
-  const data    = buildSplit(raw);
+  const nowMs   = Date.now();
   const current = closestToNow(raw);
+
+  const deduped: RawPoint[] = [];
+  let prevIcon: string | null = null;
+  for (const d of raw) {
+    const icon = skyCoverIcon(d.v);
+    if (icon !== prevIcon) {
+      deduped.push(d);
+      prevIcon = icon;
+    }
+  }
 
   return (
     <div className="flex items-center gap-2">
@@ -256,62 +305,42 @@ function CloudRow({
       <span className="text-xs w-16 shrink-0">
         {current !== undefined ? skyCoverIcon(current.v) : '—'}
       </span>
-      <div className="flex-1 h-5">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart
-            data={data}
-            margin={{ top: 1, right: 0, left: 0, bottom: 1 }}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            onClick={(p: any) => handleChartClick(p, onTimeSelect)}
-            style={{ cursor: onTimeSelect ? 'pointer' : undefined }}
-          >
-            <defs>
-              <linearGradient id="grad-sky-past" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor="#94a3b8" stopOpacity={0.2} />
-                <stop offset="95%" stopColor="#94a3b8" stopOpacity={0.02} />
-              </linearGradient>
-              <linearGradient id="grad-sky" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor="#94a3b8" stopOpacity={0.4} />
-                <stop offset="95%" stopColor="#94a3b8" stopOpacity={0.05} />
-              </linearGradient>
-            </defs>
-            <XAxis dataKey="t" type="number" domain={[domainStart, domainEnd]} hide height={0} />
-            <YAxis domain={[0, 100]} hide width={0} />
-            {/* Past — dashed stroke + lighter fill */}
-            <Area
-              type="monotone"
-              dataKey="vPast"
-              stroke="#94a3b8"
-              strokeWidth={1}
-              strokeDasharray="3 3"
-              fill="url(#grad-sky-past)"
-              dot={false}
-              isAnimationActive={false}
-              connectNulls={false}
-              legendType="none"
-            />
-            {/* Future — solid */}
-            <Area
-              type="monotone"
-              dataKey="vFuture"
-              stroke="#94a3b8"
-              strokeWidth={1}
-              fill="url(#grad-sky)"
-              dot={false}
-              isAnimationActive={false}
-              connectNulls={false}
-              legendType="none"
-            />
-            {activeTime !== undefined && (
-              <ReferenceLine
-                x={activeTime}
-                stroke="#f59e0b"
-                strokeWidth={1.5}
-                strokeDasharray="3 2"
-              />
-            )}
-          </AreaChart>
-        </ResponsiveContainer>
+      <div
+        className="flex-1 relative h-5 cursor-pointer"
+        style={{ WebkitTapHighlightColor: 'transparent' }}
+        onClick={(e) => {
+          if (!onTimeSelect) return;
+          const rect = e.currentTarget.getBoundingClientRect();
+          const pct  = (e.clientX - rect.left) / rect.width;
+          const t    = domainStart + pct * (domainEnd - domainStart);
+          onTimeSelect(Math.round(t));
+        }}
+        onMouseMove={makeMouseMove(domainStart, domainEnd, onTimeSelect)}
+        onTouchMove={makeTouchMove(domainStart, domainEnd, onTimeSelect)}
+      >
+        {deduped.map((d, i) => {
+          const pct    = ((d.t - domainStart) / (domainEnd - domainStart)) * 100;
+          if (pct < 0 || pct > 100) return null;
+          const isPast = d.t <= nowMs;
+          return (
+            <div
+              key={i}
+              className="absolute top-0 h-5 flex items-center justify-center -translate-x-1/2"
+              style={{ left: `${pct}%`, opacity: isPast ? 0.45 : 1 }}
+              title={`${skyCoverIcon(d.v)} ${d.v.toFixed(0)}% ${timeFmt(d.t)}`}
+            >
+              <span className="text-xs leading-none select-none">
+                {skyCoverIcon(d.v)}
+              </span>
+            </div>
+          );
+        })}
+        {activeTime !== undefined && (() => {
+          const pct = ((activeTime - domainStart) / (domainEnd - domainStart)) * 100;
+          return pct >= 0 && pct <= 100
+            ? <div className="absolute inset-y-0 w-px bg-amber-400 pointer-events-none" style={{ left: `${pct}%` }} />
+            : null;
+        })()}
       </div>
     </div>
   );
@@ -355,9 +384,15 @@ export function WeatherSparklines({
     .filter((o) => o.temperature_f !== undefined)
     .map((o) => ({ t: new Date(o.timestamp).getTime(), v: o.temperature_f! }));
 
-  const chillRaw: RawPoint[] = inDomain
-    .filter((o) => o.windChill_f !== undefined && o.windChill_f < (o.temperature_f ?? 99))
-    .map((o) => ({ t: new Date(o.timestamp).getTime(), v: o.windChill_f! }));
+  // Show chill sparkline for the full window if any hour has actual chill
+  const hasAnyChill = inDomain.some(
+    (o) => o.windChill_f !== undefined && o.windChill_f < (o.temperature_f ?? 99),
+  );
+  const chillRaw: RawPoint[] = hasAnyChill
+    ? inDomain
+        .filter((o) => o.windChill_f !== undefined)
+        .map((o) => ({ t: new Date(o.timestamp).getTime(), v: o.windChill_f! }))
+    : [];
 
   const pressureRaw: RawPoint[] = inDomain
     .filter((o) => o.pressure_mb !== undefined)
@@ -387,7 +422,7 @@ export function WeatherSparklines({
         onTimeSelect={onTimeSelect}
       />
       <SparkRow raw={windRaw}  color="#3b82f6" label="Speed:" format={(v) => `${v.toFixed(0)} mph`} {...shared} />
-      <SparkRow raw={gustRaw}  color="#93c5fd" label="Gust:"  format={(v) => `${v.toFixed(0)} mph`} {...shared} />
+      <SparkRow raw={gustRaw}  color="#93c5fd" label="Gust:"  format={(v) => `${v.toFixed(0)} mph`} noDataMsg="no gusts" {...shared} />
       <SparkRow raw={tempRaw}  color="#f97316" label="Air:"   format={(v) => `${v.toFixed(0)}°F`}  noDataMsg="updating soon" {...shared} />
       {chillRaw.length > 0 && (
         <SparkRow raw={chillRaw} color="#06b6d4" label="Chill:" format={(v) => `${v.toFixed(0)}°F`} {...shared} />
@@ -395,7 +430,7 @@ export function WeatherSparklines({
       <SparkRow raw={pressureRaw} color="#8b5cf6" label="P:"   format={(v) => `${v.toFixed(2)}"`} noDataMsg="updating soon" {...shared} />
       <SparkRow raw={popRaw}      color="#60a5fa" label="PoP:" format={(v) => `${v.toFixed(0)}%`}  noDataMsg="updating soon" {...shared} />
       <SparkRow raw={precipRaw}   color="#0ea5e9" label="Amt:" format={(v) => `${v.toFixed(2)}"`}  noDataMsg="updating soon" {...shared} />
-      <CloudRow raw={skyCoverRaw} {...shared} />
+      <CloudIconRow raw={skyCoverRaw} {...shared} />
     </>
   );
 }

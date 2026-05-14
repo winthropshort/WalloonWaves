@@ -74,13 +74,29 @@ export function WaveSparkline({ history, locationId, hours = 48, activeTime, onT
   const color = conditionColor(closest.h);
 
   return (
-    <div className="h-14">
+    <div
+      className="h-14"
+      style={{ WebkitTapHighlightColor: 'transparent' }}
+      onTouchMove={(e) => {
+        if (!onTimeSelect) return;
+        const touch = e.touches[0];
+        if (!touch) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        const pct  = (touch.clientX - rect.left) / rect.width;
+        const t    = domainStart + pct * (domainEnd - domainStart);
+        if (pct >= 0 && pct <= 1) onTimeSelect(Math.round(t));
+      }}
+    >
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={data}
           margin={{ top: 2, right: 0, left: 0, bottom: 0 }}
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           onClick={(p: any) => {
+            if (onTimeSelect && p?.activeLabel != null) onTimeSelect(Number(p.activeLabel));
+          }}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          onMouseMove={(p: any) => {
             if (onTimeSelect && p?.activeLabel != null) onTimeSelect(Number(p.activeLabel));
           }}
           style={{ cursor: onTimeSelect ? 'pointer' : undefined }}
@@ -111,6 +127,7 @@ export function WaveSparkline({ history, locationId, hours = 48, activeTime, onT
             strokeDasharray="3 3"
             fill={`url(#grad-${locationId}-past)`}
             dot={false}
+            activeDot={false}
             isAnimationActive={false}
             connectNulls={false}
             legendType="none"
@@ -123,6 +140,7 @@ export function WaveSparkline({ history, locationId, hours = 48, activeTime, onT
             strokeWidth={1.5}
             fill={`url(#grad-${locationId})`}
             dot={false}
+            activeDot={false}
             isAnimationActive={false}
             connectNulls={false}
             legendType="none"

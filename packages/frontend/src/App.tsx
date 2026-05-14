@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import type { ActivityMode } from '@walloon/shared';
 import { calcWaves } from '@walloon/shared';
@@ -233,7 +233,7 @@ function DockView({
 
   return (
     <div className="max-w-xl mx-auto w-full space-y-4">
-      <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+      <div className="rounded-xl bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 px-4 py-3 text-sm text-amber-800 dark:text-amber-200">
         <strong>Dock Installer View</strong> — Assembly phase requires waves &lt; 0.75 ft (pre-whitecap).
         Jetting phase tolerates up to 1.5 ft once fully assembled.
       </div>
@@ -244,7 +244,7 @@ function DockView({
           value={address}
           onChange={(e) => setAddress(e.target.value)}
           placeholder="Dock address or landmark on Walloon Lake…"
-          className="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm shadow-sm outline-none focus:border-walloon-blue-400 focus:ring-2 focus:ring-walloon-blue-100"
+          className="flex-1 rounded-xl border border-gray-200 dark:border-walloon-blue-600 bg-white dark:bg-walloon-blue-700 dark:text-gray-100 dark:placeholder-gray-400 px-4 py-2.5 text-sm shadow-sm outline-none focus:border-walloon-blue-400 focus:ring-2 focus:ring-walloon-blue-100 dark:focus:ring-walloon-blue-700"
         />
         <button
           type="submit"
@@ -257,7 +257,7 @@ function DockView({
           type="button"
           onClick={handleGeolocate}
           title="Use my location"
-          className="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-base shadow-sm hover:bg-gray-50 transition-colors"
+          className="rounded-xl border border-gray-200 dark:border-walloon-blue-600 bg-white dark:bg-walloon-blue-700 px-3 py-2.5 text-base shadow-sm hover:bg-gray-50 dark:hover:bg-walloon-blue-600 transition-colors"
         >
           📍
         </button>
@@ -278,10 +278,10 @@ function DockView({
       )}
 
       {/* Main dock card */}
-      <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-6 flex flex-col gap-4">
+      <div className="rounded-2xl bg-white dark:bg-walloon-blue-800 border border-gray-100 dark:border-walloon-blue-700 shadow-sm p-6 flex flex-col gap-4">
 
         <div>
-          <p className="font-semibold text-walloon-blue-700">{displayLabel}</p>
+          <p className="font-semibold text-walloon-blue-700 dark:text-walloon-blue-300">{displayLabel}</p>
           <p className="text-xs text-gray-400 mt-0.5">
             Conditions modeled from nearest reference point
           </p>
@@ -333,15 +333,16 @@ function DockView({
             windDir_label={activeDir}
             size={68}
           />
-          <div className="text-sm text-gray-700 space-y-0.5">
+          <div className="text-[15px] text-gray-700 dark:text-gray-200 space-y-0.5">
             <div>
               <span className="font-medium">
                 {activeObs?.windSpeed_mph ?? activeWave.windSpeed_mph} mph
               </span>
               <span className="text-gray-400 ml-1">from {activeDir}</span>
-              {activeGust > (activeObs?.windSpeed_mph ?? activeWave.windSpeed_mph) && (
-                <span className="text-gray-400"> gusts to {activeGust}mph</span>
-              )}
+              <span className="text-gray-400">
+                {' '}gusts to{' '}
+                {activeGust > 0 ? `${activeGust}mph` : '—'}
+              </span>
             </div>
             <div className="text-xs text-gray-400">
               Period {activeWave.wavePeriod_s}s · Fetch {activeWave.fetchMi}mi
@@ -350,7 +351,7 @@ function DockView({
         </div>
 
         {/* Weather metrics grid */}
-        <div className="text-sm text-gray-600 space-y-1 pl-1">
+        <div className="text-[15px] text-gray-600 dark:text-gray-300 space-y-0.5 pl-1">
           {activeObs?.temperature_f !== undefined && (
             <div>
               Air{' '}
@@ -364,12 +365,12 @@ function DockView({
               )}
             </div>
           )}
-          {activeObs?.pressure_mb !== undefined ? (
-            <div>
-              Pressure{' '}
-              <span className="font-medium text-violet-600">{mbToInHg(activeObs.pressure_mb)}"</span>
-            </div>
-          ) : null}
+          <div>
+            Pressure{' '}
+            <span className="font-medium text-violet-600 dark:text-violet-400">
+              {activeObs?.pressure_mb !== undefined ? `${mbToInHg(activeObs.pressure_mb)}"` : '—'}
+            </span>
+          </div>
           {(activeObs?.pop_pct !== undefined || activeObs?.precip_in !== undefined) && (
             <div>
               {activeObs?.pop_pct !== undefined && (
@@ -389,7 +390,7 @@ function DockView({
         </div>
 
         {/* Sparklines */}
-        <div className="relative space-y-1 pt-1 border-t border-gray-50">
+        <div className="relative space-y-1 pt-1 border-t border-gray-50 dark:border-walloon-blue-700">
           {/* Now marker */}
           <div
             className="absolute inset-y-0 w-px bg-gray-300 pointer-events-none z-10"
@@ -420,9 +421,9 @@ function DockView({
         </div>
 
         {/* Detail table toggle */}
-        <div className="border-t border-gray-50 pt-1">
+        <div className="border-t border-gray-50 dark:border-walloon-blue-700 pt-1">
           <button
-            className="flex items-center justify-between w-full text-xs text-gray-400 hover:text-gray-600 py-1"
+            className="flex items-center justify-between w-full text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 py-1"
             onClick={() => setExpanded(!expanded)}
           >
             <span>Hourly forecast (2h intervals)</span>
@@ -433,7 +434,7 @@ function DockView({
             <div className="mt-2 overflow-x-auto">
               <table className="w-full text-xs border-collapse">
                 <thead>
-                  <tr className="text-gray-400 border-b border-gray-100">
+                  <tr className="text-gray-400 border-b border-gray-100 dark:border-walloon-blue-700">
                     <th className="text-left py-1 pr-2 font-normal">Time</th>
                     <th className="text-right py-1 pr-1 font-normal">Wind</th>
                     <th className="text-right py-1 pr-2 font-normal">Gust</th>
@@ -450,9 +451,9 @@ function DockView({
                   {detailRows.map((row, i) => (
                     <tr
                       key={i}
-                      className={`border-b border-gray-50 hover:bg-gray-50 cursor-pointer ${
+                      className={`border-b border-gray-50 dark:border-walloon-blue-700 hover:bg-gray-50 dark:hover:bg-walloon-blue-700 cursor-pointer text-gray-700 dark:text-gray-200 ${
                         activeTime !== null && Math.abs(row.tMs - activeTime) < 3_600_000
-                          ? 'bg-amber-50'
+                          ? 'bg-amber-50 dark:bg-amber-900/20'
                           : ''
                       }`}
                       onClick={() => setActiveTime(row.tMs)}
@@ -493,7 +494,7 @@ function DockView({
         </div>
 
         {/* Footer */}
-        <div className="pt-1 border-t border-gray-50 space-y-0.5">
+        <div className="pt-1 border-t border-gray-50 dark:border-walloon-blue-700 space-y-0.5">
           {currentObs && (
             <div className="text-xs text-gray-400">
               Data from{' '}
@@ -550,6 +551,18 @@ function ErrorBanner({ message }: { message: string }) {
 export default function App() {
   const [activity, setActivity] = useState<ActivityMode>('dock');
   const [hours, setHours]       = useState<48 | 72>(48);
+  const [isDark, setIsDark]     = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    const stored = localStorage.getItem('theme');
+    if (stored === 'dark')  return true;
+    if (stored === 'light') return false;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', isDark);
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  }, [isDark]);
 
   const { data: locations, isLoading: locsLoading, error: locsError, dataUpdatedAt } = useLocations();
   const { data: history = [] } = useWeatherHistory(hours);
@@ -567,14 +580,20 @@ export default function App() {
     : null;
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#F5F5F0' }}>
+    <div className="min-h-screen bg-walloon-white dark:bg-walloon-blue-900">
       <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
 
-        <header className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-walloon-blue-600 tracking-tight">
+        <header className="relative text-center space-y-2">
+          <button
+            onClick={() => setIsDark(!isDark)}
+            className="absolute right-0 top-0 text-xs px-3 py-1.5 rounded-full border border-gray-200 dark:border-walloon-blue-600 bg-white dark:bg-walloon-blue-700 text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-walloon-blue-600 transition-colors shadow-sm"
+          >
+            {isDark ? 'Light' : 'Dark'}
+          </button>
+          <h1 className="text-3xl font-bold text-walloon-blue-600 dark:text-walloon-blue-300 tracking-tight">
             Walloon Lake Marine Weather
           </h1>
-          <p className="text-sm text-walloon-green-600 font-medium">
+          <p className="text-sm text-walloon-green-600 dark:text-walloon-green-400 font-medium">
             Walloon Lake, Michigan
           </p>
           {lastUpdated && (
@@ -590,7 +609,7 @@ export default function App() {
           <ErrorBanner message="Unable to load wave conditions. Check your connection and try again." />
         )}
         {locations?.some((l) => l.stale) && (
-          <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800 max-w-2xl mx-auto">
+          <div className="rounded-xl bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 px-4 py-3 text-sm text-amber-800 dark:text-amber-200 max-w-2xl mx-auto">
             Weather data is more than 8 hours old — conditions shown may not reflect current state.
           </div>
         )}
@@ -622,7 +641,7 @@ export default function App() {
           </>
         )}
 
-        <footer className="text-center text-xs text-gray-400 pt-4 border-t border-gray-200 space-y-1">
+        <footer className="text-center text-xs text-gray-400 pt-4 border-t border-gray-200 dark:border-walloon-blue-700 space-y-1">
           <p>
             Wave model: CERC/SPM fetch-limited —{' '}
             <span className="font-mono">H_s = 0.00162√(U_A²·F/g)</span>

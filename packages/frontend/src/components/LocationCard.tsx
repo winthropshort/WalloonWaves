@@ -61,11 +61,11 @@ export function LocationCard({ location, activity, history, hours, onHoursChange
   const htColor = WAVE_HEIGHT_COLORS[wave.conditions] ?? 'text-gray-700';
 
   return (
-    <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-5 flex flex-col gap-4">
+    <div className="rounded-2xl bg-white dark:bg-walloon-blue-800 border border-gray-100 dark:border-walloon-blue-700 shadow-sm p-5 flex flex-col gap-4">
 
       {/* Header */}
       <div>
-        <h2 className="font-semibold text-walloon-blue-700 text-sm leading-tight">
+        <h2 className="font-semibold text-walloon-blue-700 dark:text-walloon-blue-300 text-sm leading-tight">
           {location.name}
         </h2>
         <p className="text-xs text-gray-400 mt-0.5">{location.address}</p>
@@ -109,7 +109,7 @@ export function LocationCard({ location, activity, history, hours, onHoursChange
           }
           size={68}
         />
-        <div className="text-sm text-gray-700 space-y-0.5">
+        <div className="text-sm text-gray-700 dark:text-gray-200 space-y-0.5">
           <div>
             <span className="font-medium">{wave.windSpeed_mph} mph</span>
             {wave.windDir_deg !== null && (
@@ -128,7 +128,7 @@ export function LocationCard({ location, activity, history, hours, onHoursChange
       </div>
 
       {/* Sparklines — all rows share [w-12 label][w-16 value][flex-1 chart] = 8rem left offset */}
-      <div className="relative space-y-1 pt-1 border-t border-gray-50">
+      <div className="relative space-y-1 pt-1 border-t border-gray-50 dark:border-walloon-blue-700">
         <div
           className="absolute inset-y-0 w-px bg-gray-300 pointer-events-none z-10"
           style={{ left: `calc(8rem + ${nowPct / 100} * (100% - 8rem))` }}
@@ -146,7 +146,7 @@ export function LocationCard({ location, activity, history, hours, onHoursChange
       </div>
 
       {/* Footer */}
-      <div className="pt-1 border-t border-gray-50 space-y-0.5">
+      <div className="pt-1 border-t border-gray-50 dark:border-walloon-blue-700 space-y-0.5">
         <div className="text-xs text-gray-400">
           Data from {ageLabel(location.weatherUpdated)}
         </div>
