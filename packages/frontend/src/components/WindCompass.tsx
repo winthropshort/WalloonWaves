@@ -9,15 +9,17 @@ export function WindCompass({ windDir_deg, windDir_label, size = 72 }: Props) {
   const cy = 50;
   const r  = 36;
 
-  // Arrow from rim toward center — arrowhead at the rim, tail near center
   const arrowVisible = windDir_deg !== null;
   const θ = ((windDir_deg ?? 0) * Math.PI) / 180;
-  // Point on rim where wind comes FROM
   const rx = cx + r * Math.sin(θ);
   const ry = cy - r * Math.cos(θ);
-  // Tail (20% from center toward rim)
   const tx = cx + (r * 0.35) * Math.sin(θ + Math.PI);
   const ty = cy - (r * 0.35) * Math.cos(θ + Math.PI);
+
+  // All 16 compass bearings at 22.5° intervals
+  const allBearings = Array.from({ length: 16 }, (_, i) => i * 22.5);
+  const cardinals   = new Set([0, 90, 180, 270]);
+  const ordinals    = new Set([45, 135, 225, 315]);
 
   return (
     <svg
@@ -28,23 +30,54 @@ export function WindCompass({ windDir_deg, windDir_label, size = 72 }: Props) {
     >
       {/* Outer ring */}
       <circle cx={cx} cy={cy} r={r} fill="none" stroke="#cbd5e1" strokeWidth="1.5" />
-      {/* Cardinal labels */}
+
+      {/* Tick marks for all 16 points */}
+      {allBearings.map((deg) => {
+        if (cardinals.has(deg)) return null;
+        const a       = (deg * Math.PI) / 180;
+        const isOrd   = ordinals.has(deg);
+        const inner   = r - (isOrd ? 5 : 3);
+        return (
+          <line
+            key={deg}
+            x1={cx + inner * Math.sin(a)} y1={cy - inner * Math.cos(a)}
+            x2={cx + r     * Math.sin(a)} y2={cy - r     * Math.cos(a)}
+            stroke="#cbd5e1"
+            strokeWidth={isOrd ? 1.5 : 1}
+          />
+        );
+      })}
+
+      {/* Cardinal labels: N S E W */}
       <text x="50" y="9"  textAnchor="middle" fontSize="9" fill="#64748b" fontWeight="600">N</text>
       <text x="50" y="97" textAnchor="middle" fontSize="9" fill="#64748b" fontWeight="600">S</text>
       <text x="6"  y="53" textAnchor="middle" fontSize="9" fill="#64748b" fontWeight="600">W</text>
       <text x="94" y="53" textAnchor="middle" fontSize="9" fill="#64748b" fontWeight="600">E</text>
-      {/* Tick marks at 45° intervals */}
-      {[45, 135, 225, 315].map((deg) => {
-        const a = (deg * Math.PI) / 180;
+
+      {/* Ordinal labels: NE SE SW NW */}
+      {([
+        { deg: 45,  label: 'NE' },
+        { deg: 135, label: 'SE' },
+        { deg: 225, label: 'SW' },
+        { deg: 315, label: 'NW' },
+      ] as const).map(({ deg, label }) => {
+        const a   = (deg * Math.PI) / 180;
+        const rL  = r + 12;
         return (
-          <line
+          <text
             key={deg}
-            x1={cx + (r - 4) * Math.sin(a)} y1={cy - (r - 4) * Math.cos(a)}
-            x2={cx + r       * Math.sin(a)} y2={cy - r       * Math.cos(a)}
-            stroke="#cbd5e1" strokeWidth="1.5"
-          />
+            x={cx + rL * Math.sin(a)}
+            y={cy - rL * Math.cos(a) + 3}
+            textAnchor="middle"
+            fontSize="7"
+            fill="#64748b"
+            fontWeight="500"
+          >
+            {label}
+          </text>
         );
       })}
+
       {/* Wind arrow: points FROM bearing toward center */}
       {arrowVisible && (
         <g>
@@ -64,8 +97,10 @@ export function WindCompass({ windDir_deg, windDir_label, size = 72 }: Props) {
           />
         </g>
       )}
+
       {/* Center dot */}
       <circle cx={cx} cy={cy} r="3" fill="#1B4F72" opacity={arrowVisible ? 1 : 0.3} />
+
       {/* VRB label */}
       {!arrowVisible && (
         <text x="50" y="54" textAnchor="middle" fontSize="10" fill="#94a3b8" fontWeight="600">

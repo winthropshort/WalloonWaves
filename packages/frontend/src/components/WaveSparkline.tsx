@@ -1,18 +1,17 @@
-import { AreaChart, Area, Tooltip, ResponsiveContainer, ReferenceLine, XAxis } from 'recharts';
-// ReferenceLine is kept for the 0.75 ft and 1.5 ft wave-height threshold guides.
+import { AreaChart, Area, ResponsiveContainer, ReferenceLine, XAxis } from 'recharts';
 import { calcWaves } from '@walloon/shared';
 import type { WeatherObservation } from '../api.js';
 
 interface Props {
-  history:    WeatherObservation[];
-  locationId: string;
-  hours?:     48 | 72;
+  history:       WeatherObservation[];
+  locationId:    string;
+  hours?:        48 | 72;
+  activeTime?:   number | undefined;
+  onTimeSelect?: ((t: number) => void) | undefined;
 }
 
-interface DataPoint {
-  t: number;
-  h: number;
-}
+interface RawPoint  { t: number; h: number; }
+interface DataPoint { t: number; h: number; hPast: number | null; hFuture: number | null; }
 
 function conditionColor(h: number): string {
   if (h < 0.5) return '#22c55e';
@@ -23,12 +22,12 @@ function conditionColor(h: number): string {
 }
 
 function midnightDomain(hours: 48 | 72): [number, number] {
-  const now = new Date();
+  const now   = new Date();
   const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0).getTime();
   return [start, start + hours * 3_600_000];
 }
 
-export function WaveSparkline({ history, locationId, hours = 48 }: Props) {
+export function WaveSparkline({ history, locationId, hours = 48, activeTime, onTimeSelect }: Props) {
   if (!history.length) {
     return (
       <div className="h-14 flex items-center justify-center text-xs text-gray-400">
@@ -38,7 +37,9 @@ export function WaveSparkline({ history, locationId, hours = 48 }: Props) {
   }
 
   const [domainStart, domainEnd] = midnightDomain(hours);
-  const data: DataPoint[] = history
+  const nowMs = Date.now();
+
+  const rawData: RawPoint[] = history
     .filter((obs) => {
       const t = new Date(obs.timestamp).getTime();
       return (obs.windDir_deg !== null || obs.windSpeed_mph === 0)
@@ -51,61 +52,89 @@ export function WaveSparkline({ history, locationId, hours = 48 }: Props) {
     }))
     .sort((a, b) => a.t - b.t);
 
-  const nowMs  = Date.now();
-  const closest = data.length
-    ? data.reduce((best, d) => Math.abs(d.t - nowMs) < Math.abs(best.t - nowMs) ? d : best)
-    : undefined;
-  const maxH  = Math.max(...data.map((d) => d.h), 0.5);
-  const color = conditionColor(closest?.h ?? 0);
+  if (!rawData.length) {
+    return <div className="h-14" />;
+  }
+
+  const nowIdx = rawData.reduce(
+    (best, d, i) => Math.abs(d.t - nowMs) < Math.abs(rawData[best]!.t - nowMs) ? i : best,
+    0,
+  );
+
+  const data: DataPoint[] = rawData.map((d, i) => ({
+    ...d,
+    hPast:   i <= nowIdx ? d.h : null,
+    hFuture: i >= nowIdx ? d.h : null,
+  }));
+
+  const closest = rawData.reduce((best, d) =>
+    Math.abs(d.t - nowMs) < Math.abs(best.t - nowMs) ? d : best,
+  );
+  const maxH  = Math.max(...rawData.map((d) => d.h), 0.5);
+  const color = conditionColor(closest.h);
 
   return (
     <div className="h-14">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 2, right: 0, left: 0, bottom: 0 }}>
+        <AreaChart
+          data={data}
+          margin={{ top: 2, right: 0, left: 0, bottom: 0 }}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          onClick={(p: any) => {
+            if (onTimeSelect && p?.activeLabel != null) onTimeSelect(Number(p.activeLabel));
+          }}
+          style={{ cursor: onTimeSelect ? 'pointer' : undefined }}
+        >
           <defs>
+            <linearGradient id={`grad-${locationId}-past`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%"  stopColor={color} stopOpacity={0.18} />
+              <stop offset="95%" stopColor={color} stopOpacity={0.02} />
+            </linearGradient>
             <linearGradient id={`grad-${locationId}`} x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%"  stopColor={color} stopOpacity={0.35} />
               <stop offset="95%" stopColor={color} stopOpacity={0.05} />
             </linearGradient>
           </defs>
-          <XAxis
-            dataKey="t"
-            type="number"
-            domain={[domainStart, domainEnd]}
-            hide
-            height={0}
-          />
+          <XAxis dataKey="t" type="number" domain={[domainStart, domainEnd]} hide height={0} />
           {maxH >= 0.75 && (
             <ReferenceLine y={0.75} stroke="#94a3b8" strokeDasharray="3 3" strokeWidth={1} />
           )}
           {maxH >= 1.5 && (
-            <ReferenceLine y={1.5}  stroke="#94a3b8" strokeDasharray="3 3" strokeWidth={1} />
+            <ReferenceLine y={1.5} stroke="#94a3b8" strokeDasharray="3 3" strokeWidth={1} />
           )}
+          {/* Past — dashed + lighter fill */}
           <Area
             type="monotone"
-            dataKey="h"
+            dataKey="hPast"
+            stroke={color}
+            strokeWidth={1.5}
+            strokeDasharray="3 3"
+            fill={`url(#grad-${locationId}-past)`}
+            dot={false}
+            isAnimationActive={false}
+            connectNulls={false}
+            legendType="none"
+          />
+          {/* Future — solid */}
+          <Area
+            type="monotone"
+            dataKey="hFuture"
             stroke={color}
             strokeWidth={1.5}
             fill={`url(#grad-${locationId})`}
             dot={false}
             isAnimationActive={false}
+            connectNulls={false}
+            legendType="none"
           />
-          <Tooltip
-            content={({ active, payload }) => {
-              if (!active || !payload?.length) return null;
-              const d = payload[0]!.payload as DataPoint;
-              return (
-                <div className="rounded bg-white/90 border border-gray-200 px-2 py-1 text-xs shadow">
-                  <div className="font-medium">{(d.h).toFixed(2)} ft</div>
-                  <div className="text-gray-500">
-                    {new Date(d.t).toLocaleTimeString('en-US', {
-                      hour: '2-digit', minute: '2-digit', hour12: false,
-                    })}
-                  </div>
-                </div>
-              );
-            }}
-          />
+          {activeTime !== undefined && (
+            <ReferenceLine
+              x={activeTime}
+              stroke="#f59e0b"
+              strokeWidth={1.5}
+              strokeDasharray="3 2"
+            />
+          )}
         </AreaChart>
       </ResponsiveContainer>
     </div>

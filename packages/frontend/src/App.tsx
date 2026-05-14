@@ -9,7 +9,7 @@ import { LocationCard } from './components/LocationCard.js';
 import { GeocodeSection } from './components/GeocodeSection.js';
 import { WindCompass } from './components/WindCompass.js';
 import { WaveSparkline } from './components/WaveSparkline.js';
-import { WeatherSparklines, midnightDomain } from './components/WeatherSparklines.js';
+import { WeatherSparklines, midnightDomain, mbToInHg, skyCoverIcon } from './components/WeatherSparklines.js';
 import { geocodeAddress } from './api.js';
 import type { WeatherObservation } from './api.js';
 import type { WaveConditions } from '@walloon/shared';
@@ -55,6 +55,14 @@ const COND_STYLES: Record<string, { bg: string; text: string }> = {
   rough:        { bg: 'bg-red-100',     text: 'text-red-800'     },
   'very-rough': { bg: 'bg-purple-100',  text: 'text-purple-800'  },
 };
+const COND_LABELS: Record<string, string> = {
+  calm: 'Calm', slight: 'Slight', moderate: 'Moderate', rough: 'Rough', 'very-rough': 'Very Rough',
+};
+const DOCK_STATUS_ROW: Record<string, { color: string; label: string }> = {
+  'ok':           { color: 'text-green-600',  label: '✓ OK'    },
+  'jetting-only': { color: 'text-yellow-600', label: '~ Jet'   },
+  'avoid':        { color: 'text-red-600',    label: '✗ Avoid' },
+};
 
 interface DockResult {
   wave:      WaveConditions;
@@ -87,10 +95,12 @@ function DockView({
   hours:         48 | 72;
   onHoursChange: (h: 48 | 72) => void;
 }) {
-  const [address, setAddress] = useState('5152 Lake Grove Road, Walloon Lake, MI');
-  const [result, setResult]   = useState<DockResult | null>(null);
-  const [geoError, setGeoError] = useState<string | null>(null);
-  const [notFound, setNotFound] = useState(false);
+  const [address,    setAddress]    = useState('5152 Lake Grove Road, Walloon Lake, MI');
+  const [result,     setResult]     = useState<DockResult | null>(null);
+  const [geoError,   setGeoError]   = useState<string | null>(null);
+  const [notFound,   setNotFound]   = useState(false);
+  const [activeTime, setActiveTime] = useState<number | null>(null);
+  const [expanded,   setExpanded]   = useState(false);
 
   const windSpeed = currentObs?.windSpeed_mph ?? 0;
   const windDir   = currentObs?.windDir_deg   ?? null;
@@ -101,6 +111,7 @@ function DockView({
     setResult({ wave, presetId: preset.id, label, outOfBounds: oob });
     setNotFound(false);
     setGeoError(null);
+    setActiveTime(null);
   }
 
   const geocodeMut = useMutation({
@@ -140,19 +151,85 @@ function DockView({
     );
   }
 
-  // Default: use lake-grove-road conditions from current obs
-  const displayWave = result?.wave ?? calcWaves('lake-grove-road', windSpeed, windDir);
+  const displayWave    = result?.wave ?? calcWaves('lake-grove-road', windSpeed, windDir);
   const displayPresetId = result?.presetId ?? 'lake-grove-road';
-  const displayLabel = result?.label ?? '5152 Lake Grove Road';
+  const displayLabel   = result?.label ?? '5152 Lake Grove Road';
 
-  const dock   = DOCK_STATUS_STYLES[displayWave.dockStatus ?? 'ok']!;
-  const htClr  = HT_COLORS[displayWave.conditions] ?? 'text-gray-700';
-  const cond   = COND_STYLES[displayWave.conditions] ?? COND_STYLES['calm']!;
+  // Resolve observation + wave for the selected or current time
+  const lookupTime = activeTime ?? Date.now();
+  const activeObs: WeatherObservation | null = history.length > 0
+    ? history.reduce((best, o) => {
+        const t     = new Date(o.timestamp).getTime();
+        const bestT = new Date(best.timestamp).getTime();
+        return Math.abs(t - lookupTime) < Math.abs(bestT - lookupTime) ? o : best;
+      })
+    : null;
 
+  const activeWave: WaveConditions = activeObs
+    ? calcWaves(displayPresetId, activeObs.windSpeed_mph, activeObs.windDir_deg)
+    : displayWave;
+
+  const dock      = DOCK_STATUS_STYLES[activeWave.dockStatus ?? 'ok']!;
+  const htClr     = HT_COLORS[activeWave.conditions]    ?? 'text-gray-700';
+  const cond      = COND_STYLES[activeWave.conditions]   ?? COND_STYLES['calm']!;
+  const condLabel = COND_LABELS[activeWave.conditions]   ?? activeWave.conditions;
+
+  const whitecapNote =
+    activeWave.waveHeight_ft >= 1.5 ? 'whitecaps' :
+    activeWave.waveHeight_ft >= 0.75 ? 'whitecap risk' :
+    null;
+
+  const activeGust = activeObs?.windGust_mph ?? 0;
+  const activeDir  = degToLabel(activeObs?.windDir_deg ?? activeWave.windDir_deg ?? null);
+
+  // ── Detail table rows: future-only, every 2 hours ──────────────────────────
   const [domainStart, domainEnd] = midnightDomain(hours);
+  const nowMs = Date.now();
   const nowPct = Math.max(0, Math.min(100,
-    ((Date.now() - domainStart) / (domainEnd - domainStart)) * 100,
+    ((nowMs - domainStart) / (domainEnd - domainStart)) * 100,
   ));
+
+  const detailRows = history
+    .filter((o) => {
+      const t = new Date(o.timestamp).getTime();
+      return t >= nowMs - 1_800_000 && t >= domainStart && t <= domainEnd;
+    })
+    .sort((a, b) => a.timestamp.localeCompare(b.timestamp))
+    .filter((_, i) => i % 2 === 0)
+    .map((o) => {
+      const tMs   = new Date(o.timestamp).getTime();
+      const waves = o.windDir_deg !== null && o.windSpeed_mph > 0
+        ? calcWaves(displayPresetId, o.windSpeed_mph, o.windDir_deg)
+        : { waveHeight_ft: 0, wavePeriod_s: 0, fetchMi: 0, conditions: 'calm' as const, dockStatus: 'ok' as const, windSpeed_mph: 0, windDir_deg: 0 };
+      const d         = new Date(tMs);
+      const timeStr   = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+      const dayStr    = d.toLocaleDateString('en-US', { weekday: 'short' });
+      const htColor   = HT_COLORS[waves.conditions] ?? 'text-gray-700';
+      const dockStyle = DOCK_STATUS_ROW[waves.dockStatus ?? 'ok'] ?? DOCK_STATUS_ROW['ok']!;
+      return {
+        timeStr: `${dayStr} ${timeStr}`,
+        tMs,
+        windSpeed:  o.windSpeed_mph,
+        gustSpeed:  o.windGust_mph,
+        dirLabel:   o.windDir_label || '—',
+        fetchMi:    waves.fetchMi,
+        waveHt:     waves.waveHeight_ft,
+        period:     waves.wavePeriod_s,
+        htColor,
+        dockStyle,
+        temp:       o.temperature_f,
+        pop:        o.pop_pct,
+      };
+    });
+
+  const activeTimeFmt = activeTime
+    ? (() => {
+        const d = new Date(activeTime);
+        return d.toLocaleString('en-US', {
+          weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false,
+        });
+      })()
+    : null;
 
   return (
     <div className="max-w-xl mx-auto w-full space-y-4">
@@ -201,7 +278,7 @@ function DockView({
       )}
 
       {/* Main dock card */}
-      <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-6 flex flex-col gap-5">
+      <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-6 flex flex-col gap-4">
 
         <div>
           <p className="font-semibold text-walloon-blue-700">{displayLabel}</p>
@@ -210,64 +287,212 @@ function DockView({
           </p>
         </div>
 
-        {/* Dock status — most prominent element */}
-        <div className={`rounded-xl px-4 py-3 text-base font-bold ${dock.bg} ${dock.text}`}>
+        {/* Dock status — most prominent */}
+        <div className={`rounded-xl px-4 py-3 font-bold ${dock.bg} ${dock.text}`}>
           <div className="text-xl">{dock.icon} {dock.label}</div>
           <div className="text-sm font-normal mt-0.5 opacity-80">{dock.note}</div>
         </div>
 
+        {/* Time indicator */}
+        {activeTimeFmt ? (
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-amber-600">⏱ {activeTimeFmt}</span>
+            <button
+              className="text-xs text-walloon-blue-500 hover:text-walloon-blue-700"
+              onClick={() => setActiveTime(null)}
+            >
+              ← Now
+            </button>
+          </div>
+        ) : (
+          <div className="text-xs text-gray-400">Current conditions</div>
+        )}
+
         {/* Wave height + condition */}
-        <div className="flex items-end gap-3">
+        <div className="flex items-center gap-3">
           <div>
             <span className={`text-5xl font-bold leading-none tabular-nums ${htClr}`}>
-              {displayWave.waveHeight_ft.toFixed(2)}
+              {activeWave.waveHeight_ft.toFixed(2)}
             </span>
             <span className="text-base text-gray-400 ml-1">ft</span>
           </div>
-          <span className={`mb-1 rounded-full px-3 py-0.5 text-xs font-semibold uppercase tracking-wide ${cond.bg} ${cond.text}`}>
-            {displayWave.conditions.replace('-', ' ')}
-          </span>
+          <div className="space-y-0.5">
+            <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide ${cond.bg} ${cond.text}`}>
+              {condLabel}
+            </span>
+            {whitecapNote && (
+              <div className="text-xs text-red-500 font-medium">{whitecapNote}</div>
+            )}
+          </div>
         </div>
 
-        {/* Wind + compass */}
+        {/* Compass + wind speed/dir/gust + period/fetch */}
         <div className="flex items-center gap-4">
           <WindCompass
-            windDir_deg={displayWave.windDir_deg}
-            windDir_label={degToLabel(displayWave.windDir_deg)}
-            size={72}
+            windDir_deg={activeObs?.windDir_deg ?? activeWave.windDir_deg ?? null}
+            windDir_label={activeDir}
+            size={68}
           />
           <div className="text-sm text-gray-700 space-y-0.5">
             <div>
-              <span className="font-medium">{displayWave.windSpeed_mph} mph</span>
-              {displayWave.windDir_deg !== null && (
-                <span className="text-gray-400 ml-1">from {degToLabel(displayWave.windDir_deg)}</span>
+              <span className="font-medium">
+                {activeObs?.windSpeed_mph ?? activeWave.windSpeed_mph} mph
+              </span>
+              <span className="text-gray-400 ml-1">from {activeDir}</span>
+              {activeGust > (activeObs?.windSpeed_mph ?? activeWave.windSpeed_mph) && (
+                <span className="text-gray-400"> gusts to {activeGust}mph</span>
               )}
             </div>
-            <div className="text-gray-400 text-xs">
-              Period {displayWave.wavePeriod_s}s · Fetch {displayWave.fetchMi} mi
+            <div className="text-xs text-gray-400">
+              Period {activeWave.wavePeriod_s}s · Fetch {activeWave.fetchMi}mi
             </div>
           </div>
+        </div>
+
+        {/* Weather metrics grid */}
+        <div className="text-sm text-gray-600 space-y-1 pl-1">
+          {activeObs?.temperature_f !== undefined && (
+            <div>
+              Air{' '}
+              <span className="font-medium text-orange-500">{activeObs.temperature_f.toFixed(0)}°F</span>
+              {activeObs.windChill_f !== undefined &&
+               activeObs.windChill_f < activeObs.temperature_f && (
+                <>
+                  {' '}Chill{' '}
+                  <span className="font-medium text-cyan-500">{activeObs.windChill_f.toFixed(0)}°F</span>
+                </>
+              )}
+            </div>
+          )}
+          {activeObs?.pressure_mb !== undefined ? (
+            <div>
+              Pressure{' '}
+              <span className="font-medium text-violet-600">{mbToInHg(activeObs.pressure_mb)}"</span>
+            </div>
+          ) : null}
+          {(activeObs?.pop_pct !== undefined || activeObs?.precip_in !== undefined) && (
+            <div>
+              {activeObs?.pop_pct !== undefined && (
+                <>PoP <span className="font-medium text-blue-500">{activeObs.pop_pct.toFixed(0)}%</span></>
+              )}
+              {activeObs?.pop_pct !== undefined && activeObs?.precip_in !== undefined && '  '}
+              {activeObs?.precip_in !== undefined && (
+                <>Amount <span className="font-medium text-sky-500">{activeObs.precip_in.toFixed(2)}"</span></>
+              )}
+            </div>
+          )}
+          {activeObs?.skyCover_pct !== undefined && (
+            <div>
+              Cloud Coverage {skyCoverIcon(activeObs.skyCover_pct)}
+            </div>
+          )}
         </div>
 
         {/* Sparklines */}
         <div className="relative space-y-1 pt-1 border-t border-gray-50">
+          {/* Now marker */}
           <div
             className="absolute inset-y-0 w-px bg-gray-300 pointer-events-none z-10"
             style={{ left: `calc(8rem + ${nowPct / 100} * (100% - 8rem))` }}
           />
+          {/* Wave height row */}
           <div className="flex items-center gap-2">
             <span className="text-xs text-gray-400 w-12 shrink-0">λ:</span>
-            <span className="text-xs font-medium tabular-nums w-16 shrink-0" style={{ color: htClr }}>
-              {displayWave.waveHeight_ft.toFixed(2)} ft
+            <span className={`text-xs font-medium tabular-nums w-16 shrink-0 ${htClr}`}>
+              {activeWave.waveHeight_ft.toFixed(2)} ft
             </span>
             <div className="flex-1 h-12">
-              <WaveSparkline history={history} locationId={displayPresetId} hours={hours} />
+              <WaveSparkline
+                history={history}
+                locationId={displayPresetId}
+                hours={hours}
+                activeTime={activeTime ?? undefined}
+                onTimeSelect={setActiveTime}
+              />
             </div>
           </div>
-          <WeatherSparklines history={history} hours={hours} />
+          <WeatherSparklines
+            history={history}
+            hours={hours}
+            activeTime={activeTime ?? undefined}
+            onTimeSelect={setActiveTime}
+          />
         </div>
 
-        {/* Footer: data timestamp + window label + 72h toggle */}
+        {/* Detail table toggle */}
+        <div className="border-t border-gray-50 pt-1">
+          <button
+            className="flex items-center justify-between w-full text-xs text-gray-400 hover:text-gray-600 py-1"
+            onClick={() => setExpanded(!expanded)}
+          >
+            <span>Hourly forecast (2h intervals)</span>
+            <span>{expanded ? '▲' : '▼'}</span>
+          </button>
+
+          {expanded && detailRows.length > 0 && (
+            <div className="mt-2 overflow-x-auto">
+              <table className="w-full text-xs border-collapse">
+                <thead>
+                  <tr className="text-gray-400 border-b border-gray-100">
+                    <th className="text-left py-1 pr-2 font-normal">Time</th>
+                    <th className="text-right py-1 pr-1 font-normal">Wind</th>
+                    <th className="text-right py-1 pr-2 font-normal">Gust</th>
+                    <th className="text-left  py-1 pr-2 font-normal">Dir</th>
+                    <th className="text-right py-1 pr-2 font-normal">Fetch</th>
+                    <th className="text-right py-1 pr-2 font-normal">Wave</th>
+                    <th className="text-right py-1 pr-2 font-normal">Per</th>
+                    <th className="text-right py-1 pr-2 font-normal">Air</th>
+                    <th className="text-right py-1 pr-2 font-normal">PoP</th>
+                    <th className="text-right py-1 font-normal">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {detailRows.map((row, i) => (
+                    <tr
+                      key={i}
+                      className={`border-b border-gray-50 hover:bg-gray-50 cursor-pointer ${
+                        activeTime !== null && Math.abs(row.tMs - activeTime) < 3_600_000
+                          ? 'bg-amber-50'
+                          : ''
+                      }`}
+                      onClick={() => setActiveTime(row.tMs)}
+                    >
+                      <td className="py-1 pr-2 tabular-nums whitespace-nowrap">{row.timeStr}</td>
+                      <td className="text-right py-1 pr-1 tabular-nums">{row.windSpeed}</td>
+                      <td className="text-right py-1 pr-2 tabular-nums text-gray-400">
+                        {row.gustSpeed > 0 ? row.gustSpeed : '—'}
+                      </td>
+                      <td className="py-1 pr-2">{row.dirLabel}</td>
+                      <td className="text-right py-1 pr-2 tabular-nums text-gray-400">
+                        {row.fetchMi.toFixed(1)}
+                      </td>
+                      <td className={`text-right py-1 pr-2 tabular-nums font-semibold ${row.htColor}`}>
+                        {row.waveHt.toFixed(2)}
+                      </td>
+                      <td className="text-right py-1 pr-2 tabular-nums text-gray-400">
+                        {row.period > 0 ? row.period : '—'}
+                      </td>
+                      <td className="text-right py-1 pr-2 tabular-nums">
+                        {row.temp !== undefined ? `${row.temp.toFixed(0)}°` : '—'}
+                      </td>
+                      <td className="text-right py-1 pr-2 tabular-nums text-gray-400">
+                        {row.pop !== undefined ? `${row.pop.toFixed(0)}%` : '—'}
+                      </td>
+                      <td className={`text-right py-1 tabular-nums font-medium ${row.dockStyle.color}`}>
+                        {row.dockStyle.label}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {expanded && detailRows.length === 0 && (
+            <p className="text-xs text-gray-400 py-2">No forecast data available yet.</p>
+          )}
+        </div>
+
+        {/* Footer */}
         <div className="pt-1 border-t border-gray-50 space-y-0.5">
           {currentObs && (
             <div className="text-xs text-gray-400">

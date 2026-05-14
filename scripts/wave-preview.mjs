@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 /**
- * wave-preview.mjs — Walloon Lake wave-height preview (Phase 0)
+ * wave-preview.mjs — Walloon Lake wave-height preview
  *
- * Fetches the NWS 48-hour hourly wind forecast and runs it through the
- * CERC/SPM fetch-limited wave model. Prints a row every two hours for
- * 5152 Lake Grove Road on the eastern shore of Walloon Lake, MI.
+ * Fetches the NWS hourly wind forecast and runs it through the CERC/SPM
+ * fetch-limited wave model, using the same 32-direction fetch table as
+ * the web app (packages/shared/src/waveCalc.ts, lake-grove-road location).
+ *
+ * Prints a row every two hours for 48 hours.  Time is displayed in
+ * 24-hour (military) format, directions in 16-point compass labels.
  *
  * No dependencies — requires Node.js 18+ (native fetch).
  *
@@ -13,73 +16,65 @@
  *   node scripts/wave-preview.mjs --activity=dock        # dock installer view
  *   node scripts/wave-preview.mjs --activity=dock --gust # dock view + gust speeds
  *   node scripts/wave-preview.mjs --gust                 # mariner view + gust speeds
- *
- * Activity modes (anticipates website toggle):
- *   mariner  General wave conditions for boating safety.
- *   dock     Two-phase dock installation planning: assembly windows (< 0.75 ft,
- *            pre-whitecap) and jetting windows (< 1.5 ft). Dock sections floating
- *            before the support legs are jetted into the lakebed are at risk of
- *            being knocked apart by whitecaps — this view makes that risk explicit.
  */
 
 // ─── constants ────────────────────────────────────────────────────────────────
 
-const G          = 9.81;     // m/s²
+const G          = 9.81;
 const MPH_TO_MS  = 0.44704;
 const MI_TO_M    = 1609.34;
 const M_TO_FT    = 3.28084;
 const TIMEZONE   = 'America/Detroit';
 
-// NWS points API — any coordinate on Walloon Lake resolves to the same forecast grid.
 const NWS_POINT_URL = 'https://api.weather.gov/points/45.1050,-84.9435';
 
 // ─── dock installation thresholds ────────────────────────────────────────────
-//
-// Assembly phase: sections are floating loose or just bolted together, before
-//   the H-frame support legs are jetted into the lakebed. Whitecaps (~0.75 ft)
-//   can knock sections apart. Keep this phase strictly below whitecap onset.
-//
-// Jetting phase: dock is fully assembled and connected. Pump operator is in
-//   the water with a dry suit, working methodically. Tolerates more chop, but
-//   rough waves make pump control difficult and increase fall risk.
-//
-const ASSEMBLY_MAX_FT = 0.75;  // Rippled/Choppy boundary — whitecap onset
-const JETTING_MAX_FT  = 1.5;   // Choppy/Rough boundary
 
-// ─── fetch table for 5152 Lake Grove Road ────────────────────────────────────
+const ASSEMBLY_MAX_FT = 0.75;
+const JETTING_MAX_FT  = 1.5;
+
+// ─── 32-direction fetch table for 5152 Lake Grove Road ───────────────────────
 //
-// "Fetch" is the length of open water upwind of this location (miles).
-// 5152 Lake Grove Rd sits on the eastern shore, southern portion of the main body.
-//
-// Key geometry facts baked into this table:
-//   • The lake's main axis runs NNW–SSE; NNW gives the full ~4.5-mile run.
-//   • Easterly winds (E, ESE) have almost no fetch — the location is right at
-//     the east shore, so waves arrive from the open lake to the west/north.
-//   • The west arm (toward Petoskey Road) adds a little fetch for W and WNW.
-//
-// These values are estimated from Walloon Lake's geometry and will be replaced
-// by exact shoreline-ray-intersection calculations in Phase 3.
+// Matches packages/shared/src/waveCalc.ts (lake-grove-road).
+// 5152 Lake Grove Rd sits on the east shore of the West Arm,
+// ~0.83 mi N of Tamarack Ln narrows.  Arm axis toward Mud Lake ≈ 322°.
 //
 const FETCH_TABLE = [
-  { bearing:   0.0, label: 'N',   mi: 4.0 },  // up the long main body
-  { bearing:  22.5, label: 'NNE', mi: 3.5 },
-  { bearing:  45.0, label: 'NE',  mi: 2.5 },
-  { bearing:  67.5, label: 'ENE', mi: 1.0 },
-  { bearing:  90.0, label: 'E',   mi: 0.1 },  // right at the east shore
-  { bearing: 112.5, label: 'ESE', mi: 0.1 },
-  { bearing: 135.0, label: 'SE',  mi: 0.3 },
-  { bearing: 157.5, label: 'SSE', mi: 0.8 },
-  { bearing: 180.0, label: 'S',   mi: 1.5 },  // south toward Boyne City end
-  { bearing: 202.5, label: 'SSW', mi: 2.0 },
-  { bearing: 225.0, label: 'SW',  mi: 2.5 },
-  { bearing: 247.5, label: 'WSW', mi: 1.8 },
-  { bearing: 270.0, label: 'W',   mi: 1.5 },  // across the lake width
-  { bearing: 292.5, label: 'WNW', mi: 2.5 },  // picks up west-arm fetch
-  { bearing: 315.0, label: 'NW',  mi: 3.5 },
-  { bearing: 337.5, label: 'NNW', mi: 4.5 },  // longest run — most dangerous
+  { bearing:   0.00, mi: 0.05 }, // N     — east shore immediately
+  { bearing:  11.25, mi: 0.05 }, // NbE   — east shore
+  { bearing:  22.50, mi: 0.05 }, // NNE   — east shore
+  { bearing:  33.75, mi: 0.05 }, // NEbN  — east shore
+  { bearing:  45.00, mi: 0.05 }, // NE    — east shore
+  { bearing:  56.25, mi: 0.05 }, // NEbE  — east shore
+  { bearing:  67.50, mi: 0.05 }, // ENE   — east shore
+  { bearing:  78.75, mi: 0.05 }, // EbN   — east shore
+  { bearing:  90.00, mi: 0.05 }, // E     — east shore
+  { bearing: 101.25, mi: 0.05 }, // EbS   — east shore
+  { bearing: 112.50, mi: 0.05 }, // ESE   — east shore
+  { bearing: 123.75, mi: 0.05 }, // SEbE  — east shore
+  { bearing: 135.00, mi: 0.05 }, // SE    — east shore
+  { bearing: 146.25, mi: 0.05 }, // SEbS  — east shore
+  { bearing: 157.50, mi: 0.40 }, // SSE   — cuts toward east shore south of 5152
+  { bearing: 168.75, mi: 0.50 }, // SbE   — angled toward south shore
+  { bearing: 180.00, mi: 0.75 }, // S     — down arm to WA narrows
+  { bearing: 191.25, mi: 0.80 }, // SbW   — diagonal to west shore
+  { bearing: 202.50, mi: 0.85 }, // SSW   — diagonal to west shore
+  { bearing: 213.75, mi: 0.70 }, // SWbS  — SW diagonal
+  { bearing: 225.00, mi: 0.65 }, // SW
+  { bearing: 236.25, mi: 0.65 }, // SWbW
+  { bearing: 247.50, mi: 0.70 }, // WSW
+  { bearing: 258.75, mi: 0.90 }, // WbS   — wider diagonal cross
+  { bearing: 270.00, mi: 0.85 }, // W     — arm width (~0.85 mi)
+  { bearing: 281.25, mi: 0.85 }, // WbN   — arm width, slight diagonal
+  { bearing: 292.50, mi: 0.90 }, // WNW
+  { bearing: 303.75, mi: 1.40 }, // NWbW  — toward far NW shore
+  { bearing: 315.00, mi: 2.10 }, // NW    — long diagonal up arm
+  { bearing: 326.25, mi: 2.65 }, // NWbN  — near arm axis (322°); peak fetch
+  { bearing: 337.50, mi: 0.05 }, // NNW   — exits east shore (shore ~331°)
+  { bearing: 348.75, mi: 0.05 }, // NbW   — east shore
 ];
 
-// NWS compass strings → degrees (wind direction the wind is coming FROM)
+// 16-point compass: NWS wind direction strings → degrees
 const DIR_TO_DEG = {
   N: 0, NNE: 22.5, NE: 45, ENE: 67.5,
   E: 90, ESE: 112.5, SE: 135, SSE: 157.5,
@@ -88,54 +83,40 @@ const DIR_TO_DEG = {
 };
 
 // ─── fetch interpolation ──────────────────────────────────────────────────────
-//
-// Linear interpolation between the two nearest compass bearings (circular).
-//
+
 function fetchForDir(windDirDeg) {
-  const n = FETCH_TABLE.length;
-  let lo = n - 1;
+  const n   = FETCH_TABLE.length;
+  const deg = ((windDirDeg % 360) + 360) % 360;
+  let lo    = n - 1;
   for (let i = 0; i < n; i++) {
-    if (FETCH_TABLE[i].bearing <= windDirDeg) lo = i;
+    if (FETCH_TABLE[i].bearing <= deg) lo = i;
   }
-  const hi = (lo + 1) % n;
+  const hi     = (lo + 1) % n;
   const loBear = FETCH_TABLE[lo].bearing;
   const hiBear = hi === 0 ? 360 : FETCH_TABLE[hi].bearing;
-  const t = (windDirDeg - loBear) / (hiBear - loBear);
+  const t      = (deg - loBear) / (hiBear - loBear);
   return FETCH_TABLE[lo].mi * (1 - t) + FETCH_TABLE[hi].mi * t;
 }
 
-// ─── wave model ───────────────────────────────────────────────────────────────
+// ─── wave model (CERC/SPM 1984) ──────────────────────────────────────────────
 //
-// CERC / Shore Protection Manual (1984) fetch-limited formulas:
-//
-//   H̃_s = 0.00162 · F̃^½        where H̃_s = g·H_s / U_A²
-//   T̃_p = 0.286  · F̃^⅓                 F̃  = g·F   / U_A²
-//                                         T̃_p = g·T_p / U_A
-//
-// U_A is the adjusted wind speed (SPM 1984 eq. 3-28a):
-//   U_A = 0.71 · U^1.23   (U and U_A in m/s)
-//
-// Solving for dimensional form:
-//   H_s = 0.00162 · √(U_A² · F / g)        [metres]
-//   T_p = 0.286  · (U_A / g) · (gF/U_A²)^⅓  [seconds]
-//
-// This is fetch-limited (storm assumed long enough to reach fetch equilibrium),
-// which is the conservative assumption appropriate for planning and safety.
+//   H_s = 0.00162 · √(U_A² · F / g)            [metres]
+//   T_p = 0.286  · (U_A / g) · (gF / U_A²)^⅓   [seconds]
+//   U_A = 0.71 · U^1.23                          (m/s)
 //
 function calcWaves(windSpeedMph, windDirDeg) {
   const fetchMi = fetchForDir(windDirDeg);
-  const F       = fetchMi * MI_TO_M;         // metres
-  const U       = windSpeedMph * MPH_TO_MS;  // m/s
+  const F       = fetchMi * MI_TO_M;
+  const U       = windSpeedMph * MPH_TO_MS;
 
   if (U < 0.5) {
     return { H_ft: 0.00, T_s: 0.0, fetchMi: round1(fetchMi), condLabel: 'Calm' };
   }
 
-  const U_A  = 0.71 * Math.pow(U, 1.23);    // adjusted wind speed (m/s)
+  const U_A  = 0.71 * Math.pow(U, 1.23);
   const H_m  = 0.00162 * Math.sqrt(U_A * U_A * F / G);
   const dimF = (G * F) / (U_A * U_A);
   const T_s  = 0.286 * (U_A / G) * Math.pow(dimF, 1 / 3);
-
   const H_ft = H_m * M_TO_FT;
 
   return {
@@ -146,20 +127,16 @@ function calcWaves(windSpeedMph, windDirDeg) {
   };
 }
 
+// Matches classifyConditions() in packages/shared/src/utils/index.ts
 function waveCondLabel(H_ft) {
-  if (H_ft < 0.25) return 'Calm';
-  if (H_ft < 0.75) return 'Rippled';
-  if (H_ft < 1.5)  return 'Choppy';
-  if (H_ft < 2.5)  return 'Rough';
-  return 'Dangerous';
+  if (H_ft < 0.5) return 'Calm';
+  if (H_ft < 1.0) return 'Slight';
+  if (H_ft < 2.0) return 'Moderate';
+  if (H_ft < 3.0) return 'Rough';
+  return 'Very Rough';
 }
 
-// ─── dock status ──────────────────────────────────────────────────────────────
-//
-// Translates a wave height into a two-phase dock installation status.
-// Assembly is the critical phase — loose sections are at whitecap risk.
-// Jetting is more forgiving once the dock is fully assembled and floating.
-//
+// Matches classifyDockStatus() in packages/shared/src/utils/index.ts
 function dockStatusLabel(H_ft) {
   if (H_ft < ASSEMBLY_MAX_FT) return '✓ Assembly OK';
   if (H_ft < JETTING_MAX_FT)  return '~ Jetting only';
@@ -173,15 +150,12 @@ function dockStatusColor(H_ft) {
 }
 
 // ─── window finder ────────────────────────────────────────────────────────────
-//
-// Identifies contiguous blocks of time in the forecast where a given
-// threshold is met. Returns an array of { start, end } time strings.
-//
+
 function findWindows(rows, maxFt) {
   const windows = [];
-  let winStart = null;
+  let winStart  = null;
   for (const row of rows) {
-    const ok = !row.isVariable && row.H_ft <= maxFt;
+    const ok = !row.isVariable && row.H_ft !== null && row.H_ft <= maxFt;
     if (ok && winStart === null) {
       winStart = row.timeShort;
     } else if (!ok && winStart !== null) {
@@ -208,11 +182,11 @@ const C = {
 };
 
 const WAVE_COLOR = {
-  Calm:      C.green,
-  Rippled:   C.yellow,
-  Choppy:    C.orange,
-  Rough:     C.red,
-  Dangerous: C.purple,
+  Calm:       C.green,
+  Slight:     C.yellow,
+  Moderate:   C.orange,
+  Rough:      C.red,
+  'Very Rough': C.purple,
 };
 
 // ─── NWS helpers ─────────────────────────────────────────────────────────────
@@ -228,31 +202,30 @@ async function nwsGet(url) {
   return res.json();
 }
 
-// NWS windSpeed is "12 mph" or occasionally "10 to 15 mph" (take the upper bound).
 function parseSpeed(s) {
   if (!s || /calm/i.test(s)) return 0;
   const nums = s.match(/\d+/g);
   if (!nums) return 0;
-  return parseInt(nums[nums.length - 1], 10);  // last number = upper bound
+  return parseInt(nums[nums.length - 1], 10);
 }
 
-// NWS windDirection is a compass string like "NW" or "VRB" (variable).
 function parseDir(s) {
   if (!s || s === 'VRB') return null;
   return DIR_TO_DEG[s.trim().toUpperCase()] ?? null;
 }
 
+// Military time (24h) — no AM/PM
 function fmtTimeLong(isoStr) {
   return new Date(isoStr).toLocaleString('en-US', {
     weekday: 'short', month: 'short', day: 'numeric',
-    hour: 'numeric', minute: '2-digit', hour12: true,
+    hour: '2-digit', minute: '2-digit', hour12: false,
     timeZone: TIMEZONE,
   });
 }
 
 function fmtTimeShort(isoStr) {
   return new Date(isoStr).toLocaleString('en-US', {
-    weekday: 'short', hour: 'numeric', hour12: true,
+    weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false,
     timeZone: TIMEZONE,
   });
 }
@@ -281,25 +254,22 @@ async function main() {
 
   console.log();
   console.log(`${C.bold}  Walloon Lake — Wave Height Preview  ${C.dim}[${activityLabel}]${C.reset}`);
-  console.log(`${C.bold}  5152 Lake Grove Road${C.reset}${C.dim}  (eastern shore, main body)${C.reset}`);
+  console.log(`${C.bold}  5152 Lake Grove Road${C.reset}${C.dim}  (eastern shore, West Arm)${C.reset}`);
   console.log(`${C.dim}  ${now}${C.reset}`);
   if (useGust) console.log(`${C.dim}  Speed mode: gust (conservative upper-bound)${C.reset}`);
   console.log();
 
-  // ── Step 1: resolve NWS grid ────────────────────────────────────────────────
   process.stdout.write(`${C.dim}  Resolving NWS grid point...${C.reset}`);
   const pointData = await nwsGet(NWS_POINT_URL);
   const { gridId, gridX, gridY, forecastHourly } = pointData.properties;
   console.log(`  ${C.cyan}${gridId} (${gridX},${gridY})${C.reset}`);
 
-  // ── Step 2: fetch hourly forecast ───────────────────────────────────────────
   process.stdout.write(`${C.dim}  Fetching 48-hour hourly forecast...${C.reset}`);
   const hourlyData = await nwsGet(forecastHourly);
   const allPeriods = hourlyData.properties.periods;
   console.log(`  ${C.cyan}${allPeriods.length} hours received${C.reset}`);
   console.log();
 
-  // ── Step 3: compute rows ────────────────────────────────────────────────────
   // Every other hour for 48 hours → up to 24 rows
   const rows = allPeriods.slice(0, 48)
     .filter((_, i) => i % 2 === 0)
@@ -311,13 +281,17 @@ async function main() {
       const dirDeg    = parseDir(dirStr);
       const isVariable = dirDeg === null;
 
-      let windStr = `${mph} mph`;
+      let windStr = `${mph}mph`;
       if (!useGust && gustSpeed > baseSpeed) windStr += `g${gustSpeed}`;
 
       if (isVariable) {
-        return { isVariable: true, timeLong: fmtTimeLong(p.startTime),
-                 timeShort: fmtTimeShort(p.startTime), windStr, dirStr,
-                 H_ft: null, T_s: null, fetchMi: null, condLabel: null };
+        return {
+          isVariable: true,
+          timeLong:  fmtTimeLong(p.startTime),
+          timeShort: fmtTimeShort(p.startTime),
+          windStr, dirStr,
+          H_ft: null, T_s: null, fetchMi: null, condLabel: null,
+        };
       }
 
       const waves = calcWaves(mph, dirDeg);
@@ -331,7 +305,7 @@ async function main() {
       };
     });
 
-  // ── Step 4: dock window summary (dock mode only) ────────────────────────────
+  // ── Dock window summary ─────────────────────────────────────────────────────
   if (activity === 'dock') {
     const assemblyWindows = findWindows(rows, ASSEMBLY_MAX_FT);
     const jettingWindows  = findWindows(rows, JETTING_MAX_FT);
@@ -340,7 +314,7 @@ async function main() {
     console.log(`  ${'─'.repeat(56)}`);
 
     if (assemblyWindows.length === 0) {
-      console.log(`  ${C.red}${C.bold}Assembly OK${C.reset}  ${C.dim}(< ${ASSEMBLY_MAX_FT} ft, pre-whitecap)${C.reset}  ${C.red}No safe windows in forecast${C.reset}`);
+      console.log(`  ${C.red}${C.bold}Assembly OK${C.reset}  ${C.dim}(< ${ASSEMBLY_MAX_FT} ft)${C.reset}  ${C.red}No safe windows in forecast${C.reset}`);
     } else {
       assemblyWindows.forEach((w, i) => {
         const prefix = i === 0
@@ -351,7 +325,7 @@ async function main() {
     }
 
     if (jettingWindows.length === 0) {
-      console.log(`  ${C.yellow}${C.bold}Jetting OK${C.reset}   ${C.dim}(< ${JETTING_MAX_FT} ft, assembled dock)${C.reset}  ${C.red}No safe windows in forecast${C.reset}`);
+      console.log(`  ${C.yellow}${C.bold}Jetting OK${C.reset}   ${C.dim}(< ${JETTING_MAX_FT} ft)${C.reset}  ${C.red}No safe windows in forecast${C.reset}`);
     } else {
       jettingWindows.forEach((w, i) => {
         const prefix = i === 0
@@ -362,12 +336,12 @@ async function main() {
     }
 
     console.log(`  ${'─'.repeat(56)}`);
-    console.log(`  ${C.dim}Whitecap onset at ~${ASSEMBLY_MAX_FT} ft — do not begin new sections above this threshold${C.reset}`);
+    console.log(`  ${C.dim}Whitecap onset ~${ASSEMBLY_MAX_FT} ft — do not begin new sections above this threshold${C.reset}`);
     console.log();
   }
 
-  // ── Step 5: table ───────────────────────────────────────────────────────────
-  const W = { time: 26, wind: 11, dir: 5, fetch: 8, ht: 9, per: 8 };
+  // ── Table ───────────────────────────────────────────────────────────────────
+  const W = { time: 22, wind: 9, dir: 5, fetch: 8, ht: 9, per: 8 };
   const lastColHeader = activity === 'dock' ? 'Dock Status' : 'Conditions';
   const headerCols = [
     'Time'.padEnd(W.time),
@@ -385,8 +359,9 @@ async function main() {
 
   for (const row of rows) {
     if (row.isVariable) {
-      const timeCol = row.timeLong.padEnd(W.time);
-      console.log(`  ${timeCol}${C.dim}${row.windStr.padEnd(W.wind)}${row.dirStr.padEnd(W.dir)}— variable wind${C.reset}`);
+      console.log(
+        `  ${row.timeLong.padEnd(W.time)}${C.dim}${row.windStr.padEnd(W.wind)}${row.dirStr.padEnd(W.dir)}— variable wind${C.reset}`,
+      );
       continue;
     }
 
@@ -414,7 +389,7 @@ async function main() {
 
   console.log(`  ${C.dim}${divider}${C.reset}`);
 
-  // ── Step 6: legend ──────────────────────────────────────────────────────────
+  // ── Legend ──────────────────────────────────────────────────────────────────
   console.log();
 
   if (activity === 'dock') {
@@ -424,17 +399,17 @@ async function main() {
     console.log(`    ${C.red}${C.bold}✗ Avoid${C.reset}         > ${JETTING_MAX_FT} ft   Whitecap risk — sections may be knocked apart before jetting`);
   } else {
     console.log(`  ${C.bold}Conditions${C.reset}`);
-    console.log(`    ${C.green}${C.bold}Calm${C.reset}         < 0.25 ft   Glassy or light ripple`);
-    console.log(`    ${C.yellow}${C.bold}Rippled${C.reset}      0.25–0.75 ft  Gentle chop, comfortable for all boats`);
-    console.log(`    ${C.orange}${C.bold}Choppy${C.reset}       0.75–1.5 ft   Noticeable chop, okay with care`);
-    console.log(`    ${C.red}${C.bold}Rough${C.reset}        1.5–2.5 ft    Short steep waves, small craft caution`);
-    console.log(`    ${C.purple}${C.bold}Dangerous${C.reset}    > 2.5 ft      Unsafe for small craft`);
+    console.log(`    ${C.green}${C.bold}Calm${C.reset}           < 0.5 ft    Glassy or light ripple`);
+    console.log(`    ${C.yellow}${C.bold}Slight${C.reset}         0.5–1.0 ft  Gentle chop, comfortable for all boats`);
+    console.log(`    ${C.orange}${C.bold}Moderate${C.reset}       1.0–2.0 ft  Noticeable chop, okay with care`);
+    console.log(`    ${C.red}${C.bold}Rough${C.reset}          2.0–3.0 ft  Short steep waves, small craft caution`);
+    console.log(`    ${C.purple}${C.bold}Very Rough${C.reset}     > 3.0 ft    Unsafe for small craft`);
   }
 
   console.log();
   console.log(`  ${C.dim}Wave model:  CERC/SPM fetch-limited — H_s = 0.00162√(U_A²·F/g)${C.reset}`);
   console.log(`  ${C.dim}             T_p = 0.286·(U_A/g)·(gF/U_A²)^⅓   where U_A = 0.71·U^1.23${C.reset}`);
-  console.log(`  ${C.dim}Fetch table: estimated from lake geometry — exact ray-cast in Phase 3${C.reset}`);
+  console.log(`  ${C.dim}Fetch table: 32-direction ray-cast, lake-grove-road (matches web app)${C.reset}`);
   console.log(`  ${C.dim}Wind source: NWS hourly forecast, ${gridId} office${C.reset}`);
   console.log(`  ${C.dim}Tip: add --gust for worst-case wave heights · --activity=dock for dock view${C.reset}`);
   console.log();
