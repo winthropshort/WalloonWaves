@@ -15,6 +15,7 @@
     "build:frontend": "npm run build -w packages/frontend",
     "build:backend": "npm run build -w packages/backend",
     "build:infra": "npm run build -w packages/infrastructure",
+    "gen:addresses": "npx tsx scripts/gen_lake_addresses.ts",
     "test": "npm run test --workspaces --if-present",
     "lint": "eslint packages/*/src --ext .ts,.tsx",
     "format": "prettier --write \"packages/*/src/**/*.{ts,tsx}\"",
