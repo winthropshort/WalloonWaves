@@ -35,3 +35,6 @@ tmp/
 
 # CDK
 cdk.context.json
+
+# Claude Code agent worktrees
+.claude/worktrees/
