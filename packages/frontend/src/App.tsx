@@ -4,7 +4,7 @@ import type { ActivityMode } from '@walloon/shared';
 import { calcWaves } from '@walloon/shared';
 import { useLocations } from './hooks/useLocations.js';
 import { useWeatherHistory } from './hooks/useWeatherHistory.js';
-import { ActivityToggle } from './components/ActivityToggle.js';
+import { useAurora } from './hooks/useAurora.js';
 import { LocationCard } from './components/LocationCard.js';
 import { GeocodeSection } from './components/GeocodeSection.js';
 import { WindCompass } from './components/WindCompass.js';
@@ -40,11 +40,6 @@ function degToLabel(deg: number | null) {
   return COMPASS[Math.round(((deg % 360) + 360) % 360 / 22.5) % 16] ?? 'N';
 }
 
-const DOCK_STATUS_STYLES = {
-  'ok':           { bg: 'bg-green-50',  text: 'text-green-700',  icon: '✓', label: 'Assembly OK',  note: '< 0.75 ft — assembly safe'   },
-  'jetting-only': { bg: 'bg-yellow-50', text: 'text-yellow-700', icon: '~', label: 'Jetting Only', note: '0.75–1.5 ft — no new sections' },
-  'avoid':        { bg: 'bg-red-50',    text: 'text-red-700',    icon: '✗', label: 'Avoid',        note: '> 1.5 ft — whitecap risk'     },
-};
 const HT_COLORS: Record<string, string> = {
   calm: 'text-green-600', slight: 'text-yellow-600', moderate: 'text-orange-500',
   rough: 'text-red-600', 'very-rough': 'text-purple-700',
@@ -102,6 +97,8 @@ function DockView({
   const [notFound,   setNotFound]   = useState(false);
   const [activeTime, setActiveTime] = useState<number | null>(null);
   const [expanded,   setExpanded]   = useState(false);
+
+  const { data: auroraData } = useAurora();
 
   const windSpeed = currentObs?.windSpeed_mph ?? 0;
   const windDir   = currentObs?.windDir_deg   ?? null;
@@ -170,7 +167,10 @@ function DockView({
     ? calcWaves(displayPresetId, activeObs.windSpeed_mph, activeObs.windDir_deg)
     : displayWave;
 
-  const dock      = DOCK_STATUS_STYLES[activeWave.dockStatus ?? 'ok']!;
+  const cardBorderColor =
+    activeWave.dockStatus === 'ok'           ? 'border-green-400 dark:border-green-600' :
+    activeWave.dockStatus === 'jetting-only' ? 'border-amber-400 dark:border-amber-500' :
+                                               'border-red-400 dark:border-red-600';
   const htClr     = HT_COLORS[activeWave.conditions]    ?? 'text-gray-700';
   const cond      = COND_STYLES[activeWave.conditions]   ?? COND_STYLES['calm']!;
   const condLabel = COND_LABELS[activeWave.conditions]   ?? activeWave.conditions;
@@ -234,11 +234,6 @@ function DockView({
 
   return (
     <div className="max-w-xl mx-auto w-full space-y-4">
-      <div className="rounded-xl bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 px-4 py-3 text-sm text-amber-800 dark:text-amber-200">
-        <strong>Dock Installer View</strong> — Assembly phase requires waves &lt; 0.75 ft (pre-whitecap).
-        Jetting phase tolerates up to 1.5 ft once fully assembled.
-      </div>
-
       {/* Address input */}
       <form onSubmit={handleSubmit} className="flex gap-2">
         <input
@@ -279,20 +274,7 @@ function DockView({
       )}
 
       {/* Main dock card */}
-      <div className="rounded-2xl bg-white dark:bg-walloon-blue-800 border border-gray-100 dark:border-walloon-blue-700 shadow-sm p-6 flex flex-col gap-4">
-
-        <div>
-          <p className="font-semibold text-walloon-blue-700 dark:text-walloon-blue-300">{displayLabel}</p>
-          <p className="text-xs text-gray-400 mt-0.5">
-            Conditions modeled from nearest reference point
-          </p>
-        </div>
-
-        {/* Dock status — most prominent */}
-        <div className={`rounded-xl px-4 py-3 font-bold ${dock.bg} ${dock.text}`}>
-          <div className="text-xl">{dock.icon} {dock.label}</div>
-          <div className="text-sm font-normal mt-0.5 opacity-80">{dock.note}</div>
-        </div>
+      <div className={`rounded-2xl bg-white dark:bg-walloon-blue-800 border-2 ${cardBorderColor} shadow-sm p-6 flex flex-col gap-4`}>
 
         {/* Time indicator */}
         {activeTimeFmt ? (
@@ -332,7 +314,7 @@ function DockView({
           <WindCompass
             windDir_deg={activeObs?.windDir_deg ?? activeWave.windDir_deg ?? null}
             windDir_label={activeDir}
-            size={68}
+            size={84}
           />
           <div className="text-[15px] text-gray-700 dark:text-gray-200 space-y-0.5">
             <div>
@@ -366,28 +348,48 @@ function DockView({
               )}
             </div>
           )}
-          <div>
-            Pressure{' '}
-            <span className="font-medium text-violet-600 dark:text-violet-400">
-              {activeObs?.pressure_mb !== undefined ? `${mbToInHg(activeObs.pressure_mb)}"` : '—'}
+          <div className="flex flex-wrap items-baseline gap-x-3">
+            <span>
+              Pressure{' '}
+              <span className="font-medium text-violet-600 dark:text-violet-400">
+                {activeObs?.pressure_mb !== undefined ? `${mbToInHg(activeObs.pressure_mb)}"` : '—'}
+              </span>
             </span>
+            {activeObs?.pop_pct !== undefined && (
+              <span>PoP <span className="font-medium text-blue-500">{activeObs.pop_pct.toFixed(0)}%</span></span>
+            )}
+            {activeObs?.precip_in !== undefined && (
+              <span>Amount <span className="font-medium text-sky-500">{activeObs.precip_in.toFixed(2)}"</span></span>
+            )}
           </div>
-          {(activeObs?.pop_pct !== undefined || activeObs?.precip_in !== undefined) && (
-            <div>
-              {activeObs?.pop_pct !== undefined && (
-                <>PoP <span className="font-medium text-blue-500">{activeObs.pop_pct.toFixed(0)}%</span></>
-              )}
-              {activeObs?.pop_pct !== undefined && activeObs?.precip_in !== undefined && '  '}
-              {activeObs?.precip_in !== undefined && (
-                <>Amount <span className="font-medium text-sky-500">{activeObs.precip_in.toFixed(2)}"</span></>
-              )}
-            </div>
-          )}
           {activeObs?.skyCover_pct !== undefined && (
             <div>
               Cloud Coverage {skyCoverIcon(activeObs.skyCover_pct)}
             </div>
           )}
+          <div>
+            Aurora{' '}
+            {auroraData ? (
+              <>
+                <span className={`font-medium ${
+                  auroraData.probability >= 60 ? 'text-purple-500 dark:text-purple-400' :
+                  auroraData.probability >= 30 ? 'text-violet-500 dark:text-violet-400' :
+                  auroraData.probability >= 10 ? 'text-indigo-500 dark:text-indigo-400' :
+                  'text-gray-400 dark:text-gray-500'
+                }`}>
+                  {auroraData.probability}%
+                </span>
+                <span className="text-xs text-gray-400 dark:text-gray-500 ml-1">
+                  KP {auroraData.kp.toFixed(1)}
+                  {activeObs?.skyCover_pct !== undefined && activeObs.skyCover_pct >= 75 && (
+                    <span className="ml-1 italic">· overcast</span>
+                  )}
+                </span>
+              </>
+            ) : (
+              <span className="font-medium text-gray-400 dark:text-gray-500">—</span>
+            )}
+          </div>
         </div>
 
         {/* Sparklines */}
@@ -496,14 +498,6 @@ function DockView({
 
         {/* Footer */}
         <div className="pt-1 border-t border-gray-50 dark:border-walloon-blue-700 space-y-0.5">
-          {currentObs && (
-            <div className="text-xs text-gray-400">
-              Data from{' '}
-              {new Date(currentObs.timestamp).toLocaleTimeString('en-US', {
-                hour: '2-digit', minute: '2-digit', hour12: false,
-              })}
-            </div>
-          )}
           <div className="flex items-center justify-between">
             <span className="text-xs text-gray-400">{windowLabel(hours)}</span>
             <label className="flex items-center gap-1 text-xs text-gray-400 cursor-pointer select-none">
@@ -516,6 +510,16 @@ function DockView({
               72h
             </label>
           </div>
+          {currentObs && (
+            <div className="text-xs text-gray-400">
+              Data from{' '}
+              {new Date(currentObs.timestamp).toLocaleTimeString('en-US', {
+                hour: '2-digit', minute: '2-digit', hour12: false,
+              })}
+              {' · '}
+              <span className="italic">see ☰ for dock thresholds</span>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -576,38 +580,24 @@ export default function App() {
       )
     : null;
 
-  const lastUpdated = dataUpdatedAt
-    ? new Date(dataUpdatedAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
-    : null;
-
   return (
     <div className="min-h-screen bg-walloon-white dark:bg-walloon-blue-900">
-      <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
+      <div className="max-w-5xl mx-auto px-4 py-4 space-y-4">
 
-        <header className="relative text-center space-y-2">
-          <div className="absolute right-0 top-0 flex items-center gap-2">
+        <header className="flex items-center justify-between gap-2">
+          <h1 className="text-base font-bold text-walloon-blue-600 dark:text-walloon-blue-300 tracking-tight leading-tight">
+            Walloon Lake Marine Weather
+          </h1>
+          <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => setIsDark(!isDark)}
               className="text-xs px-3 py-1.5 rounded-full border border-gray-200 dark:border-walloon-blue-600 bg-white dark:bg-walloon-blue-700 text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-walloon-blue-600 transition-colors shadow-sm"
             >
               {isDark ? 'Light' : 'Dark'}
             </button>
-            <InfoPanel />
+            <InfoPanel activity={activity} onActivityChange={setActivity} />
           </div>
-          <h1 className="text-3xl font-bold text-walloon-blue-600 dark:text-walloon-blue-300 tracking-tight">
-            Walloon Lake Marine Weather
-          </h1>
-          <p className="text-sm text-walloon-green-600 dark:text-walloon-green-400 font-medium">
-            Walloon Lake, Michigan
-          </p>
-          {lastUpdated && (
-            <p className="text-xs text-gray-400">Last checked {lastUpdated}</p>
-          )}
         </header>
-
-        <div className="flex justify-center">
-          <ActivityToggle value={activity} onChange={setActivity} />
-        </div>
 
         {locsError && (
           <ErrorBanner message="Unable to load wave conditions. Check your connection and try again." />

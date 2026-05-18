@@ -49,10 +49,10 @@ export function WindCompass({ windDir_deg, windDir_label, size = 72 }: Props) {
       })}
 
       {/* Cardinal labels: N S E W */}
-      <text x="50" y="9"  textAnchor="middle" fontSize="10" fill="#64748b" fontWeight="600">N</text>
-      <text x="50" y="97" textAnchor="middle" fontSize="10" fill="#64748b" fontWeight="600">S</text>
-      <text x="6"  y="53" textAnchor="middle" fontSize="10" fill="#64748b" fontWeight="600">W</text>
-      <text x="94" y="53" textAnchor="middle" fontSize="10" fill="#64748b" fontWeight="600">E</text>
+      <text x="50" y="9"  textAnchor="middle" fontSize="13" fill="#334155" fontWeight="700">N</text>
+      <text x="50" y="98" textAnchor="middle" fontSize="13" fill="#334155" fontWeight="700">S</text>
+      <text x="5"  y="54" textAnchor="middle" fontSize="13" fill="#334155" fontWeight="700">W</text>
+      <text x="95" y="54" textAnchor="middle" fontSize="13" fill="#334155" fontWeight="700">E</text>
 
       {/* Ordinal labels: NE SE SW NW */}
       {([
@@ -69,9 +69,9 @@ export function WindCompass({ windDir_deg, windDir_label, size = 72 }: Props) {
             x={cx + rL * Math.sin(a)}
             y={cy - rL * Math.cos(a) + 3}
             textAnchor="middle"
-            fontSize="8"
+            fontSize="9"
             fill="#64748b"
-            fontWeight="500"
+            fontWeight="600"
           >
             {label}
           </text>
@@ -82,16 +82,26 @@ export function WindCompass({ windDir_deg, windDir_label, size = 72 }: Props) {
       {arrowVisible && (
         <g>
           <defs>
-            <marker id="arrowhead" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto">
-              <polygon points="0 0, 6 2, 0 4" fill="#1B4F72" />
+            <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" fill="#1d4ed8" />
             </marker>
           </defs>
+          {/* Shadow/halo for contrast */}
           <line
             x1={tx} y1={ty}
             x2={rx - (rx - cx) * 0.18}
             y2={ry - (ry - cy) * 0.18}
-            stroke="#1B4F72"
-            strokeWidth="2.5"
+            stroke="white"
+            strokeWidth="5"
+            strokeLinecap="round"
+            opacity="0.6"
+          />
+          <line
+            x1={tx} y1={ty}
+            x2={rx - (rx - cx) * 0.18}
+            y2={ry - (ry - cy) * 0.18}
+            stroke="#1d4ed8"
+            strokeWidth="3.5"
             strokeLinecap="round"
             markerEnd="url(#arrowhead)"
           />
@@ -99,7 +109,7 @@ export function WindCompass({ windDir_deg, windDir_label, size = 72 }: Props) {
       )}
 
       {/* Center dot */}
-      <circle cx={cx} cy={cy} r="3" fill="#1B4F72" opacity={arrowVisible ? 1 : 0.3} />
+      <circle cx={cx} cy={cy} r="4" fill="#1d4ed8" opacity={arrowVisible ? 1 : 0.3} />
 
       {/* VRB label */}
       {!arrowVisible && (

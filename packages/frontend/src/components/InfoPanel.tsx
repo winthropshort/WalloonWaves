@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import type { ActivityMode } from '@walloon/shared';
 
 // ── Static data ──────────────────────────────────────────────────────────────
 // Source: scripts/shoreline_data.json fetch_runs + CERC/SPM model
@@ -53,7 +54,12 @@ const WAVE_TABLE = [
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export function InfoPanel() {
+interface InfoPanelProps {
+  activity:         ActivityMode;
+  onActivityChange: (m: ActivityMode) => void;
+}
+
+export function InfoPanel({ activity, onActivityChange }: InfoPanelProps) {
   const [open, setOpen] = useState(false);
 
   // Close on Escape
@@ -116,6 +122,61 @@ export function InfoPanel() {
         </div>
 
         <div className="px-5 py-5 space-y-7">
+
+          {/* ── View toggle ── */}
+          <section>
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">View</h3>
+            <div className="inline-flex rounded-full border border-walloon-blue-200 dark:border-walloon-blue-600 bg-white dark:bg-walloon-blue-800 p-1 shadow-sm">
+              {(['dock', 'mariner'] as const).map((mode) => {
+                const active = activity === mode;
+                return (
+                  <button
+                    key={mode}
+                    onClick={() => { onActivityChange(mode); setOpen(false); }}
+                    className={[
+                      'rounded-full px-5 py-1.5 text-sm font-medium transition-colors',
+                      active
+                        ? 'bg-walloon-blue-500 text-white shadow-sm'
+                        : 'text-walloon-blue-500 dark:text-walloon-blue-300 hover:bg-walloon-blue-50 dark:hover:bg-walloon-blue-700',
+                    ].join(' ')}
+                  >
+                    {mode === 'mariner' ? '⛵ Mariner' : '🔧 Dock Installer'}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* ── Dock installer thresholds ── */}
+          <section>
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Dock Installer Thresholds</h3>
+            <div className="rounded-xl border border-gray-100 dark:border-walloon-blue-700 overflow-hidden text-sm">
+              <div className="flex items-start gap-3 px-4 py-3 bg-green-50 dark:bg-green-900/20 border-b border-gray-100 dark:border-walloon-blue-700">
+                <span className="font-bold text-green-700 dark:text-green-400 shrink-0">✓</span>
+                <div>
+                  <span className="font-semibold text-green-700 dark:text-green-400">Assembly OK</span>
+                  <span className="text-green-700/70 dark:text-green-400/70 ml-1">&lt; 0.75 ft — pre-whitecap, safe to add sections</span>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 px-4 py-3 bg-yellow-50 dark:bg-yellow-900/20 border-b border-gray-100 dark:border-walloon-blue-700">
+                <span className="font-bold text-yellow-700 dark:text-yellow-400 shrink-0">~</span>
+                <div>
+                  <span className="font-semibold text-yellow-700 dark:text-yellow-400">Jetting Only</span>
+                  <span className="text-yellow-700/70 dark:text-yellow-400/70 ml-1">0.75–1.5 ft — jetting tolerated, no new sections</span>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 px-4 py-3 bg-red-50 dark:bg-red-900/20">
+                <span className="font-bold text-red-700 dark:text-red-400 shrink-0">✗</span>
+                <div>
+                  <span className="font-semibold text-red-700 dark:text-red-400">Avoid</span>
+                  <span className="text-red-700/70 dark:text-red-400/70 ml-1">&gt; 1.5 ft — whitecap risk</span>
+                </div>
+              </div>
+            </div>
+            <p className="mt-1.5 text-[11px] text-gray-400 leading-snug">
+              Card border color mirrors dock status in real time: green · amber · red.
+            </p>
+          </section>
 
           {/* ── Lake map ── */}
           <section>
@@ -234,6 +295,7 @@ export function InfoPanel() {
                     { field: 'Wind chill',         source: 'Calculated',        tag: 'calc', note: 'NOAA formula — valid when T ≤ 50 °F and speed ≥ 3 mph' },
                     { field: 'Wave height',        source: 'Calculated',        tag: 'calc', note: 'CERC/SPM 1984, fetch-limited' },
                     { field: 'Wave period',        source: 'Calculated',        tag: 'calc', note: 'CERC/SPM 1984, fetch-limited' },
+                    { field: 'Aurora visibility',  source: 'NOAA SWPC',         tag: 'swpc', note: 'Planetary K-index (1-min) → % chance at 45.3°N; clear sky required' },
                   ] as const).map((r, i) => (
                     <tr key={i} className="border-t border-gray-100 dark:border-walloon-blue-700 text-gray-700 dark:text-gray-200">
                       <td className="px-3 py-2 font-medium whitespace-nowrap">{r.field}</td>
@@ -242,6 +304,7 @@ export function InfoPanel() {
                           'inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold',
                           r.tag === 'om'   ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300' :
                           r.tag === 'nws'  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' :
+                          r.tag === 'swpc' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' :
                                              'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300',
                         ].join(' ')}>
                           {r.source}
@@ -254,7 +317,8 @@ export function InfoPanel() {
               </table>
             </div>
             <p className="mt-1.5 text-[11px] text-gray-400 leading-snug">
-              Ingested every 4 h by AWS Lambda. Open-Meteo forecast horizon: 7 days. NWS: ~156 h.
+              Weather ingested every 4 h by AWS Lambda. Open-Meteo: 7-day horizon. NWS: ~156 h.
+              Aurora KP fetched live from NOAA SWPC (1-min cadence, no API key).
             </p>
           </section>
 
