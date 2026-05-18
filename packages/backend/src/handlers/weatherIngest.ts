@@ -10,7 +10,7 @@
 
 import { BatchWriteCommand } from '@aws-sdk/lib-dynamodb';
 import { db, TABLE_NAME } from '../lib/dynamo.js';
-import { fetchHourlyForecast, fetchGridpointData } from '../lib/nws.js';
+import { fetchHourlyForecast, fetchGridpointData, degToLabel } from '../lib/nws.js';
 
 const TTL_DAYS = 90;
 
@@ -43,7 +43,14 @@ export const handler = async (): Promise<void> => {
 
   console.log(`[WeatherIngest] Fetched ${periods.length} periods`);
 
-  let gridpoint = { pressureMap: new Map<string, number>(), skyCoverMap: new Map<string, number>(), precipMap: new Map<string, number>() };
+  let gridpoint = {
+    pressureMap:  new Map<string, number>(),
+    skyCoverMap:  new Map<string, number>(),
+    precipMap:    new Map<string, number>(),
+    windSpeedMap: new Map<string, number>(),
+    windGustMap:  new Map<string, number>(),
+    windDirMap:   new Map<string, number>(),
+  };
   try {
     gridpoint = await fetchGridpointData();
     console.log(`[WeatherIngest] Gridpoint: ${gridpoint.pressureMap.size} pressure, ${gridpoint.skyCoverMap.size} sky cover, ${gridpoint.precipMap.size} precip values`);
@@ -51,7 +58,7 @@ export const handler = async (): Promise<void> => {
     console.warn('[WeatherIngest] Gridpoint fetch failed, continuing without gridpoint data:', err);
   }
 
-  const { pressureMap, skyCoverMap, precipMap } = gridpoint;
+  const { pressureMap, skyCoverMap, precipMap, windSpeedMap, windGustMap, windDirMap } = gridpoint;
 
   const items = periods.map((p) => {
     const utcIso  = toUtcIso(p.startTime);
@@ -64,16 +71,25 @@ export const handler = async (): Promise<void> => {
     const skyCover  = skyCoverMap.get(hourKey);
     const precipMm  = precipMap.get(hourKey);
 
+    // Prefer Open-Meteo for numeric wind (continuous degrees, mph); fall back to NWS
+    const omSpeed = windSpeedMap.get(hourKey);
+    const omGust  = windGustMap.get(hourKey);
+    const omDir   = windDirMap.get(hourKey);
+    const windSpeed = omSpeed ?? p.windSpeed_mph;
+    const windGust  = omGust  ?? p.windGust_mph;
+    const windDeg   = omDir   !== undefined ? omDir : p.windDir_deg;
+    const windLabel = omDir   !== undefined ? degToLabel(omDir) : p.windDir_label;
+
     return {
       PK:            `WEATHER#${dateStr}`,
       SK:            `OBS#${utcIso}`,
       timestamp:     utcIso,
-      windSpeed_mph: p.windSpeed_mph,
-      windGust_mph:  p.windGust_mph,
-      windDir_deg:   p.windDir_deg,
-      windDir_label: p.windDir_label,
+      windSpeed_mph: windSpeed,
+      windGust_mph:  windGust,
+      windDir_deg:   windDeg,
+      windDir_label: windLabel,
       temperature_f: p.temperature_f,
-      windChill_f:   windChill(p.temperature_f, p.windSpeed_mph),
+      windChill_f:   windChill(p.temperature_f, windSpeed),
       ...(pressure  !== undefined && { pressure_mb:  pressure }),
       ...(p.pop_pct !== null      && p.pop_pct !== undefined && { pop_pct: p.pop_pct }),
       ...(skyCover  !== undefined && { skyCover_pct: Math.round(skyCover) }),

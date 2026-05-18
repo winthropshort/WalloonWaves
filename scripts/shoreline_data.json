@@ -213,6 +213,50 @@
     { "name": "Unknown",         "lat": 45.26898, "lng": -84.94935, "notes": "East side of The Foot [Google Maps]" }
   ],
 
+  "fetch_runs": [
+    {
+      "id": "west_arm_full",
+      "note": "NNW wind fills the full West Arm — Mud Lake narrows to WA narrows at Tamarack Ln",
+      "wind_from_deg": 334,
+      "wind_name": "NNW",
+      "distance_mi": 3.56,
+      "label_side": 1,
+      "from": { "lat": 45.33771, "lng": -85.04655, "note": "Mud Lake narrows — top of West Arm" },
+      "to":   { "lat": 45.29164, "lng": -85.01390, "note": "5948 Tamarack Ln / WA narrows east" }
+    },
+    {
+      "id": "wildwood_basin_nw",
+      "note": "NW wind crosses Wildwood Basin — Camp Sherwood NW shore to Ellis Rd channel entrance. Does NOT continue into The Foot (Randall Point blocks straight-line water).",
+      "wind_from_deg": 307,
+      "wind_name": "NW",
+      "distance_mi": 2.40,
+      "label_side": 1,
+      "from": { "lat": 45.29240, "lng": -85.03030, "note": "Camp Sherwood / Wildwood Basin NW shore" },
+      "to":   { "lat": 45.27169, "lng": -84.99064, "note": "Ellis Rd — SE corner of Wildwood Basin / channel entrance" }
+    },
+    {
+      "id": "the_foot_nw_to_village",
+      "note": "WNW wind across The Foot — Indian Garden Rd NW corner to Walloon Village SE tip. Separate from Wildwood Basin fetch.",
+      "wind_from_deg": 295,
+      "wind_name": "WNW",
+      "distance_mi": 1.85,
+      "label_side": 1,
+      "from": { "lat": 45.27496, "lng": -84.96949, "note": "7409 Indian Garden Rd — NW corner of The Foot" },
+      "to":   { "lat": 45.26352, "lng": -84.93499, "note": "Walloon Village — SE tip of The Foot" }
+    },
+    {
+      "id": "north_arm_to_foot",
+      "note": "N wind funnels down the North Arm, through NA narrows, to the SW heel of The Foot",
+      "wind_from_deg": 3,
+      "wind_name": "N",
+      "distance_mi": 3.77,
+      "label_side": 1,
+      "label_frac": 0.30,
+      "from": { "lat": 45.30902, "lng": -84.97059, "note": "North Arm north tip (east lobe)" },
+      "to":   { "lat": 45.25458, "lng": -84.97411, "note": "449 Shadow Trails Rd E — SW heel of The Foot" }
+    }
+  ],
+
   "polygons": [
     {
       "id": "west_arm",

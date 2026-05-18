@@ -10,6 +10,7 @@ import { GeocodeSection } from './components/GeocodeSection.js';
 import { WindCompass } from './components/WindCompass.js';
 import { WaveSparkline } from './components/WaveSparkline.js';
 import { WeatherSparklines, midnightDomain, mbToInHg, skyCoverIcon } from './components/WeatherSparklines.js';
+import { InfoPanel } from './components/InfoPanel.js';
 import { geocodeAddress } from './api.js';
 import type { WeatherObservation } from './api.js';
 import type { WaveConditions } from '@walloon/shared';
@@ -584,12 +585,15 @@ export default function App() {
       <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
 
         <header className="relative text-center space-y-2">
-          <button
-            onClick={() => setIsDark(!isDark)}
-            className="absolute right-0 top-0 text-xs px-3 py-1.5 rounded-full border border-gray-200 dark:border-walloon-blue-600 bg-white dark:bg-walloon-blue-700 text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-walloon-blue-600 transition-colors shadow-sm"
-          >
-            {isDark ? 'Light' : 'Dark'}
-          </button>
+          <div className="absolute right-0 top-0 flex items-center gap-2">
+            <button
+              onClick={() => setIsDark(!isDark)}
+              className="text-xs px-3 py-1.5 rounded-full border border-gray-200 dark:border-walloon-blue-600 bg-white dark:bg-walloon-blue-700 text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-walloon-blue-600 transition-colors shadow-sm"
+            >
+              {isDark ? 'Light' : 'Dark'}
+            </button>
+            <InfoPanel />
+          </div>
           <h1 className="text-3xl font-bold text-walloon-blue-600 dark:text-walloon-blue-300 tracking-tight">
             Walloon Lake Marine Weather
           </h1>

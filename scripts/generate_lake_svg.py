@@ -14,8 +14,9 @@ import math
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).parent.parent
-data_path = REPO_ROOT / "scripts" / "shoreline_data.json"
-out_path  = REPO_ROOT / "img" / "walloon_lake.svg"
+data_path  = REPO_ROOT / "scripts" / "shoreline_data.json"
+out_path   = REPO_ROOT / "img" / "walloon_lake.svg"
+public_path = REPO_ROOT / "packages" / "frontend" / "public" / "walloon_lake.svg"
 out_path.parent.mkdir(exist_ok=True)
 
 with open(data_path) as f:
@@ -132,6 +133,62 @@ for n in data["narrows"]:
         f'fill="#8B5E3C" stroke="white" stroke-width="1"/>'
     )
 
+# Fetch arrows — longest wind-driven fetch runs on the lake
+FETCH_COLOR = "#C05000"
+
+for run in data.get("fetch_runs", []):
+    x1, y1 = proj(run["from"]["lat"], run["from"]["lng"])
+    x2, y2 = proj(run["to"]["lat"], run["to"]["lng"])
+
+    dx, dy = x2 - x1, y2 - y1
+    length = math.sqrt(dx * dx + dy * dy)
+    ux, uy = dx / length, dy / length   # unit vector along travel
+    px, py = -uy, ux                    # left-hand perpendicular in SVG space
+
+    AHEAD, AWIDE = 13, 5.5             # arrowhead reach, half-width
+
+    # Dashed shaft (stops short of tip so arrowhead sits cleanly)
+    svg.append(
+        f'  <line x1="{x1:.1f}" y1="{y1:.1f}" '
+        f'x2="{x2 - ux*AHEAD:.1f}" y2="{y2 - uy*AHEAD:.1f}" '
+        f'stroke="{FETCH_COLOR}" stroke-width="2.5" stroke-dasharray="9,5" opacity="0.9"/>'
+    )
+
+    # Arrowhead polygon
+    b1 = (x2 - ux*AHEAD + px*AWIDE, y2 - uy*AHEAD + py*AWIDE)
+    b2 = (x2 - ux*AHEAD - px*AWIDE, y2 - uy*AHEAD - py*AWIDE)
+    svg.append(
+        f'  <polygon points="{x2:.1f},{y2:.1f} {b1[0]:.1f},{b1[1]:.1f} {b2[0]:.1f},{b2[1]:.1f}" '
+        f'fill="{FETCH_COLOR}" opacity="0.9"/>'
+    )
+
+    # Origin dot at upwind shore
+    svg.append(
+        f'  <circle cx="{x1:.1f}" cy="{y1:.1f}" r="4" '
+        f'fill="{FETCH_COLOR}" stroke="white" stroke-width="1.5" opacity="0.9"/>'
+    )
+
+    # Label along the arrow (default midpoint), offset perpendicular
+    side = run.get("label_side", 1)
+    frac = run.get("label_frac", 0.5)
+    OFF = 28
+    mx = x1 + (x2 - x1) * frac
+    my = y1 + (y2 - y1) * frac
+    lx_f = mx + px * side * OFF
+    ly_f = my + py * side * OFF
+
+    label = f'{run["wind_from_deg"]:03d}° {run["wind_name"]}  ·  {run["distance_mi"]:.2f} mi'
+    HW, HH = 70, 8
+    svg.append(
+        f'  <rect x="{lx_f - HW:.1f}" y="{ly_f - HH - 1:.1f}" '
+        f'width="{HW * 2}" height="{HH * 2 + 2}" rx="3" fill="white" opacity="0.88"/>'
+    )
+    svg.append(
+        f'  <text x="{lx_f:.1f}" y="{ly_f + HH - 3:.1f}" text-anchor="middle" '
+        f'font-family="Arial, sans-serif" font-size="9.5" font-weight="bold" fill="{FETCH_COLOR}">'
+        f'{label}</text>'
+    )
+
 # Preset location markers — optional "labelOffset" field controls label nudge
 for preset in data["presets"]:
     x, y = proj(preset["lat"], preset["lng"])
@@ -200,7 +257,7 @@ svg.append(
 )
 
 # Legend
-lx, ly = MARGIN + 5, SVG_H - 48
+lx, ly = MARGIN + 5, SVG_H - 90
 svg.append(
     f'  <circle cx="{lx+4}" cy="{ly}" r="4" fill="{RED}" stroke="white" stroke-width="1"/>'
 )
@@ -209,16 +266,35 @@ svg.append(
     f'Preset location</text>'
 )
 svg.append(
-    f'  <polygon points="{lx+4},{ly+12} {lx+8},{ly+17} {lx+4},{ly+22} {lx},{ly+17}" '
+    f'  <polygon points="{lx+4},{ly+14} {lx+8},{ly+19} {lx+4},{ly+24} {lx},{ly+19}" '
     f'fill="#8B5E3C" stroke="white" stroke-width="1"/>'
 )
 svg.append(
-    f'  <text x="{lx+12}" y="{ly+21}" font-family="Arial" font-size="9" fill="{DARK}">'
+    f'  <text x="{lx+12}" y="{ly+23}" font-family="Arial" font-size="9" fill="{DARK}">'
     f'Narrows</text>'
+)
+# Fetch arrow legend entry
+fa_y = ly + 37
+svg.append(
+    f'  <line x1="{lx}" y1="{fa_y}" x2="{lx+14}" y2="{fa_y}" '
+    f'stroke="{FETCH_COLOR}" stroke-width="2" stroke-dasharray="5,3"/>'
+)
+svg.append(
+    f'  <polygon points="{lx+18},{fa_y} {lx+9},{fa_y-4} {lx+9},{fa_y+4}" '
+    f'fill="{FETCH_COLOR}"/>'
+)
+svg.append(
+    f'  <text x="{lx+24}" y="{fa_y+4}" font-family="Arial" font-size="9" fill="{DARK}">'
+    f'Max fetch run</text>'
 )
 
 svg.append("</svg>")
 
-out_path.write_text("\n".join(svg))
-print(f"Written: {out_path}")
+svg_text = "\n".join(svg)
+out_path.write_text(svg_text)
+if public_path.parent.exists():
+    public_path.write_text(svg_text)
+    print(f"Written: {out_path}  +  {public_path}")
+else:
+    print(f"Written: {out_path}  (public dir not found — skipped)")
 print(f"  Canvas: {SVG_W}×{SVG_H} px | scale: {scale:.0f} px/° | 1 mi ≈ {one_mile_px:.1f} px")
