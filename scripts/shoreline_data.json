@@ -62,7 +62,12 @@
         { "address": "5551 Country Club Shores", "lat": 45.28528, "lng": -84.96197 },
         { "address": "5495 Country Club Shores", "lat": 45.28460, "lng": -84.96288 },
         { "address": "5157 Sand Point Ln",       "lat": 45.28241, "lng": -84.96345 },
-        { "address": "5085 Sand Point Ln",       "lat": 45.28194, "lng": -84.96530, "notes": "Near North Arm narrows, east side" }
+        { "address": "5085 Sand Point Ln",       "lat": 45.28194, "lng": -84.96530, "notes": "Near North Arm narrows, east side" },
+        { "address": "5085 Sand Point Ln",       "lat": 45.28212, "lng": -84.96473 },
+        { "address": "5085 Sand Point Ln",       "lat": 45.28185, "lng": -84.96510 },
+        { "address": "(no address)",             "lat": 45.28178, "lng": -84.96594 },
+        { "address": "5073 Sand Point Ln",       "lat": 45.28160, "lng": -84.96534 },
+        { "address": "5069 Sand Point Ln",       "lat": 45.28027, "lng": -84.96490 }
       ],
       "west_shore": [
         { "address": "1937 Kilarney Shores",       "lat": 45.30509, "lng": -84.97994 },
@@ -78,7 +83,12 @@
         { "address": "6333 Indian Garden Rd",      "lat": 45.28969, "lng": -84.97060 },
         { "address": "6443 Indian Garden Rd",      "lat": 45.28754, "lng": -84.97148 },
         { "address": "6545 Indian Garden Rd",      "lat": 45.28590, "lng": -84.97221 },
-        { "address": "6729 Indian Garden Rd",      "lat": 45.28305, "lng": -84.97145, "notes": "Near North Arm narrows, west side" }
+        { "address": "6729 Indian Garden Rd",      "lat": 45.28305, "lng": -84.97145, "notes": "Near North Arm narrows, west side" },
+        { "address": "6769 Indian Garden Rd",      "lat": 45.28253, "lng": -84.97056 },
+        { "address": "6801 Indian Garden Rd",      "lat": 45.28204, "lng": -84.96959 },
+        { "address": "6833 Indian Garden Rd",      "lat": 45.28176, "lng": -84.96864 },
+        { "address": "6833 Indian Garden Rd",      "lat": 45.28138, "lng": -84.96934 },
+        { "address": "6869 Indian Garden Rd",      "lat": 45.28074, "lng": -84.96970 }
       ]
     },
 
@@ -86,6 +96,7 @@
       "description": "Runs ~332°/152° (NNW-SSE), ~2.9 mi from Mud Lake narrows to WA narrows. ~0.85 mi wide. East shore = Lake Grove Road. West shore = Eagle Island Rd / Fox Run / Bear Cove Ln / Curtis Ln / Camp Daggett.",
       "east_shore": [
         { "address": "5948 Tamarack Ln",        "lat": 45.29164, "lng": -85.01390, "notes": "WA narrows, east pin — southern terminus of West Arm" },
+        { "address": "5890 Tamarack Ln",        "lat": 45.29239, "lng": -85.01253 },
         { "address": "5720 Lake Grove Rd",       "lat": 45.29391, "lng": -85.01084 },
         { "address": "5608 Lake Grove Trail",    "lat": 45.29539, "lng": -85.01073 },
         { "address": "5416 Lake Grove Trail",    "lat": 45.29802, "lng": -85.00925 },
@@ -131,7 +142,12 @@
         { "address": "(no address)",             "lat": 45.30184, "lng": -85.03070 },
         { "address": "2731 Eagle Island Rd",     "lat": 45.30058, "lng": -85.03017 },
         { "address": "2497 Eagle Island Rd",     "lat": 45.29884, "lng": -85.02492 },
+        { "address": "6210 Red Pine Rd",         "lat": 45.29475, "lng": -85.02048 },
         { "address": "6130 Red Pine Rd",         "lat": 45.29372, "lng": -85.01926 },
+        { "address": "6130 Red Pine Rd",         "lat": 45.29366, "lng": -85.01928, "notes": "Second pin — slight shore curvature" },
+        { "address": "6100-6172 Red Pine Rd",    "lat": 45.29257, "lng": -85.01911 },
+        { "address": "2017 Eagle Island Rd",     "lat": 45.29216, "lng": -85.02056 },
+        { "address": "2084 Eagle Island Rd",     "lat": 45.29202, "lng": -85.02138, "notes": "Second pin near WA narrows" },
         { "address": "2084 Eagle Island Rd",     "lat": 45.29205, "lng": -85.02145, "notes": "WA narrows, west pin — southern terminus of West Arm west shore" }
       ]
     },
@@ -140,6 +156,11 @@
       "description": "Rhombus-shaped body ~2.0 mi E-W × ~1.4 mi N-S. SE tip = Walloon Village. NW boundary is Randall Point / Indian Garden Rd, where The Foot transitions to Wildwood Basin. North shore faces Indian Garden Rd. Bear Creek (lake drainage to Lake Michigan) exits near Walloon Village.",
       "boundary": [
         { "address": "Walloon Village (legacy-water-sports preset)", "lat": 45.26352, "lng": -84.93499, "notes": "SE tip; Bear Creek drainage ~0.1 mi SE at 45.26118, -84.93423" },
+        { "address": "2036 N Shore Rd",         "lat": 45.26531, "lng": -84.93531 },
+        { "address": "1996 N Shore Rd",         "lat": 45.26575, "lng": -84.93614 },
+        { "address": "1934 N Shore Rd",         "lat": 45.26636, "lng": -84.93731 },
+        { "address": "1898 N Shore Rd",         "lat": 45.26661, "lng": -84.93872 },
+        { "address": "1808 N Shore Rd",         "lat": 45.26681, "lng": -84.94066 },
         { "address": "1280 N Shore Rd",         "lat": 45.26921, "lng": -84.95349, "notes": "North shore, east end" },
         { "address": "870 N Shore Rd",          "lat": 45.27484, "lng": -84.96140, "notes": "North shore" },
         { "address": "7409 Indian Garden Rd",   "lat": 45.27496, "lng": -84.96949, "notes": "NW corner — where Indian Garden Rd turns from N-S to E-W" },
@@ -151,7 +172,21 @@
         { "address": "287 Shadow Trails Rd E",  "lat": 45.25827, "lng": -84.97229 },
         { "address": "449 Shadow Trails Rd E",  "lat": 45.25458, "lng": -84.97411, "notes": "SW corner" },
         { "address": "605 S Shore Dr",          "lat": 45.25708, "lng": -84.96240 },
-        { "address": "1031 Sweet Pea Ln",       "lat": 45.25930, "lng": -84.95490, "notes": "South shore, closing back toward SE tip" }
+        { "address": "1031 Sweet Pea Ln",       "lat": 45.25930, "lng": -84.95490, "notes": "South shore, closing back toward SE tip" },
+        { "address": "1889 Bear Foot Ln",       "lat": 45.25994, "lng": -84.93916 },
+        { "address": "3979 M-75 N",             "lat": 45.25943, "lng": -84.93779 },
+        { "address": "3981 M-75 N",             "lat": 45.25970, "lng": -84.93660, "notes": "Source address may be 3981 or 3982 (typo in original)" },
+        { "address": "3992 M-75 N",             "lat": 45.26126, "lng": -84.93423 },
+        { "address": "4013 M-75 N",             "lat": 45.26246, "lng": -84.93380, "notes": "public beach" },
+        { "address": "4013 M-75 N",             "lat": 45.26260, "lng": -84.93383 },
+        { "address": "4029 M-75 N",             "lat": 45.26336, "lng": -84.93410 },
+        { "address": "4069 M-75 N",             "lat": 45.26347, "lng": -84.93384 },
+        { "address": "4113 Windsor",             "lat": 45.26416, "lng": -84.93392, "notes": "boat ramp" },
+        { "address": "4113 Windsor",             "lat": 45.26465, "lng": -84.93394 },
+        { "address": "4205 West St",             "lat": 45.26470, "lng": -84.93422 },
+        { "address": "4205 West St",             "lat": 45.26486, "lng": -84.93437 },
+        { "address": "4205 West St",             "lat": 45.26485, "lng": -84.93454 },
+        { "address": "4205 West St",             "lat": 45.26511, "lng": -84.93477 }
       ]
     },
 
@@ -159,6 +194,13 @@
       "description": "Large basin (~1.6 mi N-S × ~1.3 mi E-W) extending west from The Foot. Connected to The Foot via Randall Point channel (~0.4 mi wide at Ellis Rd). Connected to West Arm via WA narrows (very narrow, ~0.16 mi). East shore = Lake Grove Rd (south end) transitioning to North Arm shoreline (north end).",
       "east_shore": [
         { "address": "(WA narrows, east pin) 5948 Tamarack Ln",  "lat": 45.29164, "lng": -85.01390 },
+        { "address": "5995 Tamarack Ln",      "lat": 45.29129, "lng": -85.01523 },
+        { "address": "5995 Tamarack Ln",      "lat": 45.29088, "lng": -85.01689 },
+        { "address": "5995 Tamarack Ln",      "lat": 45.29087, "lng": -85.01578 },
+        { "address": "5971 Tamarack Ln",      "lat": 45.29104, "lng": -85.01467 },
+        { "address": "5939 Tamarack Ln",      "lat": 45.29093, "lng": -85.01357 },
+        { "address": "5915 Tamarack Ln",      "lat": 45.29058, "lng": -85.01262 },
+        { "address": "6008 Lake Grove Rd",    "lat": 45.29001, "lng": -85.01207 },
         { "address": "6008 Lake Grove Rd",    "lat": 45.29041, "lng": -85.01234 },
         { "address": "6166 Lake Grove Rd",    "lat": 45.28551, "lng": -85.01093 },
         { "address": "6238 Lake Grove Rd",    "lat": 45.28431, "lng": -85.00764 },
@@ -172,7 +214,11 @@
       ],
       "west_shore": [
         { "address": "(WA narrows, west pin) 2084 Eagle Island Rd", "lat": 45.29205, "lng": -85.02145 },
+        { "address": "2124 Eagle Island Rd",             "lat": 45.29230, "lng": -85.02232 },
+        { "address": "2172 Eagle Island Rd",             "lat": 45.29291, "lng": -85.02367 },
         { "address": "2230 Eagle Island Rd",             "lat": 45.29360, "lng": -85.02472 },
+        { "address": "2230 Eagle Island Rd",             "lat": 45.29363, "lng": -85.02474, "notes": "Second pin — slight curvature" },
+        { "address": "2250 Eagle Island Rd",             "lat": 45.29382, "lng": -85.02456 },
         { "address": "2286 Eagle Island Rd",             "lat": 45.29471, "lng": -85.02519 },
         { "address": "(no address)",                     "lat": 45.29488, "lng": -85.02746 },
         { "address": "2549-2999 Camp Sherwood Rd",       "lat": 45.29240, "lng": -85.03030 },

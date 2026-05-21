@@ -43,6 +43,7 @@ const FETCH_TABLES: Record<string, FetchEntry[]> = {
   // East shore of the West Arm, ~0.83 mi N of WA narrows (Tamarack Ln).
   // Arm axis toward Mud Lake ~322° (peak fetch 2.91 mi); NWbN (326.25°) = 2.65 mi.
   // N through SEbS exits east shore immediately; shore cliff at ~331°.
+  // SSW (202.5°) = 1.25 mi — ray threads WA narrows into Wildwood Basin.
   'lake-grove-road': [
     { bearing:   0.00, mi: 0.05 }, // N     — east shore immediately
     { bearing:  11.25, mi: 0.05 }, // NbE   — east shore
@@ -59,10 +60,10 @@ const FETCH_TABLES: Record<string, FetchEntry[]> = {
     { bearing: 135.00, mi: 0.05 }, // SE    — east shore
     { bearing: 146.25, mi: 0.05 }, // SEbS  — east shore
     { bearing: 157.50, mi: 0.40 }, // SSE   — cuts toward east shore south of 5152
-    { bearing: 168.75, mi: 0.50 }, // SbE   — angled toward south shore
+    { bearing: 168.75, mi: 0.55 }, // SbE   — angled toward south shore
     { bearing: 180.00, mi: 0.75 }, // S     — down arm to WA narrows
-    { bearing: 191.25, mi: 0.80 }, // SbW   — diagonal to west shore
-    { bearing: 202.50, mi: 0.85 }, // SSW   — diagonal to west shore
+    { bearing: 191.25, mi: 0.85 }, // SbW   — diagonal to west shore
+    { bearing: 202.50, mi: 1.25 }, // SSW   — threads WA narrows into Wildwood Basin
     { bearing: 213.75, mi: 0.70 }, // SWbS  — SW diagonal
     { bearing: 225.00, mi: 0.65 }, // SW
     { bearing: 236.25, mi: 0.65 }, // SWbW
@@ -80,15 +81,16 @@ const FETCH_TABLES: Record<string, FetchEntry[]> = {
 
   // Walloon Village — 45.26352°N, 84.93499°W — SE tip of The Foot
   // The Foot: rhombus ~2.0 mi E-W × ~1.4 mi N-S. WV at extreme SE corner.
-  // Open-water sector ~255°–293°; maximum fetch WbN (281.25°) = 2.10 mi.
-  // All other directions blocked immediately by south/east shore.
+  // Open-water sector ~247°–292°; W (270°) = 1.95 mi across The Foot.
+  // WbN (281.25°) = 4.10 mi — ray threads through The Foot AND Wildwood Basin
+  //   via the Randall Point channel; represents full connected water fetch.
   // NOTE: also registered as 'legacy-water-sports' for backward compat.
   'walloon-village': [
     { bearing:   0.00, mi: 0.05 }, // N     — SE tip, east shore immediately
-    { bearing:  11.25, mi: 0.05 }, // NbE   — east shore
-    { bearing:  22.50, mi: 0.05 }, // NNE   — east shore
-    { bearing:  33.75, mi: 0.05 }, // NEbN  — east shore
-    { bearing:  45.00, mi: 0.05 }, // NE    — east shore
+    { bearing:  11.25, mi: 0.10 }, // NbE   — SE shore
+    { bearing:  22.50, mi: 0.10 }, // NNE   — SE shore
+    { bearing:  33.75, mi: 0.10 }, // NEbN  — SE shore
+    { bearing:  45.00, mi: 0.05 }, // NE    — SE corner
     { bearing:  56.25, mi: 0.05 }, // NEbE  — east shore
     { bearing:  67.50, mi: 0.05 }, // ENE   — east shore
     { bearing:  78.75, mi: 0.05 }, // EbN   — east shore
@@ -96,26 +98,26 @@ const FETCH_TABLES: Record<string, FetchEntry[]> = {
     { bearing: 101.25, mi: 0.05 }, // EbS   — east shore
     { bearing: 112.50, mi: 0.05 }, // ESE   — east shore
     { bearing: 123.75, mi: 0.05 }, // SEbE  — SE corner
-    { bearing: 135.00, mi: 0.05 }, // SE    — SE corner
-    { bearing: 146.25, mi: 0.05 }, // SEbS  — south shore
-    { bearing: 157.50, mi: 0.05 }, // SSE   — south shore
-    { bearing: 168.75, mi: 0.05 }, // SbE   — south shore
-    { bearing: 180.00, mi: 0.05 }, // S     — south shore
-    { bearing: 191.25, mi: 0.05 }, // SbW   — south shore
-    { bearing: 202.50, mi: 0.05 }, // SSW   — south shore
-    { bearing: 213.75, mi: 0.05 }, // SWbS  — south shore
-    { bearing: 225.00, mi: 0.05 }, // SW    — south shore
-    { bearing: 236.25, mi: 0.05 }, // SWbW  — south shore
-    { bearing: 247.50, mi: 0.05 }, // WSW   — south shore (outside open sector)
-    { bearing: 258.75, mi: 1.85 }, // WbS   — entering open sector
+    { bearing: 135.00, mi: 0.10 }, // SE    — SE corner
+    { bearing: 146.25, mi: 0.10 }, // SEbS  — south shore
+    { bearing: 157.50, mi: 0.15 }, // SSE   — south shore
+    { bearing: 168.75, mi: 0.15 }, // SbE   — south shore
+    { bearing: 180.00, mi: 0.20 }, // S     — south shore
+    { bearing: 191.25, mi: 0.25 }, // SbW   — south shore
+    { bearing: 202.50, mi: 0.30 }, // SSW   — south shore
+    { bearing: 213.75, mi: 0.30 }, // SWbS  — south shore
+    { bearing: 225.00, mi: 0.35 }, // SW    — south shore
+    { bearing: 236.25, mi: 0.45 }, // SWbW  — south shore
+    { bearing: 247.50, mi: 0.70 }, // WSW   — entering open sector
+    { bearing: 258.75, mi: 1.85 }, // WbS   — long fetch across The Foot
     { bearing: 270.00, mi: 1.95 }, // W     — long fetch across The Foot
-    { bearing: 281.25, mi: 2.10 }, // WbN   — max fetch across The Foot
-    { bearing: 292.50, mi: 2.00 }, // WNW   — long fetch
-    { bearing: 303.75, mi: 0.05 }, // NWbW  — north shore (outside open sector)
-    { bearing: 315.00, mi: 0.05 }, // NW    — north shore
-    { bearing: 326.25, mi: 0.05 }, // NWbN  — east shore
-    { bearing: 337.50, mi: 0.05 }, // NNW   — east shore
-    { bearing: 348.75, mi: 0.05 }, // NbW   — east shore
+    { bearing: 281.25, mi: 4.10 }, // WbN   — The Foot + Wildwood via Randall Pt channel
+    { bearing: 292.50, mi: 2.00 }, // WNW   — long fetch across The Foot
+    { bearing: 303.75, mi: 0.45 }, // NWbW  — north shore
+    { bearing: 315.00, mi: 0.30 }, // NW    — north shore
+    { bearing: 326.25, mi: 0.25 }, // NWbN  — east shore
+    { bearing: 337.50, mi: 0.15 }, // NNW   — east shore
+    { bearing: 348.75, mi: 0.15 }, // NbW   — east shore
   ],
 
   // Bear Cove Marina — 45.32611°N, 85.04358°W — west shore of West Arm
@@ -159,10 +161,10 @@ const FETCH_TABLES: Record<string, FetchEntry[]> = {
 
   // Jones Landing — 45.30219°N, 84.96792°W — east shore of North Arm
   // North Arm runs ~N-S, ~0.6 mi wide, ~1.87 mi long. JL on east shore, mid-arm.
-  // Maximum fetch S (180°) = 1.40 mi to the south narrows (~45.28169°N).
-  // N through SEbS and SSE exit east shore; W through NWbN cross arm to west shore.
+  // S (180°) = 3.20 mi — ray threads NA narrows connector into The Foot/Wildwood.
+  // N through SEbS exit east shore immediately. W through NWbN cross arm.
   'jones-landing': [
-    { bearing:   0.00, mi: 0.45 }, // N     — north to upper arm end
+    { bearing:   0.00, mi: 0.40 }, // N     — north to upper arm end
     { bearing:  11.25, mi: 0.40 }, // NbE   — east shore angles in
     { bearing:  22.50, mi: 0.05 }, // NNE   — east shore immediately
     { bearing:  33.75, mi: 0.05 }, // NEbN  — east shore
@@ -175,10 +177,10 @@ const FETCH_TABLES: Record<string, FetchEntry[]> = {
     { bearing: 112.50, mi: 0.05 }, // ESE   — east shore
     { bearing: 123.75, mi: 0.05 }, // SEbE  — east shore
     { bearing: 135.00, mi: 0.05 }, // SE    — east shore
-    { bearing: 146.25, mi: 0.05 }, // SEbS  — east shore
+    { bearing: 146.25, mi: 0.15 }, // SEbS  — angled, clips east shore
     { bearing: 157.50, mi: 0.15 }, // SSE   — angled, clips east shore
     { bearing: 168.75, mi: 1.25 }, // SbE   — entering arm channel
-    { bearing: 180.00, mi: 1.40 }, // S     — down arm to narrows (max fetch)
+    { bearing: 180.00, mi: 3.20 }, // S     — NA narrows → connector → The Foot
     { bearing: 191.25, mi: 0.70 }, // SbW   — diagonal to west shore
     { bearing: 202.50, mi: 0.65 }, // SSW   — diagonal
     { bearing: 213.75, mi: 0.60 }, // SWbS  — cross-arm diagonal
@@ -193,7 +195,7 @@ const FETCH_TABLES: Record<string, FetchEntry[]> = {
     { bearing: 315.00, mi: 0.50 }, // NW    — cross-arm to west shore
     { bearing: 326.25, mi: 0.45 }, // NWbN  — west shore angles in
     { bearing: 337.50, mi: 0.45 }, // NNW   — west shore
-    { bearing: 348.75, mi: 0.50 }, // NbW   — west shore, arm widens
+    { bearing: 348.75, mi: 0.45 }, // NbW   — west shore
   ],
 
   // Camp Michagania — ~45.3215°N, 84.9628°W — north tip of North Arm, east shore
