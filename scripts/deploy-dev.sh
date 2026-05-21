@@ -164,10 +164,19 @@ if ! $BACKEND_ONLY; then
     --delete \
     --region "${REGION_CF}"
 
+  echo "  Uploading non-hashed public assets (cache: 5 min)…"
+  run aws s3 sync \
+    "${DIST_DIR}" "s3://${WEB_BUCKET}" \
+    --exclude "*" \
+    --include "walloon_lake.svg" \
+    --cache-control "public, max-age=300" \
+    --region "${REGION_CF}"
+
   echo "  Uploading hashed assets (cache: 1 year)…"
   run aws s3 sync \
     "${DIST_DIR}" "s3://${WEB_BUCKET}" \
     --exclude "*.html" \
+    --exclude "walloon_lake.svg" \
     --cache-control "public, max-age=31536000, immutable" \
     --delete \
     --region "${REGION_CF}"
