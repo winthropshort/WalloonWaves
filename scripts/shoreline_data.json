@@ -190,6 +190,38 @@
       ]
     },
 
+    "mud_lake": {
+      "description": "Small lake north of the West Arm, connected via Mud Lake narrows (~45.338°N). East shore = Manthei Rd; west shore = W End Dr / unnamed. North tip ~45.349°N.",
+      "east_shore": [
+        { "address": "(no address)",          "lat": 45.33756, "lng": -85.04611, "notes": "South end, near Mud Lake narrows east" },
+        { "address": "(no address)",          "lat": 45.33762, "lng": -85.04543 },
+        { "address": "(no address)",          "lat": 45.33938, "lng": -85.04545 },
+        { "address": "(no address)",          "lat": 45.34085, "lng": -85.04710 },
+        { "address": "(no address)",          "lat": 45.34141, "lng": -85.04779 },
+        { "address": "5353 Manthei Rd",       "lat": 45.34173, "lng": -85.04883 },
+        { "address": "(no address)",          "lat": 45.34329, "lng": -85.05040 },
+        { "address": "5301-5435 Manthei Rd",  "lat": 45.34407, "lng": -85.04996 },
+        { "address": "5463-5491 Manthei Rd",  "lat": 45.34672, "lng": -85.05141 },
+        { "address": "(no address)",          "lat": 45.34705, "lng": -85.05208 },
+        { "address": "5491 Manthei Rd",       "lat": 45.34814, "lng": -85.05276 },
+        { "address": "5491 Manthei Rd",       "lat": 45.34844, "lng": -85.05323 }
+      ],
+      "west_shore": [
+        { "address": "(no address)",          "lat": 45.34911, "lng": -85.05518, "notes": "North tip of Mud Lake" },
+        { "address": "(no address)",          "lat": 45.34728, "lng": -85.05464 },
+        { "address": "(no address)",          "lat": 45.34574, "lng": -85.05599 },
+        { "address": "(no address)",          "lat": 45.34510, "lng": -85.05594 },
+        { "address": "(no address)",          "lat": 45.34472, "lng": -85.05631 },
+        { "address": "(no address)",          "lat": 45.34342, "lng": -85.05596 },
+        { "address": "(no address)",          "lat": 45.34167, "lng": -85.05321 },
+        { "address": "(no address)",          "lat": 45.34063, "lng": -85.05062 },
+        { "address": "(no address)",          "lat": 45.33931, "lng": -85.04880 },
+        { "address": "5348 W End Dr",         "lat": 45.33815, "lng": -85.04779 },
+        { "address": "(no address)",          "lat": 45.33834, "lng": -85.04661 },
+        { "address": "5348 W End Dr",         "lat": 45.33800, "lng": -85.04730, "notes": "South end, near Mud Lake narrows west" }
+      ]
+    },
+
     "wildwood_basin": {
       "description": "Large basin (~1.6 mi N-S × ~1.3 mi E-W) extending west from The Foot. Connected to The Foot via Randall Point channel (~0.4 mi wide at Ellis Rd). Connected to West Arm via WA narrows (very narrow, ~0.16 mi). East shore = Lake Grove Rd (south end) transitioning to North Arm shoreline (north end).",
       "east_shore": [
@@ -241,7 +273,7 @@
     { "name": "Unknown",         "lat": 45.25679, "lng": -84.97334, "notes": "Just east of Fineout Creek [Google Maps]" },
     { "name": "Unknown",         "lat": 45.29467, "lng": -85.02739, "notes": "Just west of Eagle Island [Google Maps]" },
     { "name": "Unknown",         "lat": 45.33422, "lng": -85.04966, "notes": "By Deer Run / Stolt Rd, S of Stolt Rd boat ramp [Google Maps]" },
-    { "name": "Unknown",         "lat": 45.34483, "lng": -85.05646, "notes": "NW side of Mud Lake (not yet mapped) [Google Maps]" },
+    { "name": "Unknown",         "lat": 45.34483, "lng": -85.05646, "notes": "NW side of Mud Lake [Google Maps]" },
     { "name": "Unknown",         "lat": 45.33994, "lng": -85.04614, "notes": "SE side of Mud Lake [Google Maps]" },
     { "name": "Unknown",         "lat": 45.27795, "lng": -84.99275, "notes": "Near intersection of Indian Garden Rd, Resort Pike Rd, Lake Grove Rd [Google Maps]" },
     { "name": "Unknown",         "lat": 45.27489, "lng": -84.97329, "notes": "Near Indian Garden Point [Google Maps]" },
@@ -304,6 +336,14 @@
   ],
 
   "polygons": [
+    {
+      "id": "mud_lake",
+      "label": { "text": "Mud Lake", "lat": 45.344, "lng": -85.051 },
+      "segments": [
+        { "ref": "basins.mud_lake.east_shore" },
+        { "ref": "basins.mud_lake.west_shore" }
+      ]
+    },
     {
       "id": "west_arm",
       "label": { "text": "West Arm", "lat": 45.316, "lng": -85.033 },
