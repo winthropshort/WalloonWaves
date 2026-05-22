@@ -18,7 +18,8 @@
     { "id": "wa_narrows_west", "address": "2084 Eagle Island Rd",   "lat": 45.29205, "lng": -85.02145, "notes": "WA narrows, west pin; 6100-6172 Red Pine Rd also at 45.29261, -85.01916" },
     { "id": "na_narrows",      "address": "North Arm Narrows",      "lat": 45.28169, "lng": -84.96688, "notes": "Center of North Arm narrows, connects North Arm to Wildwood/Foot" },
     { "id": "mud_lake_narrows_east", "address": "(no address)",     "lat": 45.33771, "lng": -85.04655, "notes": "Top of West Arm, east side; north of this is Mud Lake feeder" },
-    { "id": "mud_lake_narrows_west", "address": "(no address)",     "lat": 45.33842, "lng": -85.04658, "notes": "Top of West Arm, west side; forms pair with east pin" }
+    { "id": "mud_lake_narrows_west", "address": "(no address)",     "lat": 45.33842, "lng": -85.04658, "notes": "Top of West Arm, west side; forms pair with east pin" },
+    { "id": "wa_narrows_center",    "address": "West Arm Narrows center", "lat": 45.29165, "lng": -85.01719, "notes": "Center of West Arm narrows channel" }
   ],
 
   "midBasinPoints": {
@@ -50,6 +51,7 @@
       "east_shore": [
         { "address": "4852 Longman Ln",          "lat": 45.30752, "lng": -84.96638 },
         { "address": "4852 Longman Ln",          "lat": 45.30728, "lng": -84.96607, "notes": "Second data point for this address" },
+        { "address": "1190 W Gruler Rd",         "lat": 45.30525, "lng": -84.96653 },
         { "address": "5186 Jones Landing",       "lat": 45.30219, "lng": -84.96792, "notes": "Preset location" },
         { "address": "5228 Jones Landing",       "lat": 45.30083, "lng": -84.96632 },
         { "address": "5444 Jones Landing",       "lat": 45.29906, "lng": -84.96680 },
@@ -57,11 +59,13 @@
         { "address": "5600 Howard Rd",           "lat": 45.29623, "lng": -84.95935 },
         { "address": "5856 Howard Rd",           "lat": 45.29348, "lng": -84.95847 },
         { "address": "850 W Bear River Rd",      "lat": 45.29166, "lng": -84.95972 },
+        { "address": "5990 Country Club Shores", "lat": 45.29006, "lng": -84.95937 },
         { "address": "5791 Country Club Shores (Walloon Lake Country Club)", "lat": 45.28940, "lng": -84.95932 },
         { "address": "5647 Country Club Shores", "lat": 45.28759, "lng": -84.96196 },
         { "address": "5551 Country Club Shores", "lat": 45.28528, "lng": -84.96197 },
         { "address": "5495 Country Club Shores", "lat": 45.28460, "lng": -84.96288 },
         { "address": "5157 Sand Point Ln",       "lat": 45.28241, "lng": -84.96345 },
+        { "address": "5215 Sand Point Ln",       "lat": 45.28235, "lng": -84.96316 },
         { "address": "5085 Sand Point Ln",       "lat": 45.28194, "lng": -84.96530, "notes": "Near North Arm narrows, east side" },
         { "address": "5085 Sand Point Ln",       "lat": 45.28212, "lng": -84.96473 },
         { "address": "5085 Sand Point Ln",       "lat": 45.28185, "lng": -84.96510 },
@@ -83,6 +87,7 @@
         { "address": "6333 Indian Garden Rd",      "lat": 45.28969, "lng": -84.97060 },
         { "address": "6443 Indian Garden Rd",      "lat": 45.28754, "lng": -84.97148 },
         { "address": "6545 Indian Garden Rd",      "lat": 45.28590, "lng": -84.97221 },
+        { "address": "6695 Indian Garden Rd",      "lat": 45.28358, "lng": -84.97182 },
         { "address": "6729 Indian Garden Rd",      "lat": 45.28305, "lng": -84.97145, "notes": "Near North Arm narrows, west side" },
         { "address": "6769 Indian Garden Rd",      "lat": 45.28253, "lng": -84.97056 },
         { "address": "6801 Indian Garden Rd",      "lat": 45.28204, "lng": -84.96959 },
@@ -252,6 +257,7 @@
         { "address": "2230 Eagle Island Rd",             "lat": 45.29363, "lng": -85.02474, "notes": "Second pin — slight curvature" },
         { "address": "2250 Eagle Island Rd",             "lat": 45.29382, "lng": -85.02456 },
         { "address": "2286 Eagle Island Rd",             "lat": 45.29471, "lng": -85.02519 },
+        { "address": "(no address)",                     "lat": 45.29495, "lng": -85.02730 },
         { "address": "(no address)",                     "lat": 45.29488, "lng": -85.02746 },
         { "address": "2549-2999 Camp Sherwood Rd",       "lat": 45.29240, "lng": -85.03030 },
         { "address": "(no address)",                     "lat": 45.29092, "lng": -85.02927 },
@@ -338,7 +344,8 @@
       "label": { "text": "West Arm", "lat": 45.316, "lng": -85.033 },
       "segments": [
         { "ref": "basins.west_arm.east_shore" },
-        { "ref": "basins.west_arm.west_shore" }
+        { "ref": "basins.west_arm.west_shore" },
+        { "points": [{ "lat": 45.29165, "lng": -85.01719, "notes": "WA narrows center — closes south end of West Arm polygon" }] }
       ]
     },
     {
