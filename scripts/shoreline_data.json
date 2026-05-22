@@ -69,9 +69,7 @@
         { "address": "5085 Sand Point Ln",       "lat": 45.28194, "lng": -84.96530, "notes": "Near North Arm narrows, east side" },
         { "address": "5085 Sand Point Ln",       "lat": 45.28212, "lng": -84.96473 },
         { "address": "5085 Sand Point Ln",       "lat": 45.28185, "lng": -84.96510 },
-        { "address": "(no address)",             "lat": 45.28178, "lng": -84.96594 },
-        { "address": "5073 Sand Point Ln",       "lat": 45.28160, "lng": -84.96534 },
-        { "address": "5069 Sand Point Ln",       "lat": 45.28027, "lng": -84.96490 }
+        { "address": "(no address)",             "lat": 45.28178, "lng": -84.96594 }
       ],
       "west_shore": [
         { "address": "1937 Kilarney Shores",       "lat": 45.30509, "lng": -84.97994 },
@@ -91,9 +89,7 @@
         { "address": "6729 Indian Garden Rd",      "lat": 45.28305, "lng": -84.97145, "notes": "Near North Arm narrows, west side" },
         { "address": "6769 Indian Garden Rd",      "lat": 45.28253, "lng": -84.97056 },
         { "address": "6801 Indian Garden Rd",      "lat": 45.28204, "lng": -84.96959 },
-        { "address": "6833 Indian Garden Rd",      "lat": 45.28176, "lng": -84.96864 },
-        { "address": "6833 Indian Garden Rd",      "lat": 45.28138, "lng": -84.96934 },
-        { "address": "6869 Indian Garden Rd",      "lat": 45.28074, "lng": -84.96970 }
+        { "address": "6833 Indian Garden Rd",      "lat": 45.28176, "lng": -84.96864 }
       ]
     },
 
@@ -388,13 +384,17 @@
     },
     {
       "id": "na_foot_connector",
-      "notes": "Bridges the ~0.5 mi gap between North Arm south end and The Foot north shore at the NA narrows junction. Replace with real shoreline pins as they are collected.",
+      "notes": "Bridges the NA narrows passage between North Arm south end and The Foot north shore. 8 points include the passage-zone pins removed from north_arm shores so coverage is maintained.",
       "segments": [
         { "points": [
-            { "lat": 45.28305, "lng": -84.97145, "notes": "6729 Indian Garden Rd — North Arm west shore south terminus" },
-            { "lat": 45.28194, "lng": -84.96530, "notes": "5085 Sand Point Ln — North Arm east shore south terminus" },
-            { "lat": 45.27484, "lng": -84.96140, "notes": "870 N Shore Rd — The Foot north shore boundary[3]" },
-            { "lat": 45.27496, "lng": -84.96949, "notes": "7409 Indian Garden Rd — The Foot NW corner boundary[4]" }
+            { "lat": 45.28305, "lng": -84.97145, "notes": "6729 Indian Garden Rd — NW anchor" },
+            { "lat": 45.28138, "lng": -84.96934, "notes": "6833 Indian Garden Rd (2nd) — passage west upper" },
+            { "lat": 45.28074, "lng": -84.96970, "notes": "6869 Indian Garden Rd — passage west lower" },
+            { "lat": 45.27496, "lng": -84.96949, "notes": "7409 Indian Garden Rd — Foot NW corner" },
+            { "lat": 45.27484, "lng": -84.96140, "notes": "870 N Shore Rd — Foot north shore" },
+            { "lat": 45.28027, "lng": -84.96490, "notes": "5069 Sand Point Ln — passage east lower" },
+            { "lat": 45.28160, "lng": -84.96534, "notes": "5073 Sand Point Ln — passage east upper" },
+            { "lat": 45.28194, "lng": -84.96530, "notes": "5085 Sand Point Ln — NE anchor" }
           ]
         }
       ]
