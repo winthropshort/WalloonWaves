@@ -32,11 +32,6 @@
   <circle cx="545.2" cy="691.4" r="4" fill="#C05000" stroke="white" stroke-width="1.5" opacity="0.9"/>
   <rect x="554.2" y="750.6" width="140" height="18" rx="3" fill="white" opacity="0.88"/>
   <text x="624.2" y="764.6" text-anchor="middle" font-family="Arial, sans-serif" font-size="9.5" font-weight="bold" fill="#C05000">295° WNW  ·  1.85 mi</text>
-  <line x1="539.4" y1="436.1" x2="521.4" y2="831.1" stroke="#C05000" stroke-width="2.5" stroke-dasharray="9,5" opacity="0.9"/>
-  <polygon points="520.8,844.1 515.9,830.9 526.9,831.4" fill="#C05000" opacity="0.9"/>
-  <circle cx="539.4" cy="436.1" r="4" fill="#C05000" stroke="white" stroke-width="1.5" opacity="0.9"/>
-  <rect x="435.8" y="548.2" width="140" height="18" rx="3" fill="white" opacity="0.88"/>
-  <text x="505.8" y="562.2" text-anchor="middle" font-family="Arial, sans-serif" font-size="9.5" font-weight="bold" fill="#C05000">003° N  ·  3.77 mi</text>
   <circle cx="317.9" cy="479.4" r="5.5" fill="#d04f2c" stroke="white" stroke-width="1.5"/>
   <text x="326.9" y="483.4" font-family="Arial, sans-serif" font-size="9.5" font-weight="bold" fill="#1a3a5c" stroke="rgba(220,232,196,0.75)" stroke-width="2.5" paint-order="stroke">5152 Lake Grove Road</text>
   <circle cx="154.5" cy="308.1" r="5.5" fill="#d04f2c" stroke="white" stroke-width="1.5"/>
