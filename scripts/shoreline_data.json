@@ -16,7 +16,7 @@
   "narrows": [
     { "id": "wa_narrows_east", "address": "5948 Tamarack Ln",      "lat": 45.29164, "lng": -85.01390, "notes": "WA narrows, east pin — also start of West Arm east shore" },
     { "id": "wa_narrows_west", "address": "2084 Eagle Island Rd",   "lat": 45.29205, "lng": -85.02145, "notes": "WA narrows, west pin; 6100-6172 Red Pine Rd also at 45.29261, -85.01916" },
-    { "id": "na_narrows",      "address": "North Arm Narrows",      "lat": 45.28169, "lng": -84.96688, "notes": "Center of North Arm narrows, connects North Arm to Wildwood/Foot" },
+    { "id": "na_narrows",      "address": "North Arm Narrows",      "lat": 45.28051, "lng": -84.96730, "notes": "Center of North Arm narrows — midpoint of passage-zone GPS pins" },
     { "id": "mud_lake_narrows_east", "address": "(no address)",     "lat": 45.33771, "lng": -85.04655, "notes": "Top of West Arm, east side; north of this is Mud Lake feeder" },
     { "id": "mud_lake_narrows_west", "address": "(no address)",     "lat": 45.33842, "lng": -85.04658, "notes": "Top of West Arm, west side; forms pair with east pin" },
     { "id": "wa_narrows_center",    "address": "West Arm Narrows center", "lat": 45.29165, "lng": -85.01719, "notes": "Center of West Arm narrows channel" }
@@ -350,7 +350,7 @@
       "segments": [
         { "ref": "basins.north_arm.north_tip" },
         { "ref": "basins.north_arm.west_shore" },
-        { "points": [{ "lat": 45.28169, "lng": -84.96688, "notes": "NA narrows center — closes south end of North Arm polygon" }] },
+        { "points": [{ "lat": 45.28051, "lng": -84.96730, "notes": "NA narrows center — midpoint of 6869/5069 passage pins; ~9 px V-depth" }] },
         { "ref": "basins.north_arm.east_shore", "reverse": true }
       ]
     },
