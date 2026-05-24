@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { calcWaves } from '@walloon/shared';
+import { calcWaves, beaufortForce, beaufortDescription } from '@walloon/shared';
 import type { ActivityMode } from '@walloon/shared';
 import type { LocationWithWave, WeatherObservation } from '../api.js';
 import { WindCompass } from './WindCompass.js';
@@ -96,7 +96,7 @@ export function LocationCard({ location, activity, history, hours, onHoursChange
           <span className="text-base text-gray-400 ml-1">ft</span>
         </div>
         <span className={`mb-1 rounded-full px-3 py-0.5 text-xs font-semibold uppercase tracking-wide ${cond.bg} ${cond.text}`}>
-          {cond.label}
+          {beaufortDescription(wave.windSpeed_mph)}
         </span>
       </div>
 
@@ -138,7 +138,7 @@ export function LocationCard({ location, activity, history, hours, onHoursChange
             {wave.windDir_deg === null && <span className="text-gray-400 ml-1">variable</span>}
           </div>
           <div className="text-gray-400 text-xs">
-            Period {wave.wavePeriod_s}s · Fetch {wave.fetchMi} mi
+            Period {wave.wavePeriod_s}s · Fetch {wave.fetchMi} mi · Force {beaufortForce(wave.windSpeed_mph)}
           </div>
         </div>
       </div>

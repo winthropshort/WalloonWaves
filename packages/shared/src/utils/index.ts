@@ -18,6 +18,34 @@ export function classifyDockStatus(
   return 'avoid';
 }
 
+/** Return Beaufort force number (0–12) from wind speed in mph. */
+export function beaufortForce(windSpeed_mph: number): number {
+  if (windSpeed_mph <  1) return 0;
+  if (windSpeed_mph <  4) return 1;
+  if (windSpeed_mph <  8) return 2;
+  if (windSpeed_mph < 13) return 3;
+  if (windSpeed_mph < 19) return 4;
+  if (windSpeed_mph < 25) return 5;
+  if (windSpeed_mph < 32) return 6;
+  if (windSpeed_mph < 39) return 7;
+  if (windSpeed_mph < 47) return 8;
+  if (windSpeed_mph < 55) return 9;
+  if (windSpeed_mph < 64) return 10;
+  if (windSpeed_mph < 73) return 11;
+  return 12;
+}
+
+const BEAUFORT_DESCRIPTIONS = [
+  'Calm', 'Light Air', 'Light Breeze', 'Gentle Breeze',
+  'Moderate Breeze', 'Fresh Breeze', 'Strong Breeze', 'Near Gale',
+  'Gale', 'Strong Gale', 'Storm', 'Violent Storm', 'Hurricane',
+] as const;
+
+/** Return Beaufort wind description from wind speed in mph. */
+export function beaufortDescription(windSpeed_mph: number): string {
+  return BEAUFORT_DESCRIPTIONS[beaufortForce(windSpeed_mph)] ?? 'Hurricane';
+}
+
 /** Convert mph to knots. */
 export function mphToKnots(mph: number): number {
   return mph * 0.868976;
