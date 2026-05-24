@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { geocodeAddress } from '../api.js';
 import type { WeatherObservation } from '../api.js';
+import { beaufortForce, beaufortDescription } from '@walloon/shared';
 import type { WaveConditions, ActivityMode } from '@walloon/shared';
 import { calcWaves } from '@walloon/shared';
 import { WindCompass } from './WindCompass.js';
@@ -196,7 +197,7 @@ export function GeocodeSection({ activity, currentObs }: Props) {
               <span className="text-sm text-gray-400 ml-1">ft</span>
             </div>
             <span className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
-              {result.wave.conditions.replace('-', ' ')}
+              {beaufortDescription(result.wave.windSpeed_mph)}
             </span>
           </div>
 
@@ -222,7 +223,7 @@ export function GeocodeSection({ activity, currentObs }: Props) {
                 )}
               </div>
               <div className="text-gray-400 text-xs">
-                Period {result.wave.wavePeriod_s}s · Fetch {result.wave.fetchMi} mi
+                Period {result.wave.wavePeriod_s}s · Fetch {result.wave.fetchMi} mi · Force {beaufortForce(result.wave.windSpeed_mph)}
               </div>
             </div>
           </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import type { ActivityMode } from '@walloon/shared';
-import { calcWaves } from '@walloon/shared';
+import { calcWaves, beaufortForce, beaufortDescription } from '@walloon/shared';
 import { useLocations } from './hooks/useLocations.js';
 import { useWeatherHistory } from './hooks/useWeatherHistory.js';
 import { useAurora } from './hooks/useAurora.js';
@@ -50,9 +50,6 @@ const COND_STYLES: Record<string, { bg: string; text: string }> = {
   moderate:     { bg: 'bg-orange-100',  text: 'text-orange-800'  },
   rough:        { bg: 'bg-red-100',     text: 'text-red-800'     },
   'very-rough': { bg: 'bg-purple-100',  text: 'text-purple-800'  },
-};
-const COND_LABELS: Record<string, string> = {
-  calm: 'Calm', slight: 'Slight', moderate: 'Moderate', rough: 'Rough', 'very-rough': 'Very Rough',
 };
 const DOCK_STATUS_ROW: Record<string, { color: string; label: string }> = {
   'ok':           { color: 'text-green-600',  label: '✓ OK'    },
@@ -173,7 +170,7 @@ function DockView({
                                                'border-red-400 dark:border-red-600';
   const htClr     = HT_COLORS[activeWave.conditions]    ?? 'text-gray-700';
   const cond      = COND_STYLES[activeWave.conditions]   ?? COND_STYLES['calm']!;
-  const condLabel = COND_LABELS[activeWave.conditions]   ?? activeWave.conditions;
+  const condLabel = beaufortDescription(activeWave.windSpeed_mph);
 
   const whitecapNote =
     activeWave.waveHeight_ft >= 1.5 ? 'whitecaps' :
@@ -328,7 +325,7 @@ function DockView({
               </span>
             </div>
             <div className="text-xs text-gray-400">
-              Period {activeWave.wavePeriod_s}s · Fetch {activeWave.fetchMi}mi
+              Period {activeWave.wavePeriod_s}s · Fetch {activeWave.fetchMi} mi · Force {beaufortForce(activeWave.windSpeed_mph)}
             </div>
           </div>
         </div>
