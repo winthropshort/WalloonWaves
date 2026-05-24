@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { calcWaves } from '@walloon/shared';
 import type { ActivityMode } from '@walloon/shared';
 import type { LocationWithWave, WeatherObservation } from '../api.js';
 import { WindCompass } from './WindCompass.js';
@@ -52,13 +54,27 @@ function ageLabel(isoTs: string | null): string {
 
 export function LocationCard({ location, activity, history, hours, onHoursChange }: Props) {
   const wave = location.currentWave;
+  const [activeTime, setActiveTime] = useState<number | null>(null);
   const [domainStart, domainEnd] = midnightDomain(hours);
   const nowPct = Math.max(0, Math.min(100,
     ((Date.now() - domainStart) / (domainEnd - domainStart)) * 100,
   ));
+
+  const activeObs = activeTime !== null && history.length > 0
+    ? history.reduce((best, o) => {
+        const t     = new Date(o.timestamp).getTime();
+        const bestT = new Date(best.timestamp).getTime();
+        return Math.abs(t - activeTime) < Math.abs(bestT - activeTime) ? o : best;
+      })
+    : null;
+
+  const activeWave = activeObs
+    ? calcWaves(location.id, activeObs.windSpeed_mph, activeObs.windDir_deg)
+    : wave;
+
   const cond = CONDITION_STYLES[wave.conditions] ?? CONDITION_STYLES['calm']!;
   const dock = DOCK_STYLES[wave.dockStatus ?? 'ok']!;
-  const htColor = WAVE_HEIGHT_COLORS[wave.conditions] ?? 'text-gray-700';
+  const htColor = WAVE_HEIGHT_COLORS[activeWave.conditions] ?? 'text-gray-700';
 
   return (
     <div className="rounded-2xl bg-white dark:bg-walloon-blue-800 border border-gray-100 dark:border-walloon-blue-700 shadow-sm p-5 flex flex-col gap-4">
@@ -135,14 +151,25 @@ export function LocationCard({ location, activity, history, hours, onHoursChange
         />
         <div className="flex items-center gap-2">
           <span className="text-xs text-gray-400 w-12 shrink-0">λ:</span>
-          <span className="text-xs font-medium tabular-nums w-16 shrink-0" style={{ color: htColor }}>
-            {wave.waveHeight_ft.toFixed(2)} ft
+          <span className={`text-xs font-medium tabular-nums w-16 shrink-0 ${htColor}`}>
+            {activeWave.waveHeight_ft.toFixed(2)} ft
           </span>
           <div className="flex-1 h-12">
-            <WaveSparkline history={history} locationId={location.id} hours={hours} />
+            <WaveSparkline
+              history={history}
+              locationId={location.id}
+              hours={hours}
+              activeTime={activeTime ?? undefined}
+              onTimeSelect={setActiveTime}
+            />
           </div>
         </div>
-        <WeatherSparklines history={history} hours={hours} />
+        <WeatherSparklines
+          history={history}
+          hours={hours}
+          activeTime={activeTime ?? undefined}
+          onTimeSelect={setActiveTime}
+        />
       </div>
 
       {/* Footer */}

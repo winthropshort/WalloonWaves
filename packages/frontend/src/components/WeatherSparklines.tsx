@@ -20,11 +20,10 @@ export function midnightDomain(hours: 48 | 72): [number, number] {
   return [start, start + hours * 3_600_000];
 }
 
-function closestToNow<T extends { t: number }>(items: T[]): T | undefined {
+function closestToNow<T extends { t: number }>(items: T[], t = Date.now()): T | undefined {
   if (!items.length) return undefined;
-  const now = Date.now();
   return items.reduce((best, d) =>
-    Math.abs(d.t - now) < Math.abs(best.t - now) ? d : best,
+    Math.abs(d.t - t) < Math.abs(best.t - t) ? d : best,
   );
 }
 
@@ -111,7 +110,7 @@ function DirRow({
   onTimeSelect?: ((t: number) => void) | undefined;
 }) {
   const nowMs   = Date.now();
-  const current = closestToNow(data);
+  const current = closestToNow(data, activeTime);
 
   const deduped: typeof data = [];
   let prevLabel: string | null = null;
@@ -201,7 +200,7 @@ function SparkRow({
   }
 
   const data    = buildSplit(raw);
-  const current = closestToNow(raw);
+  const current = closestToNow(raw, activeTime);
 
   return (
     <div className="flex items-center gap-2">
@@ -287,7 +286,7 @@ function CloudIconRow({
   }
 
   const nowMs   = Date.now();
-  const current = closestToNow(raw);
+  const current = closestToNow(raw, activeTime);
 
   const deduped: RawPoint[] = [];
   let prevIcon: string | null = null;
