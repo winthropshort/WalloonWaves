@@ -83,9 +83,10 @@ export function WindCompass({ windDir_deg, windDir_label, size = 72 }: Props) {
         <g>
           <defs>
             <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-              <polygon points="0 0, 8 3, 0 6" fill="#1d4ed8" />
+              <polygon points="0 0, 8 3, 0 6" fill="#1d4ed8" className="arrowhead-polygon" />
             </marker>
           </defs>
+          <style>{`.dark .arrowhead-polygon { stroke: white; stroke-width: 2; paint-order: stroke fill; }`}</style>
           {/* Shadow/halo for contrast */}
           <line
             x1={tx} y1={ty}
