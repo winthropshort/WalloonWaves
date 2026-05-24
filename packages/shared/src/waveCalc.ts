@@ -106,9 +106,9 @@ const FETCH_TABLES: Record<string, FetchEntry[]> = {
     { bearing: 191.25, mi: 0.25 }, // SbW   — south shore
     { bearing: 202.50, mi: 0.30 }, // SSW   — south shore
     { bearing: 213.75, mi: 0.30 }, // SWbS  — south shore
-    { bearing: 225.00, mi: 0.35 }, // SW    — south shore
-    { bearing: 236.25, mi: 0.45 }, // SWbW  — south shore
-    { bearing: 247.50, mi: 0.70 }, // WSW   — entering open sector
+    { bearing: 225.00, mi: 0.75 }, // SW    — south shore
+    { bearing: 236.25, mi: 0.85 }, // SWbW  — south shore
+    { bearing: 247.50, mi: 0.95 }, // WSW   — entering open sector
     { bearing: 258.75, mi: 1.85 }, // WbS   — long fetch across The Foot
     { bearing: 270.00, mi: 1.95 }, // W     — long fetch across The Foot
     { bearing: 281.25, mi: 4.10 }, // WbN   — The Foot + Wildwood via Randall Pt channel
@@ -128,7 +128,7 @@ const FETCH_TABLES: Record<string, FetchEntry[]> = {
     { bearing:   0.00, mi: 0.65 }, // N     — to upper arm NE corner
     { bearing:  11.25, mi: 0.55 }, // NbE   — cross-arm
     { bearing:  22.50, mi: 0.50 }, // NNE   — cross-arm to east shore
-    { bearing:  33.75, mi: 0.50 }, // NEbN  — cross-arm
+    { bearing:  33.75, mi: 0.45 }, // NEbN  — cross-arm
     { bearing:  45.00, mi: 0.50 }, // NE    — cross-arm
     { bearing:  56.25, mi: 0.55 }, // NEbE  — cross-arm
     { bearing:  67.50, mi: 0.50 }, // ENE   — cross-arm (~0.85 mi wide here)
@@ -137,7 +137,7 @@ const FETCH_TABLES: Record<string, FetchEntry[]> = {
     { bearing: 101.25, mi: 0.55 }, // EbS   — angled cross
     { bearing: 112.50, mi: 0.70 }, // ESE   — angled cross
     { bearing: 123.75, mi: 1.35 }, // SEbE  — toward far east shore, angled
-    { bearing: 135.00, mi: 2.00 }, // SE    — along arm toward WA narrows
+    { bearing: 135.00, mi: 2.05 }, // SE    — along arm toward WA narrows
     { bearing: 146.25, mi: 2.75 }, // SEbS  — near arm axis (148°); peak fetch
     { bearing: 157.50, mi: 0.85 }, // SSE   — hits far east shore
     { bearing: 168.75, mi: 0.05 }, // SbE   — west shore immediately
@@ -156,7 +156,7 @@ const FETCH_TABLES: Record<string, FetchEntry[]> = {
     { bearing: 315.00, mi: 0.05 }, // NW    — west shore
     { bearing: 326.25, mi: 0.05 }, // NWbN  — west shore
     { bearing: 337.50, mi: 0.05 }, // NNW   — west shore
-    { bearing: 348.75, mi: 0.15 }, // NbW   — slight gap toward north narrows
+    { bearing: 348.75, mi: 0.05 }, // NbW   — west shore
   ],
 
   // Jones Landing — 45.30219°N, 84.96792°W — east shore of North Arm
@@ -180,7 +180,7 @@ const FETCH_TABLES: Record<string, FetchEntry[]> = {
     { bearing: 146.25, mi: 0.15 }, // SEbS  — angled, clips east shore
     { bearing: 157.50, mi: 0.15 }, // SSE   — angled, clips east shore
     { bearing: 168.75, mi: 1.25 }, // SbE   — entering arm channel
-    { bearing: 180.00, mi: 3.20 }, // S     — NA narrows → connector → The Foot
+    { bearing: 180.00, mi: 3.40 }, // S     — NA narrows → connector → The Foot
     { bearing: 191.25, mi: 0.70 }, // SbW   — diagonal to west shore
     { bearing: 202.50, mi: 0.65 }, // SSW   — diagonal
     { bearing: 213.75, mi: 0.60 }, // SWbS  — cross-arm diagonal

@@ -98,6 +98,8 @@ LAND      = "#dce8c4"
 DARK      = "#1a3a5c"
 RED       = "#d04f2c"
 GREEN     = "#3d7a3d"
+SAND      = "#D4AA50"
+SAND_EDGE = "#A07828"
 
 svg: list[str] = [
     f'<svg xmlns="http://www.w3.org/2000/svg" width="{SVG_W}" height="{SVG_H}" '
@@ -124,6 +126,15 @@ for poly_def in data["polygons"]:
     lbl = poly_def["label"]
     x, y = proj(lbl["lat"], lbl["lng"])
     svg.append(f'  <text x="{x}" y="{y}" {LABEL_STYLE}>{lbl["text"]}</text>')
+
+# Sandbars — submerged, non-motorized passage only
+for sb in data.get("sandbars", []):
+    pts = [proj(pt["lat"], pt["lng"]) for pt in sb["points"]]
+    svg.append(
+        f'  <polygon id="{sb["id"]}" points="{fmt(pts)}" '
+        f'fill="{SAND}" stroke="{SAND_EDGE}" stroke-width="1" '
+        f'stroke-linejoin="round" opacity="0.85"/>'
+    )
 
 # Narrows markers (brown diamonds)
 for n in data["narrows"]:
@@ -286,6 +297,16 @@ svg.append(
 svg.append(
     f'  <text x="{lx+24}" y="{fa_y+4}" font-family="Arial" font-size="9" fill="{DARK}">'
     f'Max fetch run</text>'
+)
+# Sandbar legend entry
+sb_y = fa_y + 16
+svg.append(
+    f'  <rect x="{lx}" y="{sb_y-5}" width="18" height="10" rx="2" '
+    f'fill="{SAND}" stroke="{SAND_EDGE}" stroke-width="1" opacity="0.85"/>'
+)
+svg.append(
+    f'  <text x="{lx+24}" y="{sb_y+4}" font-family="Arial" font-size="9" fill="{DARK}">'
+    f'Sandbar (non-motorized only)</text>'
 )
 
 svg.append("</svg>")

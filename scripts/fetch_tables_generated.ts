@@ -104,9 +104,9 @@ const FETCH_TABLES: Record<string, FetchEntry[]> = {
     { bearing: 191.25, mi: 0.25 }, // SbW
     { bearing: 202.50, mi: 0.30 }, // SSW
     { bearing: 213.75, mi: 0.30 }, // SWbS
-    { bearing: 225.00, mi: 0.35 }, // SW
-    { bearing: 236.25, mi: 0.45 }, // SWbW
-    { bearing: 247.50, mi: 0.70 }, // WSW
+    { bearing: 225.00, mi: 0.75 }, // SW
+    { bearing: 236.25, mi: 0.85 }, // SWbW
+    { bearing: 247.50, mi: 0.95 }, // WSW
     { bearing: 258.75, mi: 1.85 }, // WbS
     { bearing: 270.00, mi: 1.95 }, // W
     { bearing: 281.25, mi: 4.10 }, // WbN
@@ -137,7 +137,7 @@ const FETCH_TABLES: Record<string, FetchEntry[]> = {
     { bearing: 146.25, mi: 0.15 }, // SEbS
     { bearing: 157.50, mi: 0.15 }, // SSE
     { bearing: 168.75, mi: 1.25 }, // SbE
-    { bearing: 180.00, mi: 3.20 }, // S
+    { bearing: 180.00, mi: 3.40 }, // S
     { bearing: 191.25, mi: 0.70 }, // SbW
     { bearing: 202.50, mi: 0.65 }, // SSW
     { bearing: 213.75, mi: 0.60 }, // SWbS

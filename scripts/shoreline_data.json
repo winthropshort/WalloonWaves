@@ -172,8 +172,38 @@
         { "address": "13 Shadow Trails Rd E",   "lat": 45.26277, "lng": -84.97518 },
         { "address": "287 Shadow Trails Rd E",  "lat": 45.25827, "lng": -84.97229 },
         { "address": "449 Shadow Trails Rd E",  "lat": 45.25458, "lng": -84.97411, "notes": "SW corner" },
-        { "address": "605 S Shore Dr",          "lat": 45.25708, "lng": -84.96240 },
-        { "address": "1031 Sweet Pea Ln",       "lat": 45.25930, "lng": -84.95490, "notes": "South shore, closing back toward SE tip" },
+        { "address": "565 Shadow Trails Rd E",  "lat": 45.25257, "lng": -84.97158 },
+        { "address": "(no address)",             "lat": 45.25250, "lng": -84.96965 },
+        { "address": "675 Southbay Ln",          "lat": 45.25307, "lng": -84.96686 },
+        { "address": "693 Southbay Ln",          "lat": 45.25354, "lng": -84.96550 },
+        { "address": "299 S Shore Dr",           "lat": 45.25396, "lng": -84.96451 },
+        { "address": "409 S Shore Dr",           "lat": 45.25448, "lng": -84.96441 },
+        { "address": "465 S Shore Dr",           "lat": 45.25537, "lng": -84.96412 },
+        { "address": "605 S Shore Dr",           "lat": 45.25649, "lng": -84.96282 },
+        { "address": "605 S Shore Dr",           "lat": 45.25701, "lng": -84.96234 },
+        { "address": "651 S Shore Dr",           "lat": 45.25745, "lng": -84.96172 },
+        { "address": "707 S Shore Dr",           "lat": 45.25777, "lng": -84.96102 },
+        { "address": "743 S Shore Dr",           "lat": 45.25844, "lng": -84.96067 },
+        { "address": "759 S Shore Dr",           "lat": 45.25878, "lng": -84.96017 },
+        { "address": "759 S Shore Dr",           "lat": 45.25878, "lng": -84.95898 },
+        { "address": "831 S Shore Dr",           "lat": 45.25842, "lng": -84.95756 },
+        { "address": "851 S Shore Dr",           "lat": 45.25856, "lng": -84.95680 },
+        { "address": "895 S Shore Dr",           "lat": 45.25883, "lng": -84.95617 },
+        { "address": "949 S Shore Dr",           "lat": 45.25921, "lng": -84.95516 },
+        { "address": "1039 Sweet Pea Ln",        "lat": 45.25891, "lng": -84.95417 },
+        { "address": "1133 Sweet Pea Ln",        "lat": 45.25821, "lng": -84.95271 },
+        { "address": "1227 S Shore Dr",          "lat": 45.25697, "lng": -84.95079 },
+        { "address": "1271 S Shore Dr",          "lat": 45.25644, "lng": -84.94976 },
+        { "address": "1319 S Shore Dr",          "lat": 45.25597, "lng": -84.94946 },
+        { "address": "1371 S Shore Dr",          "lat": 45.25550, "lng": -84.94843 },
+        { "address": "1403 S Shore Dr",          "lat": 45.25569, "lng": -84.94764 },
+        { "address": "3545 Hamilton Ct",         "lat": 45.25599, "lng": -84.94643 },
+        { "address": "3535 M-75 N",              "lat": 45.25570, "lng": -84.94533 },
+        { "address": "3595 M-75 N",              "lat": 45.25537, "lng": -84.94442 },
+        { "address": "3595 M-75 N",              "lat": 45.25542, "lng": -84.94359 },
+        { "address": "3749 M-75 N",              "lat": 45.25597, "lng": -84.94321 },
+        { "address": "383375 M-75 N",            "lat": 45.25756, "lng": -84.94150 },
+        { "address": "1859 Fort Wayne Camp Ln",  "lat": 45.25913, "lng": -84.94017 },
         { "address": "1889 Bear Foot Ln",       "lat": 45.25994, "lng": -84.93916 },
         { "address": "3979 M-75 N",             "lat": 45.25943, "lng": -84.93779 },
         { "address": "3981 M-75 N",             "lat": 45.25970, "lng": -84.93660, "notes": "Source address may be 3981 or 3982 (typo in original)" },
@@ -291,6 +321,80 @@
     { "name": "Unknown",         "lat": 45.28298, "lng": -84.96288, "notes": "East side of North Arm, N of Sand Point Lane [Google Maps]" },
     { "name": "Unknown",         "lat": 45.27005, "lng": -84.95527, "notes": "East side of The Foot, off N Shore Drive [Google Maps]" },
     { "name": "Unknown",         "lat": 45.26898, "lng": -84.94935, "notes": "East side of The Foot [Google Maps]" }
+  ],
+
+  "sandbars": [
+    {
+      "id": "na_narrows_west_sandbar",
+      "name": "NA Narrows – West Sandbar",
+      "notes": "Submerged; impassable for motor/sail craft. Kayak, canoe, SUP only.",
+      "points": [
+        { "address": "6833 Indian Garden Rd", "lat": 45.28199, "lng": -84.96868 },
+        { "address": "(no address)",           "lat": 45.28203, "lng": -84.96805 },
+        { "address": "(no address)",           "lat": 45.28205, "lng": -84.96744 },
+        { "address": "(no address)",           "lat": 45.28181, "lng": -84.96739 },
+        { "address": "(no address)",           "lat": 45.28165, "lng": -84.96762 },
+        { "address": "(no address)",           "lat": 45.28159, "lng": -84.96812 },
+        { "address": "(no address)",           "lat": 45.28171, "lng": -84.96868 }
+      ]
+    },
+    {
+      "id": "na_narrows_east_sandbar",
+      "name": "NA Narrows – East Sandbar",
+      "notes": "Submerged; impassable for motor/sail craft. Kayak, canoe, SUP only.",
+      "points": [
+        { "address": "(no address)", "lat": 45.28198, "lng": -84.96579 },
+        { "address": "(no address)", "lat": 45.28207, "lng": -84.96624 },
+        { "address": "(no address)", "lat": 45.28192, "lng": -84.96644 },
+        { "address": "(no address)", "lat": 45.28161, "lng": -84.96642 },
+        { "address": "(no address)", "lat": 45.28155, "lng": -84.96620 },
+        { "address": "(no address)", "lat": 45.28162, "lng": -84.96590 }
+      ]
+    },
+    {
+      "id": "wa_narrows_west_sandbar",
+      "name": "WA Narrows – West Sandbar",
+      "notes": "Submerged; impassable for motor/sail craft. Kayak, canoe, SUP only.",
+      "points": [
+        { "address": "(no address)", "lat": 45.29278, "lng": -85.01860 },
+        { "address": "(no address)", "lat": 45.29235, "lng": -85.01823 },
+        { "address": "(no address)", "lat": 45.29224, "lng": -85.01844 },
+        { "address": "(no address)", "lat": 45.29232, "lng": -85.01876 },
+        { "address": "(no address)", "lat": 45.29232, "lng": -85.01892 },
+        { "address": "(no address)", "lat": 45.29240, "lng": -85.01911 }
+      ]
+    },
+    {
+      "id": "wa_narrows_east_sandbar",
+      "name": "WA Narrows – East Sandbar",
+      "notes": "Submerged; impassable for motor/sail craft. Kayak, canoe, SUP only.",
+      "points": [
+        { "address": "(no address)", "lat": 45.29170, "lng": -85.01655 },
+        { "address": "(no address)", "lat": 45.29141, "lng": -85.01733 },
+        { "address": "(no address)", "lat": 45.29114, "lng": -85.01781 },
+        { "address": "(no address)", "lat": 45.29090, "lng": -85.01798 },
+        { "address": "(no address)", "lat": 45.29063, "lng": -85.01746 },
+        { "address": "(no address)", "lat": 45.29062, "lng": -85.01698 }
+      ]
+    },
+    {
+      "id": "randall_point_sandbar",
+      "name": "Randall Point Sandbar",
+      "notes": "Submerged; impassable for motor/sail craft. Kayak, canoe, SUP only.",
+      "points": [
+        { "address": "(no address)", "lat": 45.27059, "lng": -84.97797 },
+        { "address": "(no address)", "lat": 45.27062, "lng": -84.97752 },
+        { "address": "(no address)", "lat": 45.27086, "lng": -84.97718 },
+        { "address": "(no address)", "lat": 45.27102, "lng": -84.97682 },
+        { "address": "(no address)", "lat": 45.27102, "lng": -84.97649 },
+        { "address": "(no address)", "lat": 45.27091, "lng": -84.97610 },
+        { "address": "(no address)", "lat": 45.27074, "lng": -84.97600 },
+        { "address": "(no address)", "lat": 45.27047, "lng": -84.97605 },
+        { "address": "(no address)", "lat": 45.27038, "lng": -84.97639 },
+        { "address": "(no address)", "lat": 45.27024, "lng": -84.97668 },
+        { "address": "(no address)", "lat": 45.26983, "lng": -84.97714 }
+      ]
+    }
   ],
 
   "fetch_runs": [
