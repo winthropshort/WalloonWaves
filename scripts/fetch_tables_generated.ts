@@ -109,7 +109,7 @@ const FETCH_TABLES: Record<string, FetchEntry[]> = {
     { bearing: 247.50, mi: 0.95 }, // WSW
     { bearing: 258.75, mi: 1.85 }, // WbS
     { bearing: 270.00, mi: 1.95 }, // W
-    { bearing: 281.25, mi: 4.10 }, // WbN
+    { bearing: 281.25, mi: 4.15 }, // WbN
     { bearing: 292.50, mi: 2.00 }, // WNW
     { bearing: 303.75, mi: 0.45 }, // NWbW
     { bearing: 315.00, mi: 0.30 }, // NW

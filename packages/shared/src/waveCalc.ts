@@ -82,7 +82,7 @@ const FETCH_TABLES: Record<string, FetchEntry[]> = {
   // Walloon Village — 45.26352°N, 84.93499°W — SE tip of The Foot
   // The Foot: rhombus ~2.0 mi E-W × ~1.4 mi N-S. WV at extreme SE corner.
   // Open-water sector ~247°–292°; W (270°) = 1.95 mi across The Foot.
-  // WbN (281.25°) = 4.10 mi — ray threads through The Foot AND Wildwood Basin
+  // WbN (281.25°) = 4.15 mi — ray threads through The Foot AND Wildwood Basin
   //   via the Randall Point channel; represents full connected water fetch.
   // NOTE: also registered as 'legacy-water-sports' for backward compat.
   'walloon-village': [
@@ -111,7 +111,7 @@ const FETCH_TABLES: Record<string, FetchEntry[]> = {
     { bearing: 247.50, mi: 0.95 }, // WSW   — entering open sector
     { bearing: 258.75, mi: 1.85 }, // WbS   — long fetch across The Foot
     { bearing: 270.00, mi: 1.95 }, // W     — long fetch across The Foot
-    { bearing: 281.25, mi: 4.10 }, // WbN   — The Foot + Wildwood via Randall Pt channel
+    { bearing: 281.25, mi: 4.15 }, // WbN   — The Foot + Wildwood via Randall Pt channel
     { bearing: 292.50, mi: 2.00 }, // WNW   — long fetch across The Foot
     { bearing: 303.75, mi: 0.45 }, // NWbW  — north shore
     { bearing: 315.00, mi: 0.30 }, // NW    — north shore

@@ -184,7 +184,7 @@ export function InfoPanel({ activity, onActivityChange }: InfoPanelProps) {
               Maximum Fetch Runs
             </h3>
             <img
-              src="/walloon_lake.svg?v=3"
+              src="/walloon_lake.svg?v=4"
               alt="Walloon Lake fetch diagram"
               className="w-full rounded-xl border border-gray-200 dark:border-walloon-blue-600 bg-[#dce8c4]"
             />
