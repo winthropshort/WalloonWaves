@@ -1339,92 +1339,6 @@
           "lat": 45.27183,
           "lng": -84.99143,
           "notes": "Channel south bank west end \u2014 Wildwood Basin opens up west of this point"
-        },
-        {
-          "address": "4625 Ellis Rd",
-          "lat": 45.27155,
-          "lng": -84.99053
-        },
-        {
-          "address": "4643 Ellis Rd",
-          "lat": 45.27177,
-          "lng": -84.99006
-        },
-        {
-          "address": "4643 Ellis Rd",
-          "lat": 45.27193,
-          "lng": -84.98967
-        },
-        {
-          "address": "4705 Ellis Rd",
-          "lat": 45.27181,
-          "lng": -84.98823
-        },
-        {
-          "address": "4705 Ellis Rd",
-          "lat": 45.27187,
-          "lng": -84.98758
-        },
-        {
-          "address": "4705 Ellis Rd",
-          "lat": 45.27171,
-          "lng": -84.98763
-        },
-        {
-          "address": "4781 Ellis Rd",
-          "lat": 45.27149,
-          "lng": -84.98679
-        },
-        {
-          "address": "4803 Ellis Rd",
-          "lat": 45.27115,
-          "lng": -84.98535
-        },
-        {
-          "address": "4850 Ellis Rd",
-          "lat": 45.27097,
-          "lng": -84.98442
-        },
-        {
-          "address": "385 Burns Farm Rd",
-          "lat": 45.27068,
-          "lng": -84.9833
-        },
-        {
-          "address": "365 Burns Farm Rd",
-          "lat": 45.27035,
-          "lng": -84.98189
-        },
-        {
-          "address": "(no address)",
-          "lat": 45.27006,
-          "lng": -84.9811
-        },
-        {
-          "address": "(no address)",
-          "lat": 45.26961,
-          "lng": -84.98038
-        },
-        {
-          "address": "(no address)",
-          "lat": 45.26944,
-          "lng": -84.97964
-        },
-        {
-          "address": "235 Shadow Trails Rd W",
-          "lat": 45.26931,
-          "lng": -84.97903
-        },
-        {
-          "address": "235 Shadow Trails Rd W",
-          "lat": 45.26962,
-          "lng": -84.97843
-        },
-        {
-          "address": "265 Shadow Trails Rd W",
-          "lat": 45.27,
-          "lng": -84.97786,
-          "notes": "Randall Point \u2014 channel south bank east end"
         }
       ],
       "west_shore": [
@@ -2328,24 +2242,106 @@
         {
           "points": [
             {
-              "lat": 45.26516,
-              "lng": -85.00126,
-              "notes": "Forest Ave boat ramp \u2014 SW anchor"
+              "lat": 45.27784,
+              "lng": -84.99564,
+              "notes": "6995 Lake Grove Rd \u2014 NW corner; channel/wildwood junction, north bank west"
             },
             {
-              "lat": 45.26524,
-              "lng": -84.97573,
-              "notes": "4170 Conkle Rd area \u2014 SE anchor"
+              "lat": 45.27462,
+              "lng": -84.9727,
+              "notes": "7481 Indian Garden Rd \u2014 NE corner; north bank east, opposite Randall Point"
             },
             {
-              "lat": 45.27496,
-              "lng": -84.96949,
-              "notes": "Indian Garden Rd NW corner \u2014 NE anchor (rough)"
+              "address": "265 Shadow Trails Rd W",
+              "lat": 45.27,
+              "lng": -84.97786,
+              "notes": "Randall Point \u2014 channel south bank east end"
             },
             {
+              "address": "235 Shadow Trails Rd W",
+              "lat": 45.26962,
+              "lng": -84.97843
+            },
+            {
+              "address": "235 Shadow Trails Rd W",
+              "lat": 45.26931,
+              "lng": -84.97903
+            },
+            {
+              "address": "(no address)",
+              "lat": 45.26944,
+              "lng": -84.97964
+            },
+            {
+              "address": "(no address)",
+              "lat": 45.26961,
+              "lng": -84.98038
+            },
+            {
+              "address": "(no address)",
+              "lat": 45.27006,
+              "lng": -84.9811
+            },
+            {
+              "address": "365 Burns Farm Rd",
+              "lat": 45.27035,
+              "lng": -84.98189
+            },
+            {
+              "address": "385 Burns Farm Rd",
+              "lat": 45.27068,
+              "lng": -84.9833
+            },
+            {
+              "address": "4850 Ellis Rd",
+              "lat": 45.27097,
+              "lng": -84.98442
+            },
+            {
+              "address": "4803 Ellis Rd",
+              "lat": 45.27115,
+              "lng": -84.98535
+            },
+            {
+              "address": "4781 Ellis Rd",
+              "lat": 45.27149,
+              "lng": -84.98679
+            },
+            {
+              "address": "4705 Ellis Rd",
+              "lat": 45.27171,
+              "lng": -84.98763
+            },
+            {
+              "address": "4705 Ellis Rd",
+              "lat": 45.27187,
+              "lng": -84.98758
+            },
+            {
+              "address": "4705 Ellis Rd",
+              "lat": 45.27181,
+              "lng": -84.98823
+            },
+            {
+              "address": "4643 Ellis Rd",
+              "lat": 45.27193,
+              "lng": -84.98967
+            },
+            {
+              "address": "4643 Ellis Rd",
+              "lat": 45.27177,
+              "lng": -84.99006
+            },
+            {
+              "address": "4625 Ellis Rd",
+              "lat": 45.27155,
+              "lng": -84.99053
+            },
+            {
+              "address": "4611 Ellis Rd",
               "lat": 45.27183,
               "lng": -84.99143,
-              "notes": "4611 Ellis Rd \u2014 NW anchor; aligns with wildwood polygon bottom edge to close the gap"
+              "notes": "Channel south bank west end \u2014 Wildwood Basin opens up west of this point"
             }
           ]
         }

@@ -112,7 +112,7 @@ const FETCH_TABLES: Record<string, FetchEntry[]> = {
     { bearing: 258.75, mi: 1.85 }, // WbS   — long fetch across The Foot
     { bearing: 270.00, mi: 1.95 }, // W     — long fetch across The Foot
     { bearing: 281.25, mi: 4.15 }, // WbN   — The Foot + Wildwood via Randall Pt channel
-    { bearing: 292.50, mi: 2.00 }, // WNW   — long fetch across The Foot
+    { bearing: 292.50, mi: 2.05 }, // WNW   — long fetch across The Foot
     { bearing: 303.75, mi: 0.45 }, // NWbW  — north shore
     { bearing: 315.00, mi: 0.30 }, // NW    — north shore
     { bearing: 326.25, mi: 0.25 }, // NWbN  — east shore
