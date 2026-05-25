@@ -292,24 +292,7 @@
         { "address": "6558 Lake Grove Rd",    "lat": 45.27942, "lng": -85.00031 },
         { "address": "6718 Lake Grove Rd",    "lat": 45.27736, "lng": -84.99680 },
         { "address": "6995 Lake Grove Rd",    "lat": 45.27784, "lng": -84.99564, "notes": "Where Resort Pike Rd and Indian Garden Rd end; Lake Grove Rd begins running NW" },
-        { "address": "4611 Ellis Rd",         "lat": 45.27183, "lng": -84.99143, "notes": "Channel south bank west end — Wildwood Basin opens up west of this point" },
-        { "address": "4625 Ellis Rd",         "lat": 45.27155, "lng": -84.99053 },
-        { "address": "4643 Ellis Rd",         "lat": 45.27177, "lng": -84.99006 },
-        { "address": "4643 Ellis Rd",         "lat": 45.27193, "lng": -84.98967 },
-        { "address": "4705 Ellis Rd",         "lat": 45.27181, "lng": -84.98823 },
-        { "address": "4705 Ellis Rd",         "lat": 45.27187, "lng": -84.98758 },
-        { "address": "4705 Ellis Rd",         "lat": 45.27171, "lng": -84.98763 },
-        { "address": "4781 Ellis Rd",         "lat": 45.27149, "lng": -84.98679 },
-        { "address": "4803 Ellis Rd",         "lat": 45.27115, "lng": -84.98535 },
-        { "address": "4850 Ellis Rd",         "lat": 45.27097, "lng": -84.98442 },
-        { "address": "385 Burns Farm Rd",     "lat": 45.27068, "lng": -84.98330 },
-        { "address": "365 Burns Farm Rd",     "lat": 45.27035, "lng": -84.98189 },
-        { "address": "(no address)",          "lat": 45.27006, "lng": -84.98110 },
-        { "address": "(no address)",          "lat": 45.26961, "lng": -84.98038 },
-        { "address": "(no address)",          "lat": 45.26944, "lng": -84.97964 },
-        { "address": "235 Shadow Trails Rd W","lat": 45.26931, "lng": -84.97903 },
-        { "address": "235 Shadow Trails Rd W","lat": 45.26962, "lng": -84.97843 },
-        { "address": "265 Shadow Trails Rd W","lat": 45.27000, "lng": -84.97786 }
+        { "address": "4611 Ellis Rd",         "lat": 45.27183, "lng": -84.99143, "notes": "Channel south bank west end — Wildwood Basin opens up west of this point" }
       ],
       "west_shore": [
         { "address": "(WA narrows, west pin) 2084 Eagle Island Rd", "lat": 45.29205, "lng": -85.02145 },
@@ -511,13 +494,13 @@
     },
     {
       "id": "channel",
-      "notes": "Fills the unmapped Randall Point channel between Wildwood Basin south end and The Foot NW. Replace with real shoreline pins as they are collected.",
+      "notes": "Connector polygon bridging The Foot ↔ Wildwood Basin through the Randall Point passage. 4 anchor points kept convex — concave south-bank GPS detail creates polygon exclusion zones that break the ray-cast fetch algorithm. Add south/north bank detail once both banks are surveyed and the polygon can be redesigned as a proper water-outline shape.",
       "segments": [
         { "points": [
-            { "lat": 45.26516, "lng": -85.00126, "notes": "Forest Ave boat ramp — Wildwood west shore south terminus" },
-            { "lat": 45.26524, "lng": -84.97573, "notes": "Conkle Rd — The Foot west shore, same latitude as Forest Ave" },
-            { "lat": 45.27496, "lng": -84.96949, "notes": "Indian Garden Rd NW corner — The Foot boundary[4]" },
-            { "lat": 45.27169, "lng": -84.99064, "notes": "Ellis Rd — Wildwood east shore south terminus" }
+            { "lat": 45.26516, "lng": -85.00126, "notes": "Forest Ave boat ramp — SW anchor" },
+            { "lat": 45.26524, "lng": -84.97573, "notes": "4170 Conkle Rd area — SE anchor" },
+            { "lat": 45.27496, "lng": -84.96949, "notes": "Indian Garden Rd NW corner — NE anchor (rough)" },
+            { "lat": 45.27183, "lng": -84.99143, "notes": "4611 Ellis Rd — NW anchor; aligns with wildwood polygon bottom edge to close the gap" }
           ]
         }
       ]
