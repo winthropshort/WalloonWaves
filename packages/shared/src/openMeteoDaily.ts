@@ -20,6 +20,7 @@ export const DAILY_PARAMS = [
   'precipitation_sum', 'rain_sum', 'showers_sum', 'snowfall_sum',
   'precipitation_probability_max',
   'windspeed_10m_max', 'windgusts_10m_max', 'winddirection_10m_dominant',
+  'relative_humidity_2m_max',
   'weathercode',
 ].join(',');
 
@@ -93,6 +94,7 @@ export interface OpenMeteoDaily {
   windspeed_10m_max: number[];
   windgusts_10m_max?: number[];
   winddirection_10m_dominant?: (number | null)[];
+  relative_humidity_2m_max?: (number | null)[];
   weathercode?: number[];
 }
 
@@ -106,6 +108,7 @@ export interface DailyWeatherFields {
   wind_gust_mph: number | null;
   wind_direction_deg: number | null;
   wind_direction_compass: string | null;
+  humidity_high_pct: number | null;
   pressure_mb: number | null;
   precip_type: PrecipType;
   precip_amount_in: number;
@@ -138,6 +141,7 @@ export function dailyToFields(
     wind_gust_mph: daily.windgusts_10m_max?.[i] ?? null,
     wind_direction_deg: windDirDeg,
     wind_direction_compass: degToCompassOrNull(windDirDeg),
+    humidity_high_pct: daily.relative_humidity_2m_max?.[i] ?? null,
     pressure_mb: hourly ? meanPressureForDate(hourly, daily.time[i]!) : null,
     precip_type: classifyPrecip(rainIn, snowIn, probability),
     precip_amount_in: Math.round(rainIn * 100) / 100,
